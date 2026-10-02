@@ -1,0 +1,58 @@
+@model IReadOnlyList<StaffListRowViewModel>
+@inject ProgrammePulse.Services.Tenancy.IModuleGate ModuleGate
+@inject Microsoft.Extensions.Options.IOptions<ProgrammePulse.Services.ExecutiveReview.ExecutiveReviewOptions> ExecutiveReviewOptions
+@{
+    var message = ViewData["Message"] as string;
+    var showExecutiveData = ExecutiveReviewOptions.Value.Enabled
+        && await ModuleGate.IsOnAsync(ProgrammePulse.Models.Tenancy.ProductModules.ExecutiveReview);
+}
+
+<partial name="~/Views/StaffOps/Settings/_SettingsNav.cshtml" model="@("people")" />
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+<section class="ops-panel">
+    <div class="ops-panel__header">
+        <h2 class="ops-panel__heading">People</h2>
+        <a class="ops-button ops-button--primary" asp-controller="StaffAdmin" asp-action="Create">Add a person</a>
+    </div>
+    @if (Model.Count == 0)
+    {
+        <p class="ops-empty-state">No one yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">People in this organisation, with job title, team and whether they can sign in</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Job title</th>
+                        <th scope="col">Team</th>
+                        <th scope="col">Access</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.OrderBy(r => r.IsActive ? 0 : 1).ThenBy(r => r.FullName, StringComparer.OrdinalIgnoreCase))
+                    {
+                        <tr>
+                            <th scope="row"><a class="ops-table__row-link" asp-controller="StaffAdmin" asp-action="Detail" asp-route-staffKey="@row.StaffKey">@row.FullName</a></th>
+                            <td>@row.JobTitle</td>
+                            <td>@row.Team</td>
+                            <td>@(row.IsActive ? "Active" : "Suspended")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@if (showExecutiveData)
+{
+    <p><a asp-controller="StaffExecutiveData" asp-action="Index">@Localizer["Review.Data.Title"]</a></p>
+}

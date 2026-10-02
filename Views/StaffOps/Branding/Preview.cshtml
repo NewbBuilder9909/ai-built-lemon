@@ -1,0 +1,31 @@
+@model ResolvedBrandingTheme
+@{
+    var vars = Model.CssVariables;
+    var previewStyle = string.Join(" ", vars.Select(kvp => $"{kvp.Key}:{kvp.Value};"));
+}
+
+<a class="ops-back-link" asp-controller="StaffBranding" asp-action="Index">← Branding settings</a>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Preview</h2>
+    <p class="ops-empty-state">
+        @(Model.IsUsingPlatformDefault ? "Showing the platform default theme (nothing published yet)." : "Showing the current draft — publishing has not happened yet.")
+    </p>
+
+    @* The draft's own tokens are set on this element only (they are what is
+       being previewed), so the preview never restyles the page around it. *@
+    <div class="ops-brand-preview" style="@previewStyle">
+        <div class="ops-brand-preview__header">
+            @if (Model.LogoUrl is not null)
+            {
+                <img src="@Model.LogoUrl" alt="" class="ops-brand-asset" />
+            }
+            <strong class="ops-brand-preview__name">@Model.CompanyName</strong>
+        </div>
+        <p class="ops-brand-preview__text">Header style: @Model.HeaderStyle &middot; Footer style: @Model.FooterStyle &middot; Dark mode: @(Model.DarkModeEnabled ? "on" : "off")</p>
+        <div class="ops-actions">
+            <button type="button" class="ops-brand-preview__button">Primary action</button>
+            <button type="button" class="ops-brand-preview__button ops-brand-preview__button--accent">Accent action</button>
+        </div>
+    </div>
+</section>

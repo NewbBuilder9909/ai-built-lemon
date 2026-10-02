@@ -1,0 +1,163 @@
+@using ProgrammePulse.Models.ServiceOps
+@using ProgrammePulse.Models.ViewModels.ServiceOps
+@model SupportLinksPageViewModel
+
+@{
+    var message = ViewData["Message"] as string;
+    var links = Model.Links;
+    var canReview = Model.CanReviewRootCause;
+    var unreviewed = links.Where(l => !l.IsReviewed).ToList();
+    var reviewed = links.Where(l => l.IsReviewed).ToList();
+}
+
+<p class="ops-empty-state">
+    Relationships between support cases and changes, and the reviewed assessments of which — if any —
+    actually caused the case. <a asp-controller="StaffService" asp-action="Index">Service health</a>
+</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">What a link does and does not mean</h2>
+    <p class="ops-empty-state">
+        A matching issue key means the case and the change <strong>mention each other</strong>. It is not
+        proof that the change caused the case, and this product will not treat it as such: nothing here
+        is derived from a commit landing near the time a case was raised, and nothing uses
+        <code>git blame</code>. Only a reviewer, having looked, can record a cause — with a rationale
+        that someone who disagrees can read. A person who fixed a defect gets credit for resolving it and
+        is never labelled as having caused it.
+    </p>
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Awaiting review (@unreviewed.Count)</h2>
+    @if (unreviewed.Count == 0)
+    {
+        <p class="ops-empty-state">Nothing is waiting for an assessment.</p>
+    }
+    else
+    {
+        @foreach (var link in unreviewed)
+        {
+            <article class="ops-record">
+                <h3 class="ops-record__title">Case @link.ExternalTicketId &rarr; @ProgrammePulse.Services.Shared.DisplayText.Words(link.ArtifactType).ToLowerInvariant() @link.ArtifactExternalId</h3>
+                <p>
+                    @(link.Method == SupportLinkMethod.IssueKeyMatch
+                        ? "Found automatically because the same issue key appears on both. A relationship only."
+                        : "Linked by a person. A relationship only.")
+                    @if (link.ArtifactUrl is not null)
+                    {
+                        <a href="@link.ArtifactUrl" rel="noopener noreferrer nofollow" target="_blank">Open the change</a>
+                    }
+                </p>
+
+                @if (canReview)
+                {
+                    @* One form, two verdicts: either way the finding is kept, so nobody investigates it twice. *@
+                    <form asp-controller="StaffService" asp-action="ConfirmRootCause" asp-route-linkKey="@link.LinkKey" method="post" class="ops-manage-form ops-decision-form">
+                        <div class="ops-filter-bar__field ops-decision-form__note">
+                            <label for="finding-@link.LinkKey">What did the assessment find?</label>
+                            <input type="text" id="finding-@link.LinkKey" name="reviewNote" maxlength="1000" required />
+                        </div>
+                        <div class="ops-actions">
+                            <button type="submit" class="ops-button">Confirm it caused the case</button>
+                            <button type="submit" class="ops-button ops-button--secondary" asp-controller="StaffService" asp-action="RuleOut" asp-route-linkKey="@link.LinkKey">Rule out</button>
+                        </div>
+                    </form>
+                }
+            </article>
+        }
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Reviewed (@reviewed.Count)</h2>
+    @if (reviewed.Count == 0)
+    {
+        <p class="ops-empty-state">Nothing has been assessed yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Reviewed case-to-code assessments, with reviewer and rationale</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Case</th>
+                        <th scope="col">Change</th>
+                        <th scope="col">Verdict</th>
+                        <th scope="col">Reviewed</th>
+                        <th scope="col">Assessment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var link in reviewed)
+                {
+                    <tr>
+                        <td>@link.ExternalTicketId</td>
+                        <td>@link.ArtifactType @link.ArtifactExternalId</td>
+                        <td>@(link.IsCausalClaim ? "Confirmed cause" : "Ruled out")</td>
+                        <td>@(link.ReviewedAtUtc?.ToString("yyyy-MM-dd") ?? "—")</td>
+                        <td>@link.ReviewNote</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@if (canReview)
+{
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Link a case to a change</h2>
+        <p class="ops-empty-state">This records a relationship. Confirming a cause is a separate step.</p>
+        @if ((Model.Desks ?? []).Count == 0)
+        {
+            <p class="ops-empty-state">Connect a support desk first: <a asp-controller="StaffService" asp-action="Desks">support desks</a>.</p>
+        }
+        else
+        {
+        <form asp-controller="StaffService" asp-action="LinkManually" method="post" class="ops-form">
+            <label>
+                Desk
+                <select name="connectionKey" required>
+                    @foreach (var desk in Model.Desks ?? [])
+                    {
+                        <option value="@desk.ConnectionKey">@desk.DisplayName@(desk.IsDisconnected ? " (disconnected)" : "")</option>
+                    }
+                </select>
+            </label>
+            <label>
+                Case ID
+                <input type="text" name="externalTicketId" maxlength="128" required />
+            </label>
+            <label>
+                Artefact type
+                <select name="artifactType" required>
+                    @foreach (var type in Enum.GetValues<LinkedArtifactType>())
+                    {
+                        <option value="@type">@ProgrammePulse.Services.Shared.DisplayText.Words(type)</option>
+                    }
+                </select>
+            </label>
+            <label>
+                Artefact ID
+                <input type="text" name="artifactExternalId" maxlength="200" required />
+            </label>
+            <label>
+                Where it lives (optional)
+                <input type="text" name="artifactSource" maxlength="256" placeholder="owner/repo" />
+            </label>
+            <label>
+                Link (optional)
+                <input type="url" name="artifactUrl" maxlength="512" />
+            </label>
+            <button type="submit" class="ops-button">Link</button>
+        </form>
+        }
+    </section>
+}

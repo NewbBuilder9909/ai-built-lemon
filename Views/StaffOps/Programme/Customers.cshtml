@@ -1,0 +1,67 @@
+@using ProgrammePulse.Models.ViewModels.ProgrammeOverview
+@model CustomersPageViewModel
+@{
+    var customerNames = Model.Customers.ToDictionary(c => c.CustomerKey, c => c.Name);
+}
+
+<partial name="~/Views/StaffOps/Programme/_DataNav.cshtml" model="@("customers")" />
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <p class="ops-banner ops-banner--error" role="alert">@Model.Message</p>
+}
+
+<section class="ops-panel" aria-labelledby="customers-heading">
+    <h2 class="ops-panel__heading" id="customers-heading">Customers</h2>
+    <form asp-controller="StaffCustomers" asp-action="Create" method="post" class="ops-filter-bar">
+        <div class="ops-filter-bar__field">
+            <label for="new-customer-name">New customer</label>
+            <input type="text" id="new-customer-name" name="name" maxlength="256" required />
+        </div>
+        <button type="submit" class="ops-button">Add customer</button>
+    </form>
+    @if (Model.Customers.Count == 0)
+    {
+        <p class="ops-empty-state">No customers yet.</p>
+    }
+</section>
+
+@if (Model.Programmes.Count > 0)
+{
+    <section class="ops-panel" aria-labelledby="assign-heading">
+        <h2 class="ops-panel__heading" id="assign-heading">Programmes by customer</h2>
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Each programme and the customer it belongs to</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Programme</th>
+                        <th scope="col">Customer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var programme in Model.Programmes.OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase))
+                    {
+                        <tr>
+                            <td>@programme.Name</td>
+                            <td>
+                                <form asp-controller="StaffCustomers" asp-action="Assign" method="post" class="ops-inline-form">
+                                    <input type="hidden" name="programmeKey" value="@programme.ProgrammeKey" />
+                                    <label class="ops-visually-hidden" for="customer-@programme.ProgrammeKey">Customer for @programme.Name</label>
+                                    <select id="customer-@programme.ProgrammeKey" name="customerKey">
+                                        <option value="">(none)</option>
+                                        @foreach (var customer in Model.Customers.OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase))
+                                        {
+                                            <option value="@customer.CustomerKey" selected="@(customer.CustomerKey == programme.CustomerKey)">@customer.Name</option>
+                                        }
+                                    </select>
+                                    <button type="submit" class="ops-button ops-button--secondary">Save</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}

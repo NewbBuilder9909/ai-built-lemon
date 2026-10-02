@@ -1,0 +1,243 @@
+@using ProgrammePulse.Controllers
+@using ProgrammePulse.Services.ProgrammeOps
+@model EvidenceReviewPage
+@{
+    const int RecordsShown = 25;
+    var review = Model.Review;
+    var canDecide = Model.CanDecide;
+    var decisionError = Model.DecisionError;
+    var decisionFindingKey = Model.DecisionFindingKey;
+    var savedFindingKey = Model.SavedFindingKey;
+    ViewData["StaffNames"] = Model.StaffNames;
+    string Banner(EvidenceReadiness readiness) => readiness switch
+    {
+        EvidenceReadiness.DecisionReady => "ops-banner--success",
+        EvidenceReadiness.UseWithCaveats => "ops-banner--warning",
+        EvidenceReadiness.NotDecisionReady => "ops-banner--error",
+        _ => "ops-banner--info"
+    };
+    string Owner(Guid? key) => key is { } k ? Model.StaffNames.GetValueOrDefault(k, "(former staff member)") : "No owner yet";
+    var gaps = review.Findings.Where(f => f.Category == EvidenceFindingCategory.EvidenceGap).ToList();
+    var exceptions = review.Findings.Where(f => f.Category == EvidenceFindingCategory.DeliveryException).ToList();
+    string DecisionChip(FindingDisposition d) => d switch
+    {
+        FindingDisposition.Open => "chip-decision--open",
+        FindingDisposition.Resolved => "chip-validation--ok",
+        FindingDisposition.FixAtSource => "chip-status--new",
+        _ => ""
+    };
+    ViewData["ReportActions"] = true;
+    ViewData["ExportUrl"] = $"/staffops/programme/evidence-check/reviews/{review.ReviewKey}/export";
+}
+
+<a class="ops-back-link" href="/staffops/programme/evidence-check">← Evidence Check</a>
+<ul class="ops-link-row">
+    <li><a href="/staffops/programme/evidence-check/reviews">All recorded reviews</a></li>
+    <li><a href="/staffops/programme/evidence-check/reviews/@review.ReviewKey/pack">Board pack (printable)</a></li>
+</ul>
+
+@if (!Model.IsLatest)
+{
+    <p class="ops-banner ops-banner--info" role="status">
+        A later check has been recorded since this one. This review is the record of what was known on
+        @review.RecordedAtUtc.ToString("yyyy-MM-dd") and can't be changed.
+    </p>
+}
+@if (decisionError is not null)
+{
+    <p class="ops-banner ops-banner--error" role="alert">@decisionError</p>
+}
+
+<section class="ops-panel" aria-label="Readiness when recorded">
+    <h2 class="ops-panel__heading">Recorded @review.RecordedAtUtc.ToString("yyyy-MM-dd HH:mm") UTC</h2>
+    <p><strong>Scope:</strong> @StaffEvidenceCheckController.ScopeSummary(review.Scope)</p>
+    @if (review.Scope?.Decision is { } decision)
+    {
+        <p><strong>Decision this review supports:</strong> @decision</p>
+    }
+    @{
+        var total = review.Findings.Count;
+        var withoutOwner = review.Findings.Count(f => f.OwnerStaffKey is null);
+        var undecided = review.Findings.Count(f => f.Disposition == FindingDisposition.Open);
+    }
+    @* The verdict and its figures on one side; the projects behind it on the other. *@
+    <div class="ops-verdict@(review.Readiness == EvidenceReadiness.NoData ? " ops-verdict--single" : "")">
+    <div class="ops-verdict__main">
+    @if (review.Readiness == EvidenceReadiness.NoData)
+    {
+        <p class="ops-banner @Banner(review.Readiness)">@review.ReadinessReason</p>
+    }
+    else
+    {
+        <partial name="~/Views/StaffOps/Programme/_ReadinessBand.cshtml" model="@((review.Readiness, "When recorded"))" />
+        <p class="ops-verdict__line">@StaffEvidenceCheckController.Label(review.Readiness).</p>
+        <p>@review.ReadinessReason</p>
+    }
+    <div class="ops-kpi-row">
+        <div class="ops-kpi-card">
+            <div class="ops-kpi-card__label">Findings</div>
+            <div class="ops-kpi-card__value">@total</div>
+            <div class="ops-kpi-card__sublabel">@gaps.Count evidence gaps, @exceptions.Count delivery exceptions, from @review.WorkItems.ToString("N0") work items</div>
+        </div>
+        <div class="ops-kpi-card@(withoutOwner > 0 ? " ops-kpi-card--alert" : "")">
+            <div class="ops-kpi-card__label">Without an owner</div>
+            <div class="ops-kpi-card__value">@withoutOwner</div>
+            <div class="ops-kpi-card__sublabel">of @total findings; every finding should leave the review with one</div>
+            <span class="ops-share ops-share--thin" aria-hidden="true"><span class="ops-share__fill" style="--share: @StaffEvidenceCheckController.SharePercent(withoutOwner, total)"></span></span>
+        </div>
+        <div class="ops-kpi-card">
+            <div class="ops-kpi-card__label">Not yet decided</div>
+            <div class="ops-kpi-card__value">@undecided</div>
+            <div class="ops-kpi-card__sublabel">of @total findings</div>
+            <span class="ops-share ops-share--thin" aria-hidden="true"><span class="ops-share__fill" style="--share: @StaffEvidenceCheckController.SharePercent(undecided, total)"></span></span>
+        </div>
+    </div>
+    @foreach (var note in review.SourceNotes)
+    {
+        <p class="ops-banner ops-banner--warning">@note</p>
+    }
+    </div>
+    @if (review.Readiness != EvidenceReadiness.NoData)
+    {
+        <div>
+            <partial name="~/Views/StaffOps/Programme/_ProjectBands.cshtml" model="review.Projects" />
+        </div>
+    }
+    </div>
+</section>
+
+@if (Model.SincePrevious is { } since)
+{
+    <section class="ops-panel" aria-label="Since the previous review">
+        <h2 class="ops-panel__heading">Since the previous review (@since.Previous.RecordedAtUtc.ToString("yyyy-MM-dd"))</h2>
+        <p class="ops-empty-state">
+            Readiness moved from <strong>@StaffEvidenceCheckController.Label(since.PreviousReadiness)</strong> to
+            <strong>@StaffEvidenceCheckController.Label(since.CurrentReadiness)</strong>.
+            @since.Improved improved or cleared, @since.Worse new or worse,@(since.Shifted > 0 ? $" {since.Shifted} with the same count over different records," : "") @since.BrokenCommitments decision(s) that didn't hold.
+        </p>
+        <partial name="~/Views/StaffOps/Programme/_EvidenceComparison.cshtml" model="since" view-data="ViewData" />
+    </section>
+}
+
+@foreach (var (heading, intro, findings) in new[]
+{
+    ("Evidence gaps", "Fix at source, or accept and state alongside the figures, before the report is presented.", gaps),
+    ("Delivery exceptions", "Well-evidenced problems. Each needs an owner and a decision.", exceptions)
+})
+{
+    <section class="ops-panel" aria-label="@heading">
+        <h2 class="ops-panel__heading">@heading</h2>
+        <p class="ops-empty-state">@intro</p>
+        @if (findings.Count == 0)
+        {
+            <p class="ops-empty-state">None found.</p>
+        }
+        @foreach (var finding in findings)
+        {
+            var focused = finding.FindingKey == savedFindingKey || finding.FindingKey == decisionFindingKey;
+            <details class="ops-finding" id="finding-@finding.FindingKey" open="@focused">
+                <summary>
+                    <span class="ops-finding__title">@finding.Title</span>
+                    <partial name="~/Views/StaffOps/Programme/_FindingShare.cshtml" model="@((finding.Numerator, finding.Denominator, finding.Category == EvidenceFindingCategory.EvidenceGap && finding.Severity == EvidenceFindingSeverity.High))" />
+                    <span class="ops-finding__figure">@finding.Numerator.ToString("#,0.##") of @finding.Denominator.ToString("#,0.##") @finding.Unit</span>
+                    <span class="ops-chip chip-severity--@finding.Severity.ToString().ToLowerInvariant()">@finding.Severity.ToString().ToLowerInvariant() severity</span>
+                    <span class="ops-finding__decision">
+                        <span class="ops-chip @DecisionChip(finding.Disposition)">@EvidenceReviewCalculator.Label(finding.Disposition)</span>
+                        @if (finding.OwnerStaffKey is not null)
+                        {
+                            <span>@Owner(finding.OwnerStaffKey)@(finding.TargetDate is { } due ? $", by {due:yyyy-MM-dd}" : "")</span>
+                        }
+                    </span>
+                </summary>
+                @if (savedFindingKey == finding.FindingKey)
+                {
+                    <p class="ops-banner ops-banner--success" role="status">Decision saved.</p>
+                }
+                @if (decisionError is not null && decisionFindingKey == finding.FindingKey)
+                {
+                    <p class="ops-banner ops-banner--error">@decisionError</p>
+                }
+                <p class="ops-empty-state">@finding.WhyItMatters</p>
+                @if (!string.IsNullOrWhiteSpace(finding.Note))
+                {
+                    <p><strong>Note:</strong> @finding.Note</p>
+                }
+                @if (finding.CarriedForward)
+                {
+                    <p class="ops-empty-state">Decision carried forward from the previous review and not yet revisited.</p>
+                }
+                @if (canDecide)
+                {
+                    <form method="post" action="/staffops/programme/evidence-check/reviews/@review.ReviewKey/decide" class="ops-manage-form ops-decision-form">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="findingKey" value="@finding.FindingKey" />
+                        <div class="ops-filter-bar__field">
+                            <label for="disposition-@finding.FindingKey">Decision</label>
+                            <select id="disposition-@finding.FindingKey" name="disposition">
+                                @foreach (var option in Enum.GetValues<FindingDisposition>())
+                                {
+                                    <option value="@option" selected="@(option == finding.Disposition)">@EvidenceReviewCalculator.Label(option)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="ops-filter-bar__field">
+                            <label for="owner-@finding.FindingKey">Owner</label>
+                            <select id="owner-@finding.FindingKey" name="ownerStaffKey">
+                                <option value="">No owner yet</option>
+                                @foreach (var person in Model.OwnerOptions)
+                                {
+                                    <option value="@person.StaffKey" selected="@(person.StaffKey == finding.OwnerStaffKey)">@person.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="ops-filter-bar__field">
+                            <label for="target-@finding.FindingKey">Target date</label>
+                            <input id="target-@finding.FindingKey" name="targetDate" type="date" value="@finding.TargetDate?.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="ops-filter-bar__field ops-decision-form__note">
+                            <label for="note-@finding.FindingKey">Note or caveat</label>
+                            <textarea id="note-@finding.FindingKey" name="note" rows="2" maxlength="@EvidenceReviewCalculator.MaxNoteLength">@finding.Note</textarea>
+                        </div>
+                        <button type="submit" class="ops-button">Save decision</button>
+                    </form>
+                }
+                @if (finding.Records.Count > 0)
+                {
+                    <details class="ops-disclosure">
+                        <summary>Source records (@finding.Records.Count)</summary>
+                        <div class="ops-table-scroll">
+                            <table class="ops-table">
+                                <caption class="ops-visually-hidden">Source records behind: @finding.Title</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Project</th>
+                                        <th scope="col">Source record</th>
+                                        <th scope="col">Item</th>
+                                        <th scope="col">Detail</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var record in finding.Records.Take(RecordsShown))
+                                    {
+                                        <tr>
+                                            <td>@record.Project</td>
+                                            <td>@record.Source @record.ExternalId</td>
+                                            <td>@record.Title</td>
+                                            <td>@record.Detail</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        @if (finding.Records.Count > RecordsShown)
+                        {
+                            <p class="ops-empty-state">Showing @RecordsShown of @finding.Records.Count records. The CSV has them all.</p>
+                        }
+                    </details>
+                }
+            </details>
+        }
+    </section>
+}
+
+<partial name="~/Views/StaffOps/Programme/_EvidenceMethod.cshtml" />

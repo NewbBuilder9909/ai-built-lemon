@@ -1,0 +1,45 @@
+@using ProgrammePulse.Models.ViewModels.SkillsEvidence
+@model AzureDevOpsRepositorySelectionViewModel
+
+<p class="ops-empty-state">
+    Admin-only. These are the repositories the stored token for <strong>dev.azure.com/@Model.Organisation</strong>
+    can read right now. Evidence is collected only for the ones you tick — up to @Model.MaxSelectable.
+    Disabled and empty repositories are not listed.
+    <a href="/staffops/skills/evidence">Back to evidence sources</a>
+</p>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Repositories</h2>
+    <form asp-controller="StaffAzureDevOpsEvidence" asp-action="SaveRepositories" asp-route-connectionKey="@Model.ConnectionKey" method="post" class="ops-form">
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Repositories this connection can read, and whether each is selected</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Collect</th>
+                        <th scope="col">Project</th>
+                        <th scope="col">Repository</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @for (var i = 0; i < Model.Repositories.Count; i++)
+                {
+                    var repository = Model.Repositories[i];
+                    <tr>
+                        <td>
+                            <input type="checkbox" id="repository-@i" name="repositories" value="@repository.Key" checked="@repository.Selected" />
+                        </td>
+                        <td>@repository.Project</td>
+                        <td><label for="repository-@i">@repository.Name</label></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        <p class="ops-empty-state">
+            Removing a repository later stops it being synced and marks its coverage out of scope.
+            Evidence already collected from it is kept, because it was true when it was collected.
+        </p>
+        <button type="submit" class="ops-button">Save selection</button>
+    </form>
+</section>

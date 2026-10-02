@@ -1,0 +1,12 @@
+@using ProgrammePulse.Services.ProgrammeOps
+@* How the Review and recorded reviews are worked out, said once, in one place. *@
+<details class="ops-disclosure ops-method">
+    <summary>How this is worked out</summary>
+    <ul class="ops-method__list">
+        <li>Readiness is a band, not a score. <em>Not decision-ready</em>: a connected source failed, or a high-severity gap covers at least @EvidenceCheckCalculator.MaterialShare.ToString("P0") of its data. <em>Use with caveats</em>: there are gaps to state, or the data is more than @EvidenceCheckCalculator.StaleAfterDays days old. Each project is judged on its own records.</li>
+        <li>Delivery exceptions never lower readiness: a report that shows its bad news clearly is the one to trust.</li>
+        <li>Hours are the period's. Overdue, blocked and owners are as of now. Estimate accuracy uses all time ever recorded against an item. Readiness is judged on the extract date when one is given, since an old export uploaded today is still old.</li>
+        <li>Movement since a review counts affected items or hours, not the share, so a finding can't look better because clean data arrived around it. Records are matched by their source id, so the same count over different records is shown as such, never as no change.</li>
+        <li>Each finding's bar is its affected share of its own total. On high-severity gaps, the line marks the @EvidenceCheckCalculator.MaterialShare.ToString("P0") threshold.</li>
+    </ul>
+</details>

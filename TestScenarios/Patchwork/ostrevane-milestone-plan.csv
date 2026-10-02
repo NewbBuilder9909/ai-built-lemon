@@ -1,0 +1,8 @@
+ID,Milestone,Supplier,Baseline date,Forecast date,RAG,Last updated,Notes
+M1,Discovery complete,Dunmarrow Studio,17/08/2026,17/08/2026,Complete,18/08/2026,
+M2,Ticketing API beta,Brantoft Systems,22/09/2026,22/09/2026,Complete,23/09/2026,
+M3,Mobile app beta,Kelvaro Digital,26/09/2026,26/09/2026,G,20/09/2026,On track per supplier update
+M4,Accessibility audit (wallet) passed,Dunmarrow Studio,07/10/2026,07/10/2026,A,29/09/2026,Audit started
+M5,Payment provider cut-over,Brantoft Systems,14/10/2026,14/10/2026,G,22/09/2026,
+M6,Data migration dry run,Ombreton Labs,08/09/2026,08/09/2026,Complete,12/09/2026,Confirmed on weekly call
+M7,Public launch,Ostrevane Transit,11/11/2026,11/11/2026,A,29/09/2026,Depends on M3 and M5

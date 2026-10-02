@@ -1,0 +1,106 @@
+@using ProgrammePulse.Models.ExecutiveReview
+@using ProgrammePulse.Services.ExecutiveReview
+@model DecisionDetail
+@inject ProgrammePulse.Services.Staff.IStaffAuthorizationService DataAuthorization
+@{
+    var decision = Model.Current;
+    string Name(Guid? key) => Model.People.FirstOrDefault(p => p.StaffKey == key)?.Name ?? Localizer["Decision.UnavailableOwner"].Value;
+    string Actor(int id) => Model.People.FirstOrDefault(p => p.MemberId == id)?.Name ?? Localizer["Decision.UnavailableOwner"].Value;
+    var actions = Enum.GetValues<DecisionAction>().Where(a => a != DecisionAction.Revise && ExecutiveDecisionPolicy.CanApply(decision.Status, a)
+        && (a is DecisionAction.AcceptEvidence or DecisionAction.DisputeEvidence ? Model.CanReview : Model.CanManage)).ToArray();
+}
+<a asp-action="Index">@Localizer["Decision.Queue"]</a>
+<h2 class="review-decision-title">@decision.Definition.Title</h2>
+@if (Model.ErrorKey is string error) { <p role="alert">@Localizer[error]</p> }
+@if (!Model.EvidenceIsFresh) { <p role="status">@Localizer["Decision.StaleEvidence"]</p> }
+<dl class="review-facts">
+    <dt>@Localizer["Decision.Status"]</dt><dd>@Localizer[$"Decision.Status.{decision.Status}"]</dd>
+    <dt>@Localizer["Decision.Version"]</dt><dd>@decision.Version</dd>
+    <dt>@Localizer["Decision.Materiality"]</dt><dd>@decision.Definition.Materiality</dd>
+    <dt>@Localizer["Decision.Options"]</dt><dd class="review-prose">@decision.Definition.Options</dd>
+    <dt>@Localizer["Decision.Recommendation"]</dt><dd>@decision.Definition.Recommendation</dd>
+    <dt>@Localizer["Decision.Owner"]</dt><dd>@Name(decision.Definition.OwnerStaffKey)</dd>
+    <dt>@Localizer["Decision.Due"]</dt><dd>@decision.Definition.DueOn.ToString("d")</dd>
+    <dt>@Localizer["Decision.Evidence"]</dt><dd>@Localizer[$"Decision.Evidence.{decision.Evidence}"]</dd>
+    <dt>@Localizer["Review.Record"]</dt><dd>@Model.Pack.Items.Single(i => i.WorkItemKey == decision.Definition.WorkItemKey).ExternalId</dd>
+    <dt>@Localizer["Decision.ReviewNote"]</dt><dd>@(decision.ReviewNote ?? Localizer["Review.Unknown"].Value)</dd>
+    @if (decision.Decision is not null)
+    {
+        <dt>@Localizer["Decision.Decision"]</dt><dd>@decision.Decision</dd>
+        <dt>@Localizer["Decision.Rationale"]</dt><dd>@decision.Rationale</dd>
+        <dt>@Localizer["Decision.ActionOwner"]</dt><dd>@Name(decision.ActionOwnerStaffKey)</dd>
+        <dt>@Localizer["Decision.FollowUp"]</dt><dd>@decision.FollowUpOn?.ToString("d")</dd>
+    }
+    @if (decision.Outcome is not null) { <dt>@Localizer["Decision.Outcome"]</dt><dd>@decision.Outcome</dd> }
+</dl>
+<div class="review-actions">
+    <a asp-controller="StaffExecutiveReview" asp-action="Pack" asp-route-packKey="@Model.Pack.PackKey">@Localizer["Review.Pack"]</a>
+    <a asp-action="Download" asp-route-decisionKey="@decision.DecisionKey">@Localizer["Decision.Download"]</a>
+    @if (await DataAuthorization.HasAsync(ProgrammePulse.Models.Staff.Capability.ManageStaff))
+    { <a asp-controller="StaffExecutiveData" asp-action="Index" asp-route-operation="RedactDecision" asp-route-targetKey="@decision.DecisionKey">@Localizer["Review.Data.Operation.RedactDecision"]</a> }
+    <a asp-action="Detail" asp-route-decisionKey="@decision.DecisionKey">@Localizer["Decision.Reload"]</a>
+    @if (Model.CanManage && ExecutiveDecisionPolicy.CanApply(decision.Status, DecisionAction.Revise))
+    { <a asp-action="Edit" asp-route-decisionKey="@decision.DecisionKey">@Localizer["Decision.Edit"]</a> }
+</div>
+@if (actions.Length > 0)
+{
+    <h2>@Localizer["Decision.Update"]</h2>
+    <form asp-action="Act" asp-route-decisionKey="@decision.DecisionKey" method="post" class="review-decision-form">
+        <input type="hidden" name="ExpectedVersion" value="@(Model.AttemptedAction?.ExpectedVersion ?? decision.Version)" />
+        <div>
+            <label for="Action">@Localizer["Decision.Action"]</label>
+            <select id="Action" name="Action" required>
+                <option value="">@Localizer["Decision.Select"]</option>
+                @foreach (var action in actions)
+                { <option value="@action" selected="@(Model.AttemptedAction?.Action == action)">@Localizer[$"Decision.Action.{action}"]</option> }
+            </select>
+        </div>
+        <div><label for="Note">@Localizer["Decision.Note"]</label><textarea name="Note" id="Note" rows="3" maxlength="2000" required>@Model.AttemptedAction?.Note</textarea></div>
+        @if (Model.CanManage && decision.Status == DecisionStatus.Reviewed)
+        {
+            <fieldset data-decision-fields="Decide">
+                <legend>@Localizer["Decision.Decision"]</legend>
+                <div><label for="Decision">@Localizer["Decision.Decision"]</label><textarea name="Decision" id="Decision" rows="3" maxlength="2000">@Model.AttemptedAction?.Decision</textarea></div>
+                <div><label for="Rationale">@Localizer["Decision.Rationale"]</label><textarea name="Rationale" id="Rationale" rows="3" maxlength="4000">@Model.AttemptedAction?.Rationale</textarea></div>
+                <div>
+                    <label for="ActionOwnerStaffKey">@Localizer["Decision.ActionOwner"]</label>
+                    <select name="ActionOwnerStaffKey" id="ActionOwnerStaffKey">
+                        <option value="">@Localizer["Decision.Select"]</option>
+                        @foreach (var person in Model.People.Where(p => p.IsActive))
+                        { <option value="@person.StaffKey" selected="@(Model.AttemptedAction?.ActionOwnerStaffKey == person.StaffKey)">@person.Name</option> }
+                    </select>
+                </div>
+                <div><label for="FollowUpOn">@Localizer["Decision.FollowUp"]</label><input name="FollowUpOn" id="FollowUpOn" type="date" value="@(Model.AttemptedAction?.FollowUpOn?.ToString("yyyy-MM-dd"))" /></div>
+            </fieldset>
+        }
+        @if (Model.CanManage && decision.Status == DecisionStatus.Decided)
+        { <div><label for="Outcome">@Localizer["Decision.Outcome"]</label><textarea name="Outcome" id="Outcome" maxlength="4000" rows="3" required>@Model.AttemptedAction?.Outcome</textarea></div> }
+        <button type="submit" class="ops-button">@Localizer["Decision.Record"]</button>
+    </form>
+}
+<h2>@Localizer["Decision.History"]</h2>
+@foreach (var revision in Model.History.Reverse())
+{
+    <details class="review-history">
+        <summary>@Localizer["Decision.Version"] @revision.Version: @Localizer[$"Decision.Event.{revision.Event}"] (@revision.RecordedAtUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC, @Actor(revision.ActorMemberId))</summary>
+        <dl class="review-facts">
+            <dt>@Localizer["Decision.Status"]</dt><dd>@Localizer[$"Decision.Status.{revision.Status}"]</dd>
+            <dt>@Localizer["Decision.Title"]</dt><dd>@revision.Definition.Title</dd>
+            <dt>@Localizer["Decision.Materiality"]</dt><dd>@revision.Definition.Materiality</dd>
+            <dt>@Localizer["Decision.Options"]</dt><dd class="review-prose">@revision.Definition.Options</dd>
+            <dt>@Localizer["Decision.Recommendation"]</dt><dd>@revision.Definition.Recommendation</dd>
+            <dt>@Localizer["Decision.Owner"]</dt><dd>@Name(revision.Definition.OwnerStaffKey)</dd>
+            <dt>@Localizer["Decision.Due"]</dt><dd>@revision.Definition.DueOn.ToString("d")</dd>
+            <dt>@Localizer["Decision.Evidence"]</dt><dd>@Localizer[$"Decision.Evidence.{revision.Evidence}"]</dd>
+            <dt>@Localizer["Review.Pack"]</dt><dd><a asp-controller="StaffExecutiveReview" asp-action="Pack" asp-route-packKey="@revision.Definition.PackKey">@revision.Definition.PackKey</a></dd>
+            <dt>@Localizer["Review.Record"]</dt><dd>@revision.Definition.WorkItemKey</dd>
+            <dt>@Localizer["Decision.Note"]</dt><dd>@revision.Note</dd>
+            <dt>@Localizer["Decision.Decision"]</dt><dd>@revision.Decision</dd>
+            <dt>@Localizer["Decision.Rationale"]</dt><dd>@revision.Rationale</dd>
+            <dt>@Localizer["Decision.ActionOwner"]</dt><dd>@(revision.ActionOwnerStaffKey is null ? "" : Name(revision.ActionOwnerStaffKey))</dd>
+            <dt>@Localizer["Decision.FollowUp"]</dt><dd>@revision.FollowUpOn?.ToString("d")</dd>
+            <dt>@Localizer["Decision.Outcome"]</dt><dd>@revision.Outcome</dd>
+        </dl>
+    </details>
+}
+<script src="~/js/executive-decisions.js" defer></script>

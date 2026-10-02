@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="Dashboard" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="ERP Records" xml:space="preserve"><value>ERP Records</value></data>
+  <data name="Demonstration data" xml:space="preserve"><value>Demonstration data</value></data>
+  <data name="DemoBannerBody" xml:space="preserve"><value>all records on this page are fictional, generated for learning purposes. No real customer, financial, or ERP data is used.</value></data>
+  <data name="Status Summary" xml:space="preserve"><value>Status Summary</value></data>
+  <data name="Recent Activity" xml:space="preserve"><value>Recent Activity</value></data>
+  <data name="Transformation Pipeline" xml:space="preserve"><value>Transformation Pipeline</value></data>
+  <data name="No activity yet." xml:space="preserve"><value>No activity yet.</value></data>
+
+  <data name="Total Records" xml:space="preserve"><value>Total Records</value></data>
+  <data name="Successfully Transformed" xml:space="preserve"><value>Successfully Transformed</value></data>
+  <data name="Requiring Attention" xml:space="preserve"><value>Requiring Attention</value></data>
+  <data name="Completion" xml:space="preserve"><value>Completion</value></data>
+
+  <data name="New" xml:space="preserve"><value>New</value></data>
+  <data name="In Progress" xml:space="preserve"><value>In Progress</value></data>
+  <data name="Complete" xml:space="preserve"><value>Complete</value></data>
+  <data name="Exception" xml:space="preserve"><value>Exception</value></data>
+  <data name="Validating" xml:space="preserve"><value>Validating</value></data>
+  <data name="Transformed" xml:space="preserve"><value>Transformed</value></data>
+
+  <data name="ERP ID" xml:space="preserve"><value>ERP ID</value></data>
+  <data name="Customer / Account" xml:space="preserve"><value>Customer / Account</value></data>
+  <data name="Work Type" xml:space="preserve"><value>Work Type</value></data>
+  <data name="Raw Status" xml:space="preserve"><value>Raw Status</value></data>
+  <data name="Normalised Status" xml:space="preserve"><value>Normalised Status</value></data>
+  <data name="Amount" xml:space="preserve"><value>Amount</value></data>
+  <data name="Source-System Date" xml:space="preserve"><value>Source-System Date</value></data>
+  <data name="Normalised UTC Date" xml:space="preserve"><value>Normalised UTC Date</value></data>
+  <data name="Validation" xml:space="preserve"><value>Validation</value></data>
+  <data name="Raw Status (source system)" xml:space="preserve"><value>Raw Status (source system)</value></data>
+
+  <data name="Search" xml:space="preserve"><value>Search</value></data>
+  <data name="Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Validation result" xml:space="preserve"><value>Validation result</value></data>
+  <data name="Apply" xml:space="preserve"><value>Apply</value></data>
+  <data name="All statuses" xml:space="preserve"><value>All statuses</value></data>
+  <data name="All results" xml:space="preserve"><value>All results</value></data>
+  <data name="Valid" xml:space="preserve"><value>Valid</value></data>
+  <data name="Warning" xml:space="preserve"><value>Warning</value></data>
+  <data name="Error" xml:space="preserve"><value>Error</value></data>
+
+  <data name="No records match the current filters." xml:space="preserve"><value>No records match the current filters.</value></data>
+  <data name="ShowingXOfY" xml:space="preserve"><value>Showing {0} of {1} records.</value></data>
+  <data name="Fictional ERP records with transformation and validation results" xml:space="preserve"><value>Fictional ERP records with transformation and validation results</value></data>
+
+  <data name="BackToErpRecords" xml:space="preserve"><value>Back to ERP Records</value></data>
+  <data name="Pipeline:" xml:space="preserve"><value>Pipeline:</value></data>
+  <data name="Status:" xml:space="preserve"><value>Status:</value></data>
+  <data name="Validation Result —" xml:space="preserve"><value>Validation Result —</value></data>
+  <data name="No validation messages for this record." xml:space="preserve"><value>No validation messages for this record.</value></data>
+
+  <data name="RecordTitlePrefix" xml:space="preserve"><value>Record</value></data>
+  <data name="Skip to main content" xml:space="preserve"><value>Skip to main content</value></data>
+  <data name="Toggle navigation" xml:space="preserve"><value>Toggle navigation</value></data>
+
+  <!-- Staff Ops layout chrome -->
+  <data name="My Profile" xml:space="preserve"><value>My Profile</value></data>
+  <data name="My Work" xml:space="preserve"><value>My Work</value></data>
+  <data name="Programme Overview" xml:space="preserve"><value>Programme Overview</value></data>
+  <data name="Reporting" xml:space="preserve"><value>Reporting</value></data>
+  <data name="Contracts" xml:space="preserve"><value>Contracts</value></data>
+  <data name="Approvals" xml:space="preserve"><value>Approvals</value></data>
+  <data name="Admin" xml:space="preserve"><value>Admin</value></data>
+  <data name="Branding" xml:space="preserve"><value>Branding</value></data>
+  <data name="Log out" xml:space="preserve"><value>Log out</value></data>
+
+  <!-- Reporting Hub -->
+  <data name="Reporting Hub" xml:space="preserve"><value>Reporting Hub</value></data>
+  <data name="From" xml:space="preserve"><value>From</value></data>
+  <data name="To" xml:space="preserve"><value>To</value></data>
+  <data name="Update" xml:space="preserve"><value>Update</value></data>
+  <data name="Export CSV" xml:space="preserve"><value>Export CSV</value></data>
+  <data name="RAID register" xml:space="preserve"><value>RAID register</value></data>
+  <data name="Governance" xml:space="preserve"><value>Governance</value></data>
+  <data name="Trend" xml:space="preserve"><value>Trend</value></data>
+  <data name="View cost summary" xml:space="preserve"><value>View cost summary</value></data>
+  <data name="ScopedToTeam" xml:space="preserve"><value>Scoped to team: {0}</value></data>
+  <data name="NoTeamScope" xml:space="preserve"><value>No team assigned to you, so named contributor capacity is not shown. Ask an Admin to set your team.</value></data>
+  <data name="Programme" xml:space="preserve"><value>Programme</value></data>
+  <data name="Project" xml:space="preserve"><value>Project</value></data>
+  <data name="Workstream" xml:space="preserve"><value>Workstream</value></data>
+  <data name="AllProgrammes" xml:space="preserve"><value>(all programmes)</value></data>
+  <data name="Customer" xml:space="preserve"><value>Customer</value></data>
+  <data name="AllCustomers" xml:space="preserve"><value>(all customers)</value></data>
+  <data name="Effort Variance (Estimated vs Actual)" xml:space="preserve"><value>Effort Variance (Estimated vs Actual)</value></data>
+  <data name="No workstreams with work items yet." xml:space="preserve"><value>No workstreams with work items yet.</value></data>
+  <data name="Effort variance by workstream: estimated hours versus actual logged hours" xml:space="preserve"><value>Effort variance by workstream: estimated hours versus actual logged hours</value></data>
+  <data name="Estimated (hrs)" xml:space="preserve"><value>Estimated (hrs)</value></data>
+  <data name="Actual (hrs)" xml:space="preserve"><value>Actual (hrs)</value></data>
+  <data name="Variance (hrs)" xml:space="preserve"><value>Variance (hrs)</value></data>
+  <data name="Baseline (hrs)" xml:space="preserve"><value>Baseline (hrs)</value></data>
+  <data name="Baseline variance (hrs)" xml:space="preserve"><value>Baseline variance (hrs)</value></data>
+  <data name="Forecast at completion (hrs)" xml:space="preserve"><value>Forecast at completion (hrs)</value></data>
+  <data name="Forecast variance (hrs)" xml:space="preserve"><value>Forecast variance (hrs)</value></data>
+  <data name="Estimate coverage" xml:space="preserve"><value>Estimate coverage</value></data>
+  <data name="without estimate" xml:space="preserve"><value>without estimate</value></data>
+  <data name="Contributor Capacity &amp; Residual" xml:space="preserve"><value>Contributor Capacity &amp; Residual</value></data>
+  <data name="No active staff in scope for this period." xml:space="preserve"><value>No active staff in scope for this period.</value></data>
+  <data name="Contributor capacity and residual availability by staff member" xml:space="preserve"><value>Contributor capacity and residual availability by staff member</value></data>
+  <data name="Staff" xml:space="preserve"><value>Staff</value></data>
+  <data name="Team" xml:space="preserve"><value>Team</value></data>
+  <data name="Leave (hrs)" xml:space="preserve"><value>Leave (hrs)</value></data>
+  <data name="Logged (hrs)" xml:space="preserve"><value>Logged (hrs)</value></data>
+  <data name="Residual (hrs)" xml:space="preserve"><value>Residual (hrs)</value></data>
+  <data name="Utilisation" xml:space="preserve"><value>Utilisation</value></data>
+  <data name="Billable Utilisation" xml:space="preserve"><value>Billable Utilisation</value></data>
+  <data name="Team Capacity Summary" xml:space="preserve"><value>Team Capacity Summary</value></data>
+  <data name="Contributors" xml:space="preserve"><value>Contributors</value></data>
+  <data name="Capacity and residual availability, subtotalled by team" xml:space="preserve"><value>Capacity and residual availability, subtotalled by team</value></data>
+  <data name="Portfolio by Customer" xml:space="preserve"><value>Portfolio by Customer</value></data>
+  <data name="No programmes yet — run a ClickUp sync to populate this page." xml:space="preserve"><value>No programmes yet. Import or sync delivery data to fill this page.</value></data>
+  <data name="Portfolio rollup by customer" xml:space="preserve"><value>Portfolio rollup by customer</value></data>
+  <data name="Programmes" xml:space="preserve"><value>Programmes</value></data>
+  <data name="Open Work Items" xml:space="preserve"><value>Open Work Items</value></data>
+  <data name="Blocked" xml:space="preserve"><value>Blocked</value></data>
+  <data name="Cost Summary" xml:space="preserve"><value>Cost Summary</value></data>
+  <data name="PMO Governance" xml:space="preserve"><value>PMO Governance</value></data>
+
+  <!-- Cost Summary -->
+  <data name="Back to Reporting Hub" xml:space="preserve"><value>Back to Reporting Hub</value></data>
+  <data name="Contracts.Pages" xml:space="preserve"><value>Contract pages</value></data>
+  <data name="Contracts.Overview" xml:space="preserve"><value>Portfolio overview</value></data>
+  <data name="Contracts.Assurance" xml:space="preserve"><value>Contract assurance</value></data>
+  <data name="Hours.Estimated" xml:space="preserve"><value>Estimated</value></data>
+  <data name="Hours.Coverage" xml:space="preserve"><value>Estimate coverage</value></data>
+  <data name="Hours.Actual" xml:space="preserve"><value>Actual</value></data>
+  <data name="Hours.Variance" xml:space="preserve"><value>Variance</value></data>
+  <data name="Hours.Baseline" xml:space="preserve"><value>Baseline</value></data>
+  <data name="Hours.VsBaseline" xml:space="preserve"><value>Against baseline</value></data>
+  <data name="Hours.Forecast" xml:space="preserve"><value>Forecast</value></data>
+  <data name="Hours.VsForecast" xml:space="preserve"><value>Against forecast</value></data>
+  <data name="Hours.AllInHours" xml:space="preserve"><value>Figures are hours. Forecast is at completion.</value></data>
+  <data name="Reporting.Overview" xml:space="preserve"><value>Overview</value></data>
+  <data name="Reporting.Cost" xml:space="preserve"><value>Cost summary</value></data>
+  <data name="Reporting.JiraTempo" xml:space="preserve"><value>Jira and Tempo</value></data>
+  <data name="Reporting.Pages" xml:space="preserve"><value>Reporting pages</value></data>
+  <data name="Reporting.Caveats" xml:space="preserve"><value>Before relying on these figures</value></data>
+  <data name="Reporting.Unlinked" xml:space="preserve"><value>Unlinked recorded time: {0} entries, {1} hours</value></data>
+  <data name="Reporting.ManageCustomers" xml:space="preserve"><value>Manage customers</value></data>
+  <data name="Cost by Contributor" xml:space="preserve"><value>Cost by Contributor</value></data>
+  <data name="No priced time entries in this period." xml:space="preserve"><value>No priced time entries in this period.</value></data>
+  <data name="Cost by contributor, including billable hours and total cost" xml:space="preserve"><value>Cost by contributor, including billable hours and total cost</value></data>
+  <data name="Billable (hrs)" xml:space="preserve"><value>Billable (hrs)</value></data>
+  <data name="Total Cost" xml:space="preserve"><value>Total Cost</value></data>
+  <data name="Currency" xml:space="preserve"><value>Currency</value></data>
+  <data name="Programme Budgets" xml:space="preserve"><value>Programme Budgets</value></data>
+  <data name="Budget" xml:space="preserve"><value>Budget</value></data>
+  <data name="Cost to date" xml:space="preserve"><value>Cost to date</value></data>
+  <data name="Burn %" xml:space="preserve"><value>Burn %</value></data>
+  <data name="Set budget" xml:space="preserve"><value>Set budget</value></data>
+  <data name="Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Programme budgets versus cost to date" xml:space="preserve"><value>Programme budgets versus cost to date</value></data>
+
+  <!-- RAID register -->
+  <data name="Risks" xml:space="preserve"><value>Risks</value></data>
+  <data name="Issues" xml:space="preserve"><value>Issues</value></data>
+  <data name="Title" xml:space="preserve"><value>Title</value></data>
+  <data name="Severity" xml:space="preserve"><value>Severity</value></data>
+  <data name="No risks logged yet." xml:space="preserve"><value>No risks logged yet.</value></data>
+  <data name="No issues logged yet." xml:space="preserve"><value>No issues logged yet.</value></data>
+  <data name="Logged risks with severity and status" xml:space="preserve"><value>Logged risks with severity and status</value></data>
+  <data name="Logged issues with severity and status" xml:space="preserve"><value>Logged issues with severity and status</value></data>
+
+  <!-- Governance -->
+  <data name="Change requests" xml:space="preserve"><value>Change requests</value></data>
+  <data name="No change requests logged yet." xml:space="preserve"><value>No change requests logged yet.</value></data>
+  <data name="Change requests with status and decision" xml:space="preserve"><value>Change requests with status and decision</value></data>
+  <data name="Requested by" xml:space="preserve"><value>Requested by</value></data>
+  <data name="Decided by" xml:space="preserve"><value>Decided by</value></data>
+  <data name="Decide" xml:space="preserve"><value>Decide</value></data>
+  <data name="Stakeholders (RACI)" xml:space="preserve"><value>Stakeholders (RACI)</value></data>
+  <data name="No stakeholders recorded yet." xml:space="preserve"><value>No stakeholders recorded yet.</value></data>
+  <data name="Programme stakeholders with RACI role" xml:space="preserve"><value>Programme stakeholders with RACI role</value></data>
+  <data name="Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Role" xml:space="preserve"><value>Role</value></data>
+  <data name="Remove" xml:space="preserve"><value>Remove</value></data>
+  <data name="Dependencies" xml:space="preserve"><value>Dependencies</value></data>
+  <data name="No dependencies recorded yet." xml:space="preserve"><value>No dependencies recorded yet.</value></data>
+  <data name="Work-item dependencies and whether they're still unresolved" xml:space="preserve"><value>Work-item dependencies and whether they're still unresolved</value></data>
+  <data name="Work item" xml:space="preserve"><value>Work item</value></data>
+  <data name="Stage" xml:space="preserve"><value>Stage</value></data>
+  <data name="Depends on" xml:space="preserve"><value>Depends on</value></data>
+  <data name="Depends-on stage" xml:space="preserve"><value>Depends-on stage</value></data>
+  <data name="Unresolved" xml:space="preserve"><value>Unresolved</value></data>
+  <data name="Clear" xml:space="preserve"><value>Clear</value></data>
+
+  <!-- Trend -->
+  <data name="Capture a snapshot" xml:space="preserve"><value>Capture a snapshot</value></data>
+  <data name="Capture snapshot" xml:space="preserve"><value>Capture snapshot</value></data>
+  <data name="History" xml:space="preserve"><value>History</value></data>
+  <data name="No snapshots captured yet." xml:space="preserve"><value>No snapshots captured yet.</value></data>
+  <data name="Reporting snapshot history, oldest first" xml:space="preserve"><value>Reporting snapshot history, oldest first</value></data>
+  <data name="Captured" xml:space="preserve"><value>Captured</value></data>
+  <data name="Period" xml:space="preserve"><value>Period</value></data>
+  <data name="Open" xml:space="preserve"><value>Open</value></data>
+  <data name="Avg. utilisation" xml:space="preserve"><value>Avg. utilisation</value></data>
+
+  <!-- Alerts -->
+  <data name="Alerts" xml:space="preserve"><value>Alerts</value></data>
+  <data name="No open alerts." xml:space="preserve"><value>No open alerts.</value></data>
+  <data name="Open threshold alerts" xml:space="preserve"><value>Open threshold alerts</value></data>
+  <data name="Raised" xml:space="preserve"><value>Raised</value></data>
+  <data name="Type" xml:space="preserve"><value>Type</value></data>
+  <data name="Message" xml:space="preserve"><value>Message</value></data>
+  <data name="Acknowledge" xml:space="preserve"><value>Acknowledge</value></data>
+  <data name="Refresh alerts" xml:space="preserve"><value>Refresh alerts</value></data>
+  <data name="Pagination" xml:space="preserve"><value>Pagination</value></data>
+  <data name="Previous page" xml:space="preserve"><value>Previous page</value></data>
+  <data name="Next page" xml:space="preserve"><value>Next page</value></data>
+  <data name="Page {0}" xml:space="preserve"><value>Page {0}</value></data>
+  <data name="Review.Title" xml:space="preserve"><value>Executive review</value></data>
+  <data name="Review.Pack" xml:space="preserve"><value>Operational evidence pack</value></data>
+  <data name="Review.MarketSettings" xml:space="preserve"><value>Market settings</value></data>
+  <data name="Review.Market" xml:space="preserve"><value>Market</value></data>
+  <data name="Review.Language" xml:space="preserve"><value>Default language</value></data>
+  <data name="Review.Format" xml:space="preserve"><value>Date and number format</value></data>
+  <data name="Review.ReportingCurrency" xml:space="preserve"><value>Reporting currency preference</value></data>
+  <data name="Review.TimeZone" xml:space="preserve"><value>Reporting time zone</value></data>
+  <data name="Review.FiscalStart" xml:space="preserve"><value>Financial year starts</value></data>
+  <data name="Review.Save" xml:space="preserve"><value>Save settings</value></data>
+  <data name="Review.Reload" xml:space="preserve"><value>Reload current settings</value></data>
+  <data name="Review.SettingsVersion" xml:space="preserve"><value>Settings version</value></data>
+  <data name="Review.Source" xml:space="preserve"><value>Delivery source</value></data>
+  <data name="Review.Capture" xml:space="preserve"><value>Capture operational pack</value></data>
+  <data name="Review.RecentPacks" xml:space="preserve"><value>Recent packs (up to 50)</value></data>
+  <data name="Review.NoPacks" xml:space="preserve"><value>No operational packs captured.</value></data>
+  <data name="Review.CapturedUtc" xml:space="preserve"><value>Captured (UTC)</value></data>
+  <data name="Review.Captured" xml:space="preserve"><value>Captured</value></data>
+  <data name="Review.Overdue" xml:space="preserve"><value>Overdue</value></data>
+  <data name="Review.OpenChange" xml:space="preserve"><value>Change in open items</value></data>
+  <data name="Review.Unknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="Review.Publication" xml:space="preserve"><value>Source publication</value></data>
+  <data name="Review.Account" xml:space="preserve"><value>Connected account at capture</value></data>
+  <data name="Review.FiscalYear" xml:space="preserve"><value>Financial year</value></data>
+  <data name="Review.Total" xml:space="preserve"><value>Observed work items</value></data>
+  <data name="Review.NoDueDate" xml:space="preserve"><value>Open items without a due date</value></data>
+  <data name="Review.Unmapped" xml:space="preserve"><value>Unmapped statuses</value></data>
+  <data name="Review.Verification" xml:space="preserve"><value>Review status</value></data>
+  <data name="Review.NotReviewed" xml:space="preserve"><value>Observed snapshot; not independently reviewed</value></data>
+  <data name="Review.Download" xml:space="preserve"><value>Download evidence (JSON)</value></data>
+  <data name="Review.Evidence" xml:space="preserve"><value>Captured evidence</value></data>
+  <data name="Review.Record" xml:space="preserve"><value>Source record</value></data>
+  <data name="Review.Stage" xml:space="preserve"><value>Stage</value></data>
+  <data name="Review.Due" xml:space="preserve"><value>Due</value></data>
+  <data name="Review.Updated" xml:space="preserve"><value>Source row updated</value></data>
+  <data name="Review.InvalidSettings" xml:space="preserve"><value>Select a supported value for every setting.</value></data>
+  <data name="Review.AmbiguousBoundary" xml:space="preserve"><value>The reporting boundary has an ambiguous or missing local time.</value></data>
+  <data name="Review.Conflict" xml:space="preserve"><value>Settings changed in another session. Reload current settings before saving.</value></data>
+  <data name="Review.InvalidFreshness" xml:space="preserve"><value>The publication age limit is invalid.</value></data>
+  <data name="Review.PublicationRequired" xml:space="preserve"><value>Capture requires a recent, completed successful publication. Running, failed, missing or stale publications cannot be captured.</value></data>
+  <data name="Review.ProvenanceRequired" xml:space="preserve"><value>Source account or record provenance is missing.</value></data>
+  <data name="Review.NoEvidence" xml:space="preserve"><value>No work items were found for this source.</value></data>
+  <data name="Review.InvalidSource" xml:space="preserve"><value>Select a supported delivery source.</value></data>
+  <data name="Review.Stage.Backlog" xml:space="preserve"><value>Backlog</value></data>
+  <data name="Review.Stage.Ready" xml:space="preserve"><value>Ready</value></data>
+  <data name="Review.Stage.InProgress" xml:space="preserve"><value>In progress</value></data>
+  <data name="Review.Stage.Blocked" xml:space="preserve"><value>Blocked</value></data>
+  <data name="Review.Stage.InReview" xml:space="preserve"><value>In review</value></data>
+  <data name="Review.Stage.Done" xml:space="preserve"><value>Done</value></data>
+  <data name="Review.Stage.Cancelled" xml:space="preserve"><value>Cancelled</value></data>
+  <data name="Review.Stage.Unmapped" xml:space="preserve"><value>Unmapped</value></data>
+  <data name="Decision.Queue" xml:space="preserve"><value>Executive decisions</value></data>
+  <data name="Decision.Title" xml:space="preserve"><value>Title</value></data>
+  <data name="Decision.Materiality" xml:space="preserve"><value>Materiality</value></data>
+  <data name="Decision.Options" xml:space="preserve"><value>Options</value></data>
+  <data name="Decision.Recommendation" xml:space="preserve"><value>Recommendation</value></data>
+  <data name="Decision.Owner" xml:space="preserve"><value>Decision owner</value></data>
+  <data name="Decision.Due" xml:space="preserve"><value>Decision due</value></data>
+  <data name="Decision.Evidence" xml:space="preserve"><value>Evidence review</value></data>
+  <data name="Decision.Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Decision.Version" xml:space="preserve"><value>Version</value></data>
+  <data name="Decision.ReviewNote" xml:space="preserve"><value>Review note</value></data>
+  <data name="Decision.Decision" xml:space="preserve"><value>Decision</value></data>
+  <data name="Decision.Rationale" xml:space="preserve"><value>Rationale</value></data>
+  <data name="Decision.ActionOwner" xml:space="preserve"><value>Action owner</value></data>
+  <data name="Decision.FollowUp" xml:space="preserve"><value>Follow-up due</value></data>
+  <data name="Decision.Outcome" xml:space="preserve"><value>Outcome</value></data>
+  <data name="Decision.Download" xml:space="preserve"><value>Download decision history</value></data>
+  <data name="Decision.Reload" xml:space="preserve"><value>Reload</value></data>
+  <data name="Decision.Edit" xml:space="preserve"><value>Revise decision</value></data>
+  <data name="Decision.New" xml:space="preserve"><value>New decision</value></data>
+  <data name="Decision.Detail" xml:space="preserve"><value>Decision record</value></data>
+  <data name="Decision.Update" xml:space="preserve"><value>Record an update</value></data>
+  <data name="Decision.Action" xml:space="preserve"><value>Action</value></data>
+  <data name="Decision.Select" xml:space="preserve"><value>Select</value></data>
+  <data name="Decision.Note" xml:space="preserve"><value>Reason / review note</value></data>
+  <data name="Decision.Record" xml:space="preserve"><value>Record update</value></data>
+  <data name="Decision.History" xml:space="preserve"><value>History</value></data>
+  <data name="Decision.Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Decision.AllStatuses" xml:space="preserve"><value>All statuses</value></data>
+  <data name="Decision.Filter" xml:space="preserve"><value>Filter</value></data>
+  <data name="Decision.QueueLimit" xml:space="preserve"><value>Decisions (up to 100, ordered by due date)</value></data>
+  <data name="Decision.None" xml:space="preserve"><value>No decisions.</value></data>
+  <data name="Decision.LoadPack" xml:space="preserve"><value>Load evidence pack</value></data>
+  <data name="Decision.UnavailableOwner" xml:space="preserve"><value>Unavailable person</value></data>
+  <data name="Decision.InvalidTransition" xml:space="preserve"><value>This update is not allowed in the current decision state.</value></data>
+  <data name="Decision.InvalidFields" xml:space="preserve"><value>Complete the required fields and check their length and dates.</value></data>
+  <data name="Decision.InvalidEvidence" xml:space="preserve"><value>The selected record does not belong to this evidence pack.</value></data>
+  <data name="Decision.StaleEvidence" xml:space="preserve"><value>This evidence is outside the freshness window. Fresh evidence is required before acceptance or a decision.</value></data>
+  <data name="Decision.UnmappedEvidence" xml:space="preserve"><value>The source status is unmapped. Resolve the mapping and capture a new pack before accepting this evidence.</value></data>
+  <data name="Decision.InvalidOwner" xml:space="preserve"><value>Select an active owner from this organisation.</value></data>
+  <data name="Decision.Conflict" xml:space="preserve"><value>This decision has changed. Reload the record before submitting another update.</value></data>
+  <data name="Decision.Status.Draft" xml:space="preserve"><value>Draft</value></data>
+  <data name="Decision.Status.Reviewed" xml:space="preserve"><value>Reviewed</value></data>
+  <data name="Decision.Status.Decided" xml:space="preserve"><value>Decided</value></data>
+  <data name="Decision.Status.Closed" xml:space="preserve"><value>Closed</value></data>
+  <data name="Decision.Status.Dismissed" xml:space="preserve"><value>Dismissed</value></data>
+  <data name="Decision.Evidence.Unreviewed" xml:space="preserve"><value>Unreviewed</value></data>
+  <data name="Decision.Evidence.Accepted" xml:space="preserve"><value>Accepted</value></data>
+  <data name="Decision.Evidence.Disputed" xml:space="preserve"><value>Disputed</value></data>
+  <data name="Decision.Event.Created" xml:space="preserve"><value>Created</value></data>
+  <data name="Decision.Action.Revise" xml:space="preserve"><value>Revise</value></data>
+  <data name="Decision.Event.Revise" xml:space="preserve"><value>Revise</value></data>
+  <data name="Decision.Action.AcceptEvidence" xml:space="preserve"><value>Accept evidence</value></data>
+  <data name="Decision.Event.AcceptEvidence" xml:space="preserve"><value>Accept evidence</value></data>
+  <data name="Decision.Action.DisputeEvidence" xml:space="preserve"><value>Dispute evidence</value></data>
+  <data name="Decision.Event.DisputeEvidence" xml:space="preserve"><value>Dispute evidence</value></data>
+  <data name="Decision.Action.Decide" xml:space="preserve"><value>Record decision</value></data>
+  <data name="Decision.Event.Decide" xml:space="preserve"><value>Record decision</value></data>
+  <data name="Decision.Action.Close" xml:space="preserve"><value>Record outcome and close</value></data>
+  <data name="Decision.Event.Close" xml:space="preserve"><value>Record outcome and close</value></data>
+  <data name="Decision.Action.Dismiss" xml:space="preserve"><value>Dismiss</value></data>
+  <data name="Decision.Event.Dismiss" xml:space="preserve"><value>Dismiss</value></data>
+  <data name="Decision.Action.Reopen" xml:space="preserve"><value>Reopen</value></data>
+  <data name="Decision.Event.Reopen" xml:space="preserve"><value>Reopen</value></data>
+  <data name="Review.Data.Title" xml:space="preserve"><value>Executive data controls</value></data>
+  <data name="Review.Data.Operation" xml:space="preserve"><value>Operation</value></data>
+  <data name="Review.Data.Target" xml:space="preserve"><value>Decision or pack key</value></data>
+  <data name="Review.Data.Reason" xml:space="preserve"><value>Reason</value></data>
+  <data name="Review.Data.Select" xml:space="preserve"><value>Select</value></data>
+  <data name="Review.Data.Preview" xml:space="preserve"><value>Preview affected records</value></data>
+  <data name="Review.Data.Versions" xml:space="preserve"><value>Decision versions</value></data>
+  <data name="Review.Data.Audit" xml:space="preserve"><value>Data lifecycle audit</value></data>
+  <data name="Review.Data.Cutoff" xml:space="preserve"><value>Retention cutoff</value></data>
+  <data name="Review.Data.RetentionDays" xml:space="preserve"><value>Retention period (days)</value></data>
+  <data name="Review.Data.Disabled" xml:space="preserve"><value>Not configured</value></data>
+  <data name="Review.Data.Irreversible" xml:space="preserve"><value>Permanent removal of the records counted above, including affected decision histories. Previously downloaded copies and backups are not recalled.</value></data>
+  <data name="Review.Data.Confirm" xml:space="preserve"><value>I approve permanent removal of these records.</value></data>
+  <data name="Review.Data.Apply" xml:space="preserve"><value>Remove confirmed records</value></data>
+  <data name="Review.Data.Completed" xml:space="preserve"><value>Completed. Receipt:</value></data>
+  <data name="Review.Data.InvalidRequest" xml:space="preserve"><value>Select a valid operation and matching reason. A record key is required only for decision redaction or pack withdrawal.</value></data>
+  <data name="Review.Data.RetentionDisabled" xml:space="preserve"><value>A retention period has not been configured.</value></data>
+  <data name="Review.Data.ConfirmationRequired" xml:space="preserve"><value>Preview and explicitly confirm the affected records before removal.</value></data>
+  <data name="Review.Data.Conflict" xml:space="preserve"><value>Records or retention settings changed. Nothing was removed. Preview the operation again.</value></data>
+  <data name="Review.Data.Operation.RedactDecision" xml:space="preserve"><value>Redact entire decision journal</value></data>
+  <data name="Review.Data.Operation.WithdrawPack" xml:space="preserve"><value>Withdraw pack and dependent decisions</value></data>
+  <data name="Review.Data.Operation.ApplyRetention" xml:space="preserve"><value>Apply retention policy</value></data>
+  <data name="Review.Data.Operation.PurgeTenantData" xml:space="preserve"><value>Purge all executive data for this tenant</value></data>
+  <data name="Review.Data.Operation.SubjectErasure" xml:space="preserve"><value>Subject erasure</value></data>
+  <data name="Review.Data.Reason.PersonalData" xml:space="preserve"><value>Personal data removal</value></data>
+  <data name="Review.Data.Reason.IncorrectEvidence" xml:space="preserve"><value>Incorrect or unsuitable evidence</value></data>
+  <data name="Review.Data.Reason.RetentionPolicy" xml:space="preserve"><value>Retention policy</value></data>
+  <data name="Review.Data.Reason.TenantOffboarding" xml:space="preserve"><value>Tenant offboarding</value></data>
+  <data name="Delivery" xml:space="preserve"><value>Delivery</value></data>
+  <data name="Team and continuity" xml:space="preserve"><value>Team and continuity</value></data>
+  <data name="Nav.Section.MyWork" xml:space="preserve"><value>My work</value></data>
+  <data name="Administration" xml:space="preserve"><value>Administration</value></data>
+  <data name="Delivery load" xml:space="preserve"><value>Delivery load</value></data>
+  <data name="Estimate calibration" xml:space="preserve"><value>Estimate calibration</value></data>
+  <data name="Skills Coverage" xml:space="preserve"><value>Skills Coverage</value></data>
+  <data name="Coverage Plan" xml:space="preserve"><value>Coverage Plan</value></data>
+  <data name="Service Health" xml:space="preserve"><value>Service Health</value></data>
+  <data name="Evidence Sources" xml:space="preserve"><value>Evidence Sources</value></data>
+  <data name="My Skills" xml:space="preserve"><value>My Skills</value></data>
+  <data name="Language" xml:space="preserve"><value>Language</value></data>
+  <data name="Change" xml:space="preserve"><value>Change</value></data>
+  <data name="Log in" xml:space="preserve"><value>Log in</value></data>
+  <data name="Login.Heading" xml:space="preserve"><value>Log in to {0}</value></data>
+  <data name="Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Password" xml:space="preserve"><value>Password</value></data>
+  <data name="Login.NewTo" xml:space="preserve"><value>New to {0}?</value></data>
+  <data name="Start a trial" xml:space="preserve"><value>Start a trial</value></data>
+  <data name="Login.SeeOffer" xml:space="preserve"><value>See what the diagnostic includes</value></data>
+  <data name="AccessDenied.PageTitle" xml:space="preserve"><value>No access to that page</value></data>
+  <data name="AccessDenied.Heading" xml:space="preserve"><value>You don't have access to that page</value></data>
+  <data name="AccessDenied.Body" xml:space="preserve"><value>Your role doesn't include that page. Nothing has gone wrong with your account. If you need it for your work, ask your organisation's administrator to change your role.</value></data>
+  <data name="Go to your home page" xml:space="preserve"><value>Go to your home page</value></data>
+  <data name="Overdue" xml:space="preserve"><value>Overdue</value></data>
+  <data name="Flagged" xml:space="preserve"><value>Flagged</value></data>
+  <data name="Scrollable table" xml:space="preserve"><value>Scrollable table</value></data>
+  <data name="Table.ShowAll" xml:space="preserve"><value>Show all {0} rows</value></data>
+  <data name="Table.ShowFewer" xml:space="preserve"><value>Show fewer rows</value></data>
+  <data name="Table.Showing" xml:space="preserve"><value>Showing {0} of {1} rows. Flagged rows are always shown.</value></data>
+  <data name="Nav.SignedInAs" xml:space="preserve"><value>Signed in as</value></data>
+  <data name="Print or save as PDF" xml:space="preserve"><value>Print or save as PDF</value></data>
+  <data name="Copy link" xml:space="preserve"><value>Copy link</value></data>
+  <data name="Link copied" xml:space="preserve"><value>Link copied</value></data>
+  <data name="Download CSV" xml:space="preserve"><value>Download CSV</value></data>
+  <data name="Share.Note" xml:space="preserve"><value>Anyone you send a link to needs their own sign-in and permission to see this report.</value></data>
+  <data name="Share.CopyFailed" xml:space="preserve"><value>Couldn't copy automatically. Copy the address from your browser's address bar instead.</value></data>
+  <data name="Report.GeneratedAt" xml:space="preserve"><value>Generated {0} UTC</value></data>
+  <data name="Report.Source" xml:space="preserve"><value>Source: {0}</value></data>
+  <!-- Evidence display (design and PMO data review, 30 Sep 2026) -->
+  <data name="Evidence Check" xml:space="preserve"><value>Evidence Check</value></data>
+  <data name="Overdue milestones" xml:space="preserve"><value>Overdue milestones</value></data>
+  <data name="Kpi.OfWorkItems" xml:space="preserve"><value>of {0} work items</value></data>
+  <data name="Kpi.OfOpenItems" xml:space="preserve"><value>of {0} open items</value></data>
+  <data name="Kpi.OfOpenMilestones" xml:space="preserve"><value>of {0} open milestones</value></data>
+  <data name="Trend.Lede" xml:space="preserve"><value>Each snapshot records the portfolio as it stood when it was captured. Hours are all-time totals and open and blocked items are counted at capture; only utilisation covers the period. Capture a period within a week of its end.</value></data>
+  <data name="Trend.Basis" xml:space="preserve"><value>Estimated, actual and variance are all-time totals at capture. Open and blocked are as at capture. Utilisation is the period's.</value></data>
+  <data name="Trend.CapturedLate" xml:space="preserve"><value>Captured {0} days after the period ended, so these figures are from the capture date, not the period.</value></data>
+  <data name="Trend.CaptureHint" xml:space="preserve"><value>A period can be captured from the day it ends until {0} days after.</value></data>
+  <data name="Nav.Audit" xml:space="preserve"><value>Audit trail</value></data>
+  <data name="Nav.Connections" xml:space="preserve"><value>Connections</value></data>
+  <data name="Nav.Customers" xml:space="preserve"><value>Customers</value></data>
+  <data name="Nav.Data" xml:space="preserve"><value>Data</value></data>
+  <data name="Nav.History" xml:space="preserve"><value>History</value></data>
+  <data name="Nav.Import" xml:space="preserve"><value>Import</value></data>
+  <data name="Nav.Modules" xml:space="preserve"><value>Modules</value></data>
+  <data name="Nav.People" xml:space="preserve"><value>People</value></data>
+  <data name="Nav.PeopleToMatch" xml:space="preserve"><value>People to match</value></data>
+  <data name="Nav.Programmes" xml:space="preserve"><value>Programmes</value></data>
+  <data name="Nav.Review" xml:space="preserve"><value>Review</value></data>
+  <data name="Nav.Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Search.Button" xml:space="preserve"><value>Search</value></data>
+  <data name="Search.Label" xml:space="preserve"><value>Search programmes, work items and people</value></data>
+  <data name="Search.Placeholder" xml:space="preserve"><value>Search</value></data>
+  <data name="Login.Forgot" xml:space="preserve"><value>Forgotten your password?</value></data>
+</root>

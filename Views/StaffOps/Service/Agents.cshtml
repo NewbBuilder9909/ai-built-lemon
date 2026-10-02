@@ -1,0 +1,95 @@
+@using ProgrammePulse.Models.ServiceOps
+@using ProgrammePulse.Models.Staff
+@using ProgrammePulse.Models.ViewModels.ServiceOps
+@model DeskAgentsPageViewModel
+
+@{
+    var message = ViewData["Message"] as string;
+    var unmapped = Model.Unmapped;
+    var roster = Model.Roster;
+    var connections = Model.Connections;
+}
+
+<p class="ops-empty-state">
+    Admin-only. Desk agent accounts seen resolving cases that nobody has identified yet. Until an
+    account is approved here, its resolutions reach nobody's record — the same discipline as source
+    accounts, and for the same reason.
+    <a asp-controller="StaffService" asp-action="Desks">Back to desks</a>
+</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Unidentified agents (@unmapped.Count)</h2>
+    @if (unmapped.Count == 0)
+    {
+        <p class="ops-empty-state">Nothing is waiting to be identified.</p>
+    }
+    else if (connections.Count == 0)
+    {
+        <p class="ops-empty-state">No desk is connected, so there is nothing to map these against.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Desk agent accounts awaiting identification, with case counts</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Agent account</th>
+                        <th scope="col">Cases resolved</th>
+                        <th scope="col">Approve as</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var agent in unmapped)
+                {
+                    <tr>
+                        <td>
+                            <strong>@(agent.DisplayName ?? agent.ExternalAgentId)</strong>
+                            @if (agent.DisplayName is not null)
+                            {
+                                <br /><small>@agent.ExternalAgentId</small>
+                            }
+                        </td>
+                        <td>@agent.Cases</td>
+                        <td>
+                            <form asp-controller="StaffService" asp-action="ApproveAgent" method="post">
+                                <input type="hidden" name="externalAgentId" value="@agent.ExternalAgentId" />
+                                <input type="hidden" name="agentName" value="@agent.DisplayName" />
+                                <label>
+                                    <span class="ops-visually-hidden">Desk</span>
+                                    <select name="connectionKey" required>
+                                        @foreach (var connection in connections)
+                                        {
+                                            <option value="@connection.ConnectionKey">@connection.DisplayName</option>
+                                        }
+                                    </select>
+                                </label>
+                                <label>
+                                    <span class="ops-visually-hidden">Colleague</span>
+                                    <select name="staffKey" required>
+                                        <option value="">Choose a colleague…</option>
+                                        @foreach (var staff in roster)
+                                        {
+                                            <option value="@staff.StaffKey">@staff.FullName</option>
+                                        }
+                                    </select>
+                                </label>
+                                <button type="submit" class="ops-button">Approve</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        <p class="ops-empty-state">
+            Approving records that this account is this colleague. It gives them credit for resolving
+            cases; it never attributes a defect to them.
+        </p>
+    }
+</section>

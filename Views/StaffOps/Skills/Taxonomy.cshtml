@@ -1,0 +1,89 @@
+@using ProgrammePulse.Models.SkillsEvidence
+@model IReadOnlyList<SkillDefinition>
+
+@{
+    var message = ViewData["Message"] as string;
+}
+
+<p class="ops-empty-state">
+    Admin-only. The skills your organisation tracks — your vocabulary, not a shared list,
+    and not visible to any other tenant. Retiring a skill keeps every assertion against it
+    readable but stops new ones and leaves it out of coverage.
+</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Tracked skills</h2>
+    @if (Model.Count == 0)
+    {
+        <p class="ops-empty-state">No skills yet. Add the first one below.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Every skill this tenant tracks, with its key, kind and active state</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Key</th>
+                        <th scope="col">Kind</th>
+                        <th scope="col">Taxonomy version</th>
+                        <th scope="col">State</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var skill in Model)
+                {
+                    <tr>
+                        <td>@skill.Name</td>
+                        <td><code>@skill.SkillKey</code></td>
+                        <td>@ProgrammePulse.Services.Shared.DisplayText.Words(skill.Kind)</td>
+                        <td>@skill.TaxonomyVersion</td>
+                        <td>@(skill.IsActive ? "Active" : "Retired")</td>
+                        <td>
+                            <form asp-controller="StaffSkills" asp-action="SetSkillActive" asp-route-skillKey="@skill.SkillKey" method="post">
+                                <input type="hidden" name="isActive" value="@((!skill.IsActive).ToString().ToLowerInvariant())" />
+                                <button type="submit" class="ops-button">@(skill.IsActive ? "Retire" : "Reinstate")</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Add a skill</h2>
+    <form asp-controller="StaffSkills" asp-action="CreateSkill" method="post" class="ops-form">
+        <label>
+            Name
+            <input type="text" name="name" maxlength="200" required />
+        </label>
+        <label>
+            Key (optional — derived from the name if you leave it blank)
+            <input type="text" name="skillKey" maxlength="128" />
+        </label>
+        <label>
+            Kind
+            <select name="kind" required>
+                @foreach (var kind in Enum.GetValues<SkillKind>())
+                {
+                    <option value="@kind">@ProgrammePulse.Services.Shared.DisplayText.Words(kind)</option>
+                }
+            </select>
+        </label>
+        <label>
+            Description (optional)
+            <input type="text" name="description" maxlength="1000" />
+        </label>
+        <button type="submit" class="ops-button">Add</button>
+    </form>
+</section>

@@ -1,0 +1,60 @@
+@* Served at "/" while no Umbraco content is published — wired through
+   Umbraco:CMS:Global:NoNodesViewPath in appsettings.json. Replaces Umbraco's
+   stock "Welcome to your Umbraco installation" page, which was the first
+   thing a visitor to the bare domain saw. Publishing a root content node
+   (e.g. the GardnerPMBlog template) takes over "/" again with no code change.
+   Copy here is public marketing: check it against
+   docs/commercial/claim-register.md before changing it. *@
+@{
+    Layout = null;
+    // Umbraco serves this view for every unmatched URL while nothing is
+    // published, so a mistyped link answered 200 with the marketing page.
+    // Only "/" is the home page; anything else is a real 404.
+    var isHome = !Context.Request.Path.HasValue || Context.Request.Path == "/";
+    if (!isHome)
+    {
+        Context.Response.StatusCode = Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound;
+    }
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A weekly delivery review built from task and timesheet exports: estimate against actual, remaining capacity and overdue milestones." />
+    <title>@(isHome ? ProductBrand.Value.Name : $"Page not found | {ProductBrand.Value.Name}")</title>
+    <link rel="stylesheet" href="/css/purchase.css" />
+</head>
+<body>
+<header class="site-header">
+    <a class="brand" href="/">@ProductBrand.Value.WordmarkLead<span>@ProductBrand.Value.WordmarkAccentPart</span></a>
+    <nav aria-label="Site"><a href="/purchase">The diagnostic</a><a href="/purchase#catalogue">Plans</a><a href="/staffops/account/login">Log in</a></nav>
+</header>
+<main>
+@if (!isHome)
+{
+    <section class="hero">
+        <div class="eyebrow">404</div>
+        <h1>Page not found</h1>
+        <p>There is nothing at this address. It may be mistyped, or the page may have moved.</p>
+        <div class="actions">
+            <a class="button" href="/staffops/account/login">Log in</a>
+            <a class="button button--secondary" href="/">Home</a>
+        </div>
+    </section>
+}
+else
+{
+    <section class="hero">
+        <div class="eyebrow">Weekly delivery evidence</div>
+        <h1>A weekly delivery review built from the evidence you already have.</h1>
+        <p>@ProductBrand.Value.Name turns task and timesheet exports into a weekly review: estimate against actual by workstream, remaining capacity per person and overdue milestones. Unmatched people, missing estimates and stale sources are shown on the page rather than quietly left out.</p>
+        <div class="actions">
+            <a class="button" href="/purchase">See how the diagnostic works</a>
+            <a class="button button--secondary" href="/staffops/account/login">Log in</a>
+        </div>
+    </section>
+}
+</main>
+</body>
+</html>

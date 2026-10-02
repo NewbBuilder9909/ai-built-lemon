@@ -1,0 +1,191 @@
+@using ProgrammePulse.Models.SkillsEvidence
+@using ProgrammePulse.Models.ViewModels.SkillsEvidence
+@model ProcessingDecisionPageViewModel
+
+@{
+    var message = ViewData["Message"] as string;
+    var readiness = Model.Readiness;
+    var live = Model.Live;
+    var history = Model.History;
+    var asOf = Model.AsOf;
+    var blocking = live?.BlockingReason(asOf);
+}
+
+<p class="ops-empty-state">
+    Admin-only. The basis your organisation is relying on to collect person-level repository
+    evidence, and the checks to work through before enabling it.
+    <a asp-controller="StaffContinuity" asp-action="Index">Key-person coverage</a>
+</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+@if (live is null)
+{
+    <p class="ops-banner ops-banner--info" role="status">
+        <strong>No decision recorded, so evidence collection is blocked.</strong>
+        Repository syncs will refuse to run until a lawful basis, worker notice and DPIA decision
+        are on record. The skills matrix is unaffected — it is self-declared data the subject can
+        see and challenge.
+    </p>
+}
+else if (blocking is not null)
+{
+    <p class="ops-banner ops-banner--info" role="status">
+        <strong>Evidence collection is blocked.</strong> @blocking
+    </p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">What this page can and cannot tell you</h2>
+    <p class="ops-empty-state">
+        Three different kinds of answer appear below, and the difference matters more than the ticks.
+        <strong>Observed</strong> means measured in your data just now. <strong>Structural</strong>
+        means a property of the product, with the test that proves it named — true of every
+        customer, not something checked in your database today. <strong>Your attestation</strong>
+        means only you can answer it: the product records what you say and cannot verify it.
+        Nothing here is a score, and a page with no failures does not mean you are ready — it means
+        no check in this list currently fails.
+    </p>
+</section>
+
+@foreach (var group in new[] { ReadinessKind.CustomerAttestation, ReadinessKind.Observed, ReadinessKind.Structural })
+{
+    var rows = readiness.Checks.Where(c => c.Kind == group).ToList();
+    if (rows.Count == 0) { continue; }
+
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">
+            @(group switch
+            {
+                ReadinessKind.CustomerAttestation => "Your organisation's decisions",
+                ReadinessKind.Observed => "Observed in your data",
+                _ => "Built into the product"
+            })
+        </h2>
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Pre-enablement checks</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Area</th>
+                        <th scope="col">Question</th>
+                        <th scope="col">Result</th>
+                        <th scope="col">Detail</th>
+                        <th scope="col">What to do</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var check in rows)
+                {
+                    <tr class="@(check.Result == ReadinessResult.Fail || check.Result == ReadinessResult.Attention ? "ops-table__row--overdue" : "")">
+                        <td>@check.Area</td>
+                        <td>@check.Question</td>
+                        <td>@ProgrammePulse.Services.Shared.DisplayText.Words(check.Result)</td>
+                        <td>@check.Detail</td>
+                        <td>@(check.Remedy ?? "—")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Record the decision</h2>
+    <p class="ops-empty-state">
+        Recording this supersedes any previous decision and keeps it in the history, so
+        &ldquo;what were we relying on last March, and who said so&rdquo; stays answerable.
+        The product does not and cannot judge whether your basis is sound — it refuses to collect
+        until somebody has put their name to the question.
+    </p>
+    <form asp-controller="StaffContinuity" asp-action="RecordProcessing" method="post" class="ops-form">
+        <label>
+            Lawful basis
+            <select name="lawfulBasis" required>
+                @foreach (var basis in Enum.GetValues<EvidenceLawfulBasis>())
+                {
+                    <option value="@basis" selected="@(live?.LawfulBasis == basis)">@ProgrammePulse.Services.Shared.DisplayText.Words(basis)</option>
+                }
+            </select>
+        </label>
+        <p class="ops-empty-state">
+            Consent is deliberately not offered. The ICO's position is that it is rarely valid in an
+            employment context, because the power imbalance makes it hard to show it was freely given.
+        </p>
+        <label>
+            What is the evidence collected for? (required)
+            <input type="text" name="purpose" maxlength="1000" value="@live?.Purpose" required />
+        </label>
+        <label>
+            <input type="checkbox" name="workerNoticeGiven" value="true" checked="@(live?.WorkerNoticeGiven == true)" />
+            Staff have been told their repository activity is collected
+        </label>
+        <label>
+            How were they told? (policy reference, date, meeting)
+            <input type="text" name="workerNoticeReference" maxlength="512" value="@live?.WorkerNoticeReference" />
+        </label>
+        <label>
+            <input type="checkbox" name="dpiaCompleted" value="true" checked="@(live?.DpiaCompleted == true)" />
+            A Data Protection Impact Assessment has been completed
+        </label>
+        <label>
+            DPIA reference
+            <input type="text" name="dpiaReference" maxlength="512" value="@live?.DpiaReference" />
+        </label>
+        <label>
+            DPIA completed on
+            <input type="date" name="dpiaCompletedOn" value="@live?.DpiaCompletedAtUtc?.ToString("yyyy-MM-dd")" />
+        </label>
+        <label>
+            Review this decision by (required — a DPIA is not a once-and-for-all artefact)
+            <input type="date" name="reviewDueOn" value="@live?.ReviewDueOn.ToString("yyyy-MM-dd")" required />
+        </label>
+        <button type="submit" class="ops-button">Record</button>
+    </form>
+
+    @if (live is not null)
+    {
+        <form asp-controller="StaffContinuity" asp-action="WithdrawProcessing" method="post">
+            <button type="submit" class="ops-button">Withdraw, and block collection</button>
+        </form>
+    }
+</section>
+
+@if (history.Count > 0)
+{
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">History</h2>
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Every data-processing decision recorded for this tenant</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Decided</th>
+                        <th scope="col">Basis</th>
+                        <th scope="col">Notice</th>
+                        <th scope="col">DPIA</th>
+                        <th scope="col">Review due</th>
+                        <th scope="col">State</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var decision in history)
+                {
+                    <tr>
+                        <td>@decision.DecidedAtUtc.ToString("yyyy-MM-dd")</td>
+                        <td>@decision.LawfulBasis</td>
+                        <td>@(decision.WorkerNoticeGiven ? "Given" : "Not given")</td>
+                        <td>@(decision.DpiaCompleted ? decision.DpiaReference ?? "Completed" : "Not completed")</td>
+                        <td>@decision.ReviewDueOn.ToString("yyyy-MM-dd")</td>
+                        <td>@(decision.WithdrawnAtUtc is null ? "Live" : $"Superseded {decision.WithdrawnAtUtc:yyyy-MM-dd}")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}

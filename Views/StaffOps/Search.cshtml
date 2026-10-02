@@ -1,0 +1,112 @@
+@using ProgrammePulse.Services.ProgrammeOps
+@using ProgrammePulse.Models.Programme
+@model SearchResults
+@{
+    string Stage(WorkItemLifecycleStage stage) => stage switch
+    {
+        WorkItemLifecycleStage.InProgress => "In progress",
+        WorkItemLifecycleStage.InReview => "In review",
+        WorkItemLifecycleStage.Unmapped => "Status not mapped",
+        _ => stage.ToString()
+    };
+}
+
+<form class="ops-filter-bar" role="search" method="get" asp-controller="StaffSearch" asp-action="Index">
+    <div class="ops-filter-bar__field">
+        <label for="search-page-q">Search by name or source id</label>
+        <input id="search-page-q" name="q" type="search" value="@Model.Term" maxlength="@SearchResults.MaximumLength" />
+    </div>
+    <button type="submit" class="ops-button">Search</button>
+</form>
+
+@if (Model.TooShort)
+{
+    <p class="ops-empty-state">Type at least @SearchResults.MinimumLength characters.</p>
+}
+else if (Model.IsEmpty)
+{
+    <p class="ops-empty-state">Nothing matches “@Model.Term”.</p>
+}
+else
+{
+    @if (Model.Programmes.Count > 0 || Model.Customers.Count > 0)
+    {
+        <section class="ops-panel" aria-labelledby="search-programmes">
+            <h2 class="ops-panel__heading" id="search-programmes">Programmes and customers</h2>
+            <ul class="ops-result-list">
+                @foreach (var hit in Model.Programmes)
+                {
+                    <li>
+                        <a asp-controller="StaffProgrammeOverview" asp-action="Index" asp-route-programmeKey="@hit.ProgrammeKey">@hit.Name</a>
+                        <span class="ops-result-list__meta">Programme@(hit.CustomerName is null ? "" : $" · {hit.CustomerName}")</span>
+                    </li>
+                }
+                @foreach (var hit in Model.Customers)
+                {
+                    <li>
+                        <a asp-controller="StaffProgrammeOverview" asp-action="Index" asp-route-customerKey="@hit.CustomerKey">@hit.Name</a>
+                        <span class="ops-result-list__meta">Customer</span>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (Model.WorkItems.Count > 0)
+    {
+        <section class="ops-panel" aria-labelledby="search-items">
+            <div class="ops-panel__header">
+                <h2 class="ops-panel__heading" id="search-items">Work items</h2>
+                @if (Model.MoreWorkItems)
+                {
+                    <span class="ops-panel__meta">First @Model.WorkItems.Count; type more to narrow it</span>
+                }
+            </div>
+            <div class="ops-table-scroll">
+                <table class="ops-table">
+                    <caption class="ops-visually-hidden">Work items matching “@Model.Term”</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Item</th>
+                            <th scope="col">Source id</th>
+                            <th scope="col">Stage</th>
+                            <th scope="col">Due</th>
+                            <th scope="col">Assigned to</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var hit in Model.WorkItems)
+                        {
+                            <tr>
+                                <td>
+                                    @hit.Title
+                                    <span class="ops-cell-context"><a asp-controller="StaffProgrammeOverview" asp-action="Index" asp-route-programmeKey="@hit.ProgrammeKey">@hit.Path</a></span>
+                                </td>
+                                <td class="is-nowrap">@(hit.ExternalId is null ? "—" : $"{hit.Source} {hit.ExternalId}")</td>
+                                <td>@Stage(hit.Stage)</td>
+                                <td class="is-nowrap">@(hit.DueDateUtc?.ToString("d MMM yyyy") ?? "—")</td>
+                                <td>@(hit.AssigneeName ?? "No one")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+
+    @if (Model.People.Count > 0)
+    {
+        <section class="ops-panel" aria-labelledby="search-people">
+            <h2 class="ops-panel__heading" id="search-people">People</h2>
+            <ul class="ops-result-list">
+                @foreach (var hit in Model.People)
+                {
+                    <li>
+                        <a asp-controller="StaffAdmin" asp-action="Detail" asp-route-staffKey="@hit.StaffKey">@hit.Name</a>
+                        <span class="ops-result-list__meta">@(hit.JobTitle ?? "")@(hit.IsActive ? "" : " · access removed")</span>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+}

@@ -1,0 +1,23 @@
+@using ProgrammePulse.Models.SkillsEvidence
+
+@*
+    The rubric, shown wherever someone has to pick a level. Repeating the
+    words next to the choice is deliberate: the levels only mean anything
+    if the person choosing and the person reviewing read the same
+    description at the moment they decide.
+*@
+<details class="ops-panel">
+    <summary><strong>What the proficiency levels mean</strong></summary>
+    <dl>
+        @foreach (var level in ProficiencyRubric.All)
+        {
+            <dt><strong>@level</strong></dt>
+            <dd>@ProficiencyRubric.Describe(level)</dd>
+        }
+    </dl>
+    <p class="ops-empty-state">
+        A level is set by a person and reviewed by a person. Nothing in this system
+        infers a level from activity — not commits, not tickets, not hours logged.
+        Validated levels fall due for review after @ProficiencyRubric.DefaultReviewIntervalMonths months.
+    </p>
+</details>

@@ -1,0 +1,183 @@
+@using ProgrammePulse.Models.ViewModels.ContractOps
+@model PortfolioMarginViewModel
+
+@{ ViewData["ReportActions"] = true; }
+<partial name="~/Views/StaffOps/Contracts/_ContractsNav.cshtml" model="@("overview")" />
+<p class="ops-page-lede">
+    Portfolio position across the contracts whose cost is attributable to them alone, grouped by currency and by
+    what the figure measures — never blended across either. Admin only.
+</p>
+
+<p class="ops-banner ops-banner--info">
+    <strong>There is deliberately no single portfolio margin on this page.</strong>
+    The three commercial models produce three different measures — fixed-price headroom does not include the cost of finishing
+    the scope, contracted value is not recognised revenue, and chargeable value is not invoiced — so every total below is split
+    by basis and the basis is stated alongside the number. Value is contracted, chargeable or committed value, never cash.
+</p>
+
+@if (Model.AttributionContestedContractCount > 0)
+{
+    <p class="ops-banner ops-banner--warning" role="status" aria-live="polite">
+        <strong>@Model.AttributionContestedContractCount contract(s) excluded from every total below.</strong>
+        Each shares a customer and an overlapping term with another contract, so the same logged hours are selected by both.
+        Cost is recorded against the customer, but not allocated to a single contract, so a margin for either one would be double-counted.
+        @if (Model.ContestedCost.Count > 0)
+        {
+            <text>
+                Cost held out, counting each hour once:
+                @string.Join("; ", Model.ContestedCost.Select(c => c.TotalCost.ToString("N0") + " " + c.Currency + " across " + c.ContractCount + " contract(s)")).
+            </text>
+            foreach (var row in Model.ContestedCost.Where(c => c.DisputedCost > 0))
+            {
+                <text>
+                    Of that @row.Currency figure, @row.DisputedCost.ToString("N0") is claimed by more than one contract —
+                    that is the cost under dispute, counted once, not extra cost.
+                    (Adding the held-out contracts' own cost figures together would have overstated the total above by
+                    @row.DuplicationIfSummed.ToString("N0") @row.Currency. The two differ once three or more contracts
+                    claim the same hour: it is disputed once, but inflates such a sum twice.)
+                </text>
+            }
+        }
+        Resolve by splitting the terms or recording an explicit allocation before quoting a portfolio margin.
+    </p>
+}
+
+@if (Model.MismatchedRevenueContractCount > 0)
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">
+        @Model.MismatchedRevenueContractCount contract(s) excluded from every total below — revenue not yet set (Time &amp; Materials with no bill rate).
+    </p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Totals by currency and basis</h2>
+    @if (Model.TotalsByCurrency.Count == 0)
+    {
+        <p class="ops-empty-state">No priced contracts yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Portfolio value, cost, and margin totals per currency and margin basis</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Currency</th>
+                        <th scope="col">Basis</th>
+                        <th scope="col">Contracts</th>
+                        <th scope="col">Value</th>
+                        <th scope="col">Cost</th>
+                        <th scope="col">Margin</th>
+                        <th scope="col">% of value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.TotalsByCurrency)
+                    {
+                        <tr class="@(row.Margin < 0 ? "ops-table__row--overdue" : "")">
+                            <td>@row.Currency</td>
+                            <td title="@MarginBasisText.Describe(row.MarginBasis)">@MarginBasisText.ShortLabel(row.MarginBasis)</td>
+                            <td>@row.ContractCount</td>
+                            <td>@row.TotalValue.ToString("N0")</td>
+                            <td>@row.TotalCost.ToString("N0")</td>
+                            <td>@row.Margin.ToString("N0")</td>
+                            <td>@(row.MarginPercent is not null ? row.MarginPercent + "%" : "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <ul class="ops-empty-state">
+            @foreach (var basis in Model.TotalsByCurrency.Select(r => r.MarginBasis).Distinct())
+            {
+                <li><strong>@MarginBasisText.ShortLabel(basis)</strong> — @MarginBasisText.Describe(basis)</li>
+            }
+        </ul>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">By customer</h2>
+    @if (Model.ByCustomer.Count == 0)
+    {
+        <p class="ops-empty-state">No priced contracts yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Value, cost, and margin per customer, per currency and margin basis</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Currency</th>
+                        <th scope="col">Basis</th>
+                        <th scope="col">Contracts</th>
+                        <th scope="col">Value</th>
+                        <th scope="col">Cost</th>
+                        <th scope="col">Margin</th>
+                        <th scope="col">% of value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.ByCustomer)
+                    {
+                        <tr class="@(row.Margin < 0 ? "ops-table__row--overdue" : "")">
+                            <td>@row.CustomerName</td>
+                            <td>@row.Currency</td>
+                            <td title="@MarginBasisText.Describe(row.MarginBasis)">@MarginBasisText.ShortLabel(row.MarginBasis)</td>
+                            <td>@row.ContractCount</td>
+                            <td>@row.TotalValue.ToString("N0")</td>
+                            <td>@row.TotalCost.ToString("N0")</td>
+                            <td>@row.Margin.ToString("N0")</td>
+                            <td>@(row.MarginPercent is not null ? row.MarginPercent + "%" : "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">By commercial model</h2>
+    @if (Model.ByCommercialModel.Count == 0)
+    {
+        <p class="ops-empty-state">No priced contracts yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Value, cost, and margin per commercial model, per currency and margin basis</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Model</th>
+                        <th scope="col">Currency</th>
+                        <th scope="col">Basis</th>
+                        <th scope="col">Contracts</th>
+                        <th scope="col">Value</th>
+                        <th scope="col">Cost</th>
+                        <th scope="col">Margin</th>
+                        <th scope="col">% of value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.ByCommercialModel)
+                    {
+                        <tr class="@(row.Margin < 0 ? "ops-table__row--overdue" : "")">
+                            <td>@ProgrammePulse.Services.Shared.DisplayText.Words(row.CommercialModel)</td>
+                            <td>@row.Currency</td>
+                            <td title="@MarginBasisText.Describe(row.MarginBasis)">@MarginBasisText.ShortLabel(row.MarginBasis)</td>
+                            <td>@row.ContractCount</td>
+                            <td>@row.TotalValue.ToString("N0")</td>
+                            <td>@row.TotalCost.ToString("N0")</td>
+                            <td>@row.Margin.ToString("N0")</td>
+                            <td>@(row.MarginPercent is not null ? row.MarginPercent + "%" : "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

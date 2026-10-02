@@ -1,0 +1,22 @@
+@model IReadOnlyList<ActivityFeedItemViewModel>
+
+<section class="ops-panel" aria-labelledby="activity-heading">
+    <h2 id="activity-heading" class="ops-panel__heading">@Localizer["Recent Activity"]</h2>
+    @if (Model.Count == 0)
+    {
+        <p class="ops-empty-state">@Localizer["No activity yet."]</p>
+    }
+    else
+    {
+        <ul class="ops-activity-feed">
+            @foreach (var activity in Model)
+            {
+                <li class="ops-activity-feed__item">
+                    <span class="ops-activity-feed__dot @activity.CssClass" aria-hidden="true"></span>
+                    <span class="ops-activity-feed__message">@activity.Message</span>
+                    <span class="ops-activity-feed__time">@activity.TimestampDisplay</span>
+                </li>
+            }
+        </ul>
+    }
+</section>

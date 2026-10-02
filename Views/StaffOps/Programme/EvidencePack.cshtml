@@ -1,0 +1,360 @@
+@using ProgrammePulse.Controllers
+@using ProgrammePulse.Services.ProgrammeOps
+@model EvidenceReviewPage
+@{
+    // Self-contained and printable, following the InvoiceDocument precedent:
+    // the reader is a board or client, who needs the pack and not the
+    // application around it. No script (the /staffops CSP forbids inline
+    // script), so printing is the browser's own Print / Save as PDF.
+    //
+    // Page one is the answer (design and PMO data review, 30 Sep 2026): the
+    // readiness band with the projects behind it, the headline figures, what
+    // was found and what moved since the last review. The register, the
+    // decisions still open and the appendix follow from page two. Charts come
+    // from charts.css, shared with the app, and pick up the tenant's accent.
+    Layout = null;
+    const int AppendixRecords = 50;
+    var review = Model.Review;
+    string Owner(Guid? key) => key is { } k ? Model.StaffNames.GetValueOrDefault(k, "(former staff member)") : "None named";
+    var gaps = review.Findings.Where(f => f.Category == EvidenceFindingCategory.EvidenceGap).ToList();
+    var exceptions = review.Findings.Where(f => f.Category == EvidenceFindingCategory.DeliveryException).ToList();
+    var undecided = review.Findings.Where(f => f.Disposition == FindingDisposition.Open || f.OwnerStaffKey is null).ToList();
+    var total = review.Findings.Count;
+    var withoutOwner = review.Findings.Count(f => f.OwnerStaffKey is null);
+    var notDecided = review.Findings.Count(f => f.Disposition == FindingDisposition.Open);
+    EvidenceReviewFinding? Find(string key) => review.Findings.FirstOrDefault(f => f.FindingKey == key);
+    string Share(decimal numerator, decimal denominator) => StaffEvidenceCheckController.SharePercent(numerator, denominator);
+}
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Delivery evidence pack, @review.RecordedAtUtc.ToString("yyyy-MM-dd")</title>
+    <link rel="stylesheet" href="~/staffops/branding/theme.css" />
+    <link rel="stylesheet" href="~/css/charts.css" />
+    <style>
+        body { font-family: -apple-system, "Segoe UI", sans-serif; color: #171b1e; background: #fff; max-width: 900px; margin: 2rem auto; padding: 0 1.25rem; line-height: 1.45; }
+        h1 { font-size: 1.6rem; margin: 0 0 .25rem; }
+        h2 { font-size: 1.15rem; margin: 1.75rem 0 .5rem; padding-bottom: .25rem; border-bottom: 2px solid #171b1e; }
+        h3 { font-size: 1rem; margin: 1.25rem 0 .25rem; }
+        .meta { color: #555; margin: 0 0 .75rem; }
+        .summary { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 1rem 1.75rem; align-items: start; margin: 1rem 0; }
+        .summary p { margin: .25rem 0; }
+        .figures { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; margin: 1rem 0 0; }
+        .figures div { border: 1px solid #ccc; border-radius: 6px; padding: .5rem .75rem; display: flex; flex-direction: column; gap: .25rem; }
+        .figures dt { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: #555; }
+        .figures dd { margin: 0; font-size: 1.4rem; font-weight: 700; }
+        .figures .of { display: block; font-size: .8rem; font-weight: 400; color: #555; }
+        .figures .ops-share { margin-top: .35rem; }
+        .found { list-style: none; margin: .5rem 0; padding: 0; }
+        .found li { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(6rem, 1fr) 14rem 4.5rem; gap: .25rem .75rem; align-items: center; padding: .3rem 0; border-bottom: 1px solid #ddd; font-size: .88rem; }
+        .found .group { display: block; grid-template-columns: none; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: #555; border-bottom: 1px solid #999; padding-top: .6rem; }
+        .found .figure { font-variant-numeric: tabular-nums; }
+        .found .sev { font-size: .75rem; color: #555; }
+        table { width: 100%; border-collapse: collapse; margin: .5rem 0 1rem; font-size: .9rem; }
+        th, td { text-align: start; padding: .4rem .45rem; border-bottom: 1px solid #ddd; vertical-align: top; }
+        th { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: #555; }
+        td.num { white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .flag { font-weight: 700; color: #a3261a; }
+        .small { font-size: .85rem; color: #444; }
+        .screen-only { margin: 1rem 0; padding: .5rem .75rem; background: #eef3f7; border-radius: 6px; }
+        .register { margin-top: 2rem; }
+        /* On a phone each row stacks, labelled from its column, so a
+           seven-column register never scrolls the page sideways. */
+        @@media screen and (max-width: 40rem) {
+            body { margin: 1rem auto; }
+            .summary { grid-template-columns: minmax(0, 1fr); }
+            .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .found li { grid-template-columns: minmax(0, 1fr) auto; }
+            .found li .ops-share { grid-column: 1 / -1; grid-row: 2; }
+            thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+            table, tbody, tr, td { display: block; width: 100%; }
+            tr { border-bottom: 1px solid #ddd; padding: .5rem 0; }
+            td { border: 0; padding: .1rem 0; }
+            td.num { white-space: normal; }
+            td[data-label]::before { content: attr(data-label) ": "; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: #555; }
+            td:empty { display: none; }
+        }
+        @@media print {
+            body { margin: 0; max-width: none; font-size: .9rem; }
+            .screen-only { display: none; }
+            h2 { break-after: avoid; }
+            tr, .found li { break-inside: avoid; }
+            .register, .appendix { break-before: page; }
+            /* Page one is the answer and must fit one A4 page: project rows show only their readiness
+               (the counts are in the by-project table on page two) and finding rows tighten. */
+            .summary { margin: .5rem 0; }
+            h2 { margin-top: 1rem; }
+            .ops-project-bands__counts { display: none; }
+            .ops-project-bands li { padding: .15rem 0; }
+            .found li { grid-template-columns: minmax(0, 1.8fr) minmax(4rem, 1fr) 12rem 3.5rem; font-size: .8rem; padding: .12rem 0; }
+            .meta { margin-bottom: .35rem; }
+            .figures div { padding: .35rem .6rem; }
+            .figures dd { font-size: 1.15rem; }
+            .ops-verdict__line { font-size: 1.1rem; margin: .4rem 0 .1rem; }
+        }
+    </style>
+</head>
+<body>
+    <p class="screen-only">
+        <a href="/staffops/programme/evidence-check/reviews/@review.ReviewKey">Back to the review</a>.
+        Use your browser's Print command to save this pack as a PDF.
+    </p>
+
+    <h1>Delivery evidence pack</h1>
+    <p class="meta">
+        @(Model.TenantName ?? "Delivery review")
+        · Evidence recorded @review.RecordedAtUtc.ToString("d MMMM yyyy, HH:mm") UTC
+        · @review.WorkItems.ToString("N0") work items and @review.RecordedHours.ToString("N1") recorded hours checked
+    </p>
+    <p class="meta"><strong>Scope:</strong> @StaffEvidenceCheckController.ScopeSummary(review.Scope)</p>
+    @if (review.Scope?.Decision is { } decision)
+    {
+        <p><strong>Decision this review supports:</strong> @decision</p>
+    }
+
+    <section class="summary" aria-label="Readiness">
+        <div>
+            <partial name="~/Views/StaffOps/Programme/_ReadinessBand.cshtml" model="@((review.Readiness, "This review"))" />
+            <p class="ops-verdict__line">@StaffEvidenceCheckController.Label(review.Readiness).</p>
+            <p>@review.ReadinessReason</p>
+    <dl class="figures">
+        <div>
+            <dt>Without a named owner</dt>
+            <dd>@withoutOwner <span class="of">of @total findings</span> <span class="ops-share ops-share--thin" aria-hidden="true"><span class="ops-share__fill" style="--share: @Share(withoutOwner, total)"></span></span></dd>
+        </div>
+        <div>
+            <dt>Not yet decided</dt>
+            <dd>@notDecided <span class="of">of @total findings</span> <span class="ops-share ops-share--thin" aria-hidden="true"><span class="ops-share__fill" style="--share: @Share(notDecided, total)"></span></span></dd>
+        </div>
+        @foreach (var (key, label) in new[] { ("overdue", "Past due"), ("over-estimate", "Over estimate") })
+        {
+            var finding = Find(key);
+            <div>
+                <dt>@label</dt>
+                <dd>
+                    @(finding is null ? "None" : finding.Numerator.ToString("#,0.##"))
+                    @if (finding is not null)
+                    {
+                        <span class="of">of @finding.Denominator.ToString("#,0.##") @finding.Unit</span>
+                        <span class="ops-share ops-share--thin" aria-hidden="true"><span class="ops-share__fill" style="--share: @Share(finding.Numerator, finding.Denominator)"></span></span>
+                    }
+                </dd>
+            </div>
+        }
+    </dl>
+        </div>
+        <div>
+            <partial name="~/Views/StaffOps/Programme/_ProjectBands.cshtml" model="review.Projects" />
+        </div>
+    </section>
+
+    @if (review.SourceNotes.Count > 0)
+    {
+        <h2>Data limitations</h2>
+        <ul>
+            @foreach (var note in review.SourceNotes)
+            {
+                <li>@note</li>
+            }
+        </ul>
+    }
+
+    <h2>What was found</h2>
+    <ul class="found" aria-label="Findings, each as the affected share of its own total">
+        @foreach (var (heading, findings) in new[] { ("Evidence gaps: can the figures be used?", gaps), ("Delivery exceptions: well-evidenced problems that need an owner", exceptions) })
+        {
+            <li class="group">@heading (@findings.Count)</li>
+            @foreach (var finding in findings)
+            {
+                <li>
+                    <span>@finding.Title</span>
+                    <partial name="~/Views/StaffOps/Programme/_FindingShare.cshtml" model="@((finding.Numerator, finding.Denominator, finding.Category == EvidenceFindingCategory.EvidenceGap && finding.Severity == EvidenceFindingSeverity.High))" />
+                    <span class="figure">@finding.Numerator.ToString("#,0.##") of @finding.Denominator.ToString("#,0.##") @finding.Unit</span>
+                    <span class="sev">@ProgrammePulse.Services.Shared.DisplayText.Words(finding.Severity)</span>
+                </li>
+            }
+        }
+    </ul>
+    @if (gaps.Any(f => f.Severity == EvidenceFindingSeverity.High))
+    {
+        <p class="small">The line on a bar marks @EvidenceCheckCalculator.MaterialShare.ToString("P0"): a high-severity evidence gap past it makes the report not decision-ready.</p>
+    }
+
+    @if (Model.SincePrevious is { } since)
+    {
+        var moved = since.Findings.Where(f => f.Records is not null).Select(f => f.Records!).ToList();
+        var left = moved.Count == 0 ? 0 : moved.Max(m => m.Cleared);
+        var right = moved.Count == 0 ? 0 : moved.Max(m => m.StillPresent + m.Appeared);
+        var span = Math.Max(1, left + right);
+        string At(int records) => StaffEvidenceCheckController.SharePercent(records, span);
+        <h2>Since the previous review (@since.Previous.RecordedAtUtc.ToString("d MMMM yyyy"))</h2>
+        <p>
+            Readiness moved from <strong>@StaffEvidenceCheckController.Label(since.PreviousReadiness)</strong> to
+            <strong>@StaffEvidenceCheckController.Label(since.CurrentReadiness)</strong>.
+            @since.Improved finding(s) improved or cleared; @since.Worse new or worse;
+            @(since.Shifted > 0 ? $"{since.Shifted} with the same count over different records; " : "")
+            @since.BrokenCommitments decision(s) from last time didn't hold.
+        </p>
+        <table>
+            <caption class="small">Movement is judged on the number affected, not the share. Records are matched by source id. Bars: records cleared to the left of the line, still present and new to the right.</caption>
+            <thead><tr><th>Finding</th><th>Movement</th><th>Before</th><th>Now</th><th>Records</th><th>Last decision</th></tr></thead>
+            <tbody>
+                @foreach (var row in since.Findings)
+                {
+                    <tr>
+                        <td>@row.Title</td>
+                        <td data-label="Movement">@EvidenceReviewCalculator.Label(row.Trend)</td>
+                        <td data-label="Before" class="num">@(row.PreviousNumerator?.ToString("0.##") ?? "—")</td>
+                        <td data-label="Now" class="num">@(row.CurrentNumerator?.ToString("0.##") ?? "—")</td>
+                        <td data-label="Records">
+                            @if (row.Records is { } records)
+                            {
+                                <span class="ops-movement" aria-hidden="true" style="--zero: @At(left)">
+                                    @if (records.Cleared > 0)
+                                    {
+                                        <span class="ops-movement__segment ops-movement__segment--cleared" style="--from: @At(left - records.Cleared); --size: @At(records.Cleared)"></span>
+                                    }
+                                    @if (records.StillPresent > 0)
+                                    {
+                                        <span class="ops-movement__segment ops-movement__segment--still" style="--from: @At(left); --size: @At(records.StillPresent)"></span>
+                                    }
+                                    @if (records.Appeared > 0)
+                                    {
+                                        <span class="ops-movement__segment ops-movement__segment--new" style="--from: @At(left + records.StillPresent); --size: @At(records.Appeared)"></span>
+                                    }
+                                    <span class="ops-movement__zero"></span>
+                                </span>
+                            }
+                            @EvidenceReviewCalculator.Label(row.Records)
+                        </td>
+                        <td data-label="Last decision">
+                            @(row.PreviousDecision?.DecidedAtUtc is null ? "None recorded" : EvidenceReviewCalculator.Label(row.PreviousDecision.Disposition))
+                            @if (row.ResolvedButStillPresent)
+                            {
+                                <span class="flag">Marked resolved, still found.</span>
+                            }
+                            else if (row.PastTargetDate)
+                            {
+                                <span class="flag">Target date passed, still found.</span>
+                            }
+                            else if (row.DecisionNotCarried)
+                            {
+                                <span>Its records all cleared; the ones found now are undecided.</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <section class="register">
+        <p class="small">
+            <strong>How to read this.</strong> Evidence gaps decide whether the figures in this week's report can be defended.
+            Delivery exceptions are well-evidenced problems that need an owner and a decision; they never lower readiness,
+            because a report that shows its bad news clearly is the one to trust. Readiness is a band with stated thresholds,
+            not a score: <em>not decision-ready</em> means a connected source failed, or a high-severity gap affects at least
+            @EvidenceCheckCalculator.MaterialShare.ToString("P0") of its data.
+        </p>
+
+        @if (review.Projects.Count > 0)
+        {
+            <h2>By project</h2>
+            <table>
+                <thead><tr><th>Project</th><th>Readiness</th><th>Open items</th><th>Evidence gap records</th><th>Delivery exception records</th></tr></thead>
+                <tbody>
+                    @foreach (var project in review.Projects)
+                    {
+                        <tr>
+                            <td>@project.Project</td>
+                            <td data-label="Readiness">@StaffEvidenceCheckController.Label(project.Readiness)</td>
+                            <td data-label="Open items" class="num">@project.OpenItems</td>
+                            <td data-label="Evidence gap records" class="num">@project.EvidenceGaps</td>
+                            <td data-label="Delivery exception records" class="num">@project.DeliveryExceptions</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        @if (undecided.Count > 0)
+        {
+            <h2>Decisions still needed</h2>
+            <ul>
+                @foreach (var finding in undecided)
+                {
+                    <li>
+                        <strong>@finding.Title</strong> (@finding.Numerator.ToString("#,0.##") of @finding.Denominator.ToString("#,0.##") @finding.Unit):
+                        @(finding.OwnerStaffKey is null ? "needs a named owner" : $"owner {Owner(finding.OwnerStaffKey)}")@(finding.Disposition == FindingDisposition.Open ? ", no decision yet" : "").
+                    </li>
+                }
+            </ul>
+        }
+
+        @foreach (var (heading, findings) in new[] { ("Evidence gaps", gaps), ("Delivery exceptions", exceptions) })
+        {
+            <h2>@heading</h2>
+            @if (findings.Count == 0)
+            {
+                <p>None found.</p>
+            }
+            else
+            {
+                <table>
+                    <thead><tr><th>Finding</th><th>Affected</th><th>Severity</th><th>Decision</th><th>Owner</th><th>Target</th><th>Note</th></tr></thead>
+                    <tbody>
+                        @foreach (var finding in findings)
+                        {
+                            <tr>
+                                <td><strong>@finding.Title</strong><br /><span class="small">@finding.WhyItMatters</span></td>
+                                <td data-label="Affected" class="num">@finding.Numerator.ToString("#,0.##") of @finding.Denominator.ToString("#,0.##") @finding.Unit</td>
+                                <td data-label="Severity">@ProgrammePulse.Services.Shared.DisplayText.Words(finding.Severity)</td>
+                                <td data-label="Decision">@EvidenceReviewCalculator.Label(finding.Disposition)@(finding.CarriedForward ? " (carried forward)" : "")</td>
+                                <td data-label="Owner">@Owner(finding.OwnerStaffKey)</td>
+                                <td data-label="Target" class="num">@(finding.TargetDate?.ToString("yyyy-MM-dd") ?? "—")</td>
+                                <td data-label="Note">@finding.Note</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        }
+
+        <h2>What this pack is, and isn't</h2>
+        <p class="small">
+            An automated check of the delivery data behind this report, frozen when it was recorded, with the decisions the
+            review team recorded against it. Every finding traces to the source records in the appendix. It is not an audit or
+            independent assurance: the same person may record and decide. It does not assess any individual's performance, and
+            it reads no cost or rate data.
+        </p>
+    </section>
+
+    <section class="appendix">
+        <h2>Appendix: source records</h2>
+        @foreach (var finding in review.Findings.Where(f => f.Records.Count > 0))
+        {
+            <h3>@finding.Title</h3>
+            <table>
+                <thead><tr><th>Project</th><th>Source record</th><th>Item</th><th>Detail</th></tr></thead>
+                <tbody>
+                    @foreach (var record in finding.Records.Take(AppendixRecords))
+                    {
+                        <tr>
+                            <td data-label="Project">@record.Project</td>
+                            <td data-label="Source record">@record.Source @record.ExternalId</td>
+                            <td data-label="Item">@record.Title</td>
+                            <td data-label="Detail">@record.Detail</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            @if (finding.Records.Count > AppendixRecords)
+            {
+                <p class="small">@AppendixRecords of @finding.Records.Count records shown. The review's CSV register lists them all.</p>
+            }
+        }
+    </section>
+</body>
+</html>

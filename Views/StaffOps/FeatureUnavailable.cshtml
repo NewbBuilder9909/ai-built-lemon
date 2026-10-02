@@ -1,0 +1,34 @@
+@{
+    var feature = ViewData["Feature"] as string;
+    var outcome = ViewData["Outcome"] as string;
+    var plan = ViewData["Plan"] as string;
+    var tenantUnresolved = string.Equals(outcome, "TenantUnresolved", StringComparison.Ordinal);
+}
+
+<section class="ops-panel">
+    @if (tenantUnresolved)
+    {
+        <h2 class="ops-panel__heading">Feature unavailable</h2>
+        <p class="ops-banner ops-banner--error" role="alert">
+            Your account isn't attached to an organisation, so plan-based features such as
+            <strong>@feature</strong> are switched off.
+        </p>
+        <p class="ops-empty-state">
+            This is an account set-up problem, not a plan limit. Ask your platform operator to
+            attach your staff profile to your organisation's tenant. Everything that doesn't
+            depend on a plan continues to work as normal.
+        </p>
+    }
+    else
+    {
+        <h2 class="ops-panel__heading">Not included in your plan</h2>
+        <p class="ops-banner ops-banner--info" role="status">
+            The <strong>@feature</strong> feature isn't part of your organisation's current
+            plan@(string.IsNullOrWhiteSpace(plan) ? "" : $" ({plan})").
+        </p>
+        <p class="ops-empty-state">
+            Contact your account manager to upgrade. Everything else you have access to
+            continues to work as normal.
+        </p>
+    }
+</section>

@@ -1,0 +1,269 @@
+@using ProgrammePulse.Models.SkillsEvidence
+@using ProgrammePulse.Models.ViewModels.SkillsEvidence
+@model StaffSkillPortfolioViewModel
+
+@{
+    var canDecide = Model.CanDecide;
+}
+
+<p class="ops-empty-state">
+    @Model.StaffName@(Model.JobTitle is null ? "" : $" — {Model.JobTitle}").
+    Reviewed skills, with who decided what and when. This is a record for a
+    conversation, not a score: there is no overall rating here and there is not
+    meant to be one.
+</p>
+
+<section class="ops-panel">
+    @if (Model.Evidence is not null)
+    {
+        <p><a asp-controller="StaffContributionExamples" asp-action="Staff" asp-route-staffKey="@Model.StaffKey">Contribution examples and AI assistance</a></p>
+    }
+    <h2 class="ops-panel__heading">Current record</h2>
+    @if (Model.Current.Count == 0)
+    {
+        <p class="ops-empty-state">Nothing on record for this person yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Current skill assertions for @Model.StaffName</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Skill</th>
+                        <th scope="col">Kind</th>
+                        <th scope="col">Level</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Source</th>
+                        <th scope="col">Reviewed</th>
+                        <th scope="col">Review due</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var row in Model.Current)
+                {
+                    var overdue = row.IsReviewOverdue(Model.AsOf);
+                    <tr class="@(overdue ? "ops-table__row--overdue" : "")">
+                        <td>@row.SkillName</td>
+                        <td>@ProgrammePulse.Services.Shared.DisplayText.Words(row.Kind)</td>
+                        <td>@row.Assertion.Proficiency</td>
+                        <td>@ProgrammePulse.Services.Shared.DisplayText.Words(row.Assertion.Status)</td>
+                        <td>@(row.Assertion.Origin == AssertionOrigin.SelfDeclared ? "Self-declared" : "Reviewer-recorded")</td>
+                        <td>@(row.Assertion.ReviewedAtUtc?.ToString("yyyy-MM-dd") ?? "—")</td>
+                        <td>@(row.Assertion.ReviewDueOn?.ToString("yyyy-MM-dd") ?? "—")@(overdue ? " (overdue)" : "")</td>
+                    </tr>
+                    @if (row.History.Count > 0)
+                    {
+                        <tr>
+                            <td colspan="7">
+                                <details>
+                                    <summary>History (@row.History.Count earlier version@(row.History.Count == 1 ? "" : "s"))</summary>
+                                    <ul>
+                                        @foreach (var previous in row.History)
+                                        {
+                                            <li>
+                                                @previous.RecordedAtUtc.ToString("yyyy-MM-dd") —
+                                                @previous.Proficiency, @previous.Status
+                                                @if (previous.ReviewNote is not null)
+                                                {
+                                                    <text> — “@previous.ReviewNote”</text>
+                                                }
+                                            </li>
+                                        }
+                                    </ul>
+                                </details>
+                            </td>
+                        </tr>
+                    }
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@if (Model.Evidence is { } evidence)
+{
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Engineering evidence</h2>
+
+        @if (evidence.Coverage.IsUnverifiedReplay)
+        {
+            <p class="ops-banner ops-banner--info" role="status">
+                <strong>Fixture or sandbox replay.</strong> No sync has completed cleanly against a live
+                installation, so treat everything below as illustrative, not as a record of this
+                person's work.
+            </p>
+        }
+
+        <p class="ops-empty-state">
+            Observed from @(evidence.Coverage.ObservedFromUtc?.ToString("yyyy-MM-dd") ?? "—"),
+            complete through @(evidence.Coverage.CompleteThroughUtc?.ToString("yyyy-MM-dd") ?? "not claimed").
+            This is <strong>participation, not proficiency</strong>: it shows what this person took part in
+            during the window, and says nothing about how well. It is deliberately not combined with the
+            reviewed skills above, and there is no score.
+        </p>
+
+        @if (!evidence.Coverage.IsComplete)
+        {
+            <p class="ops-banner ops-banner--info" role="status">
+                <strong>This list is incomplete.</strong>
+                @if (evidence.Coverage.WorstStatus != ProgrammePulse.Models.SkillsEvidence.EvidenceCoverageStatus.Complete)
+                {
+                    <text>At least one repository is @evidence.Coverage.WorstStatus. </text>
+                }
+                @if (evidence.Coverage.UnmappedActors > 0)
+                {
+                    <text>@evidence.Coverage.UnmappedActors source accounts are unidentified, covering
+                        @evidence.Coverage.UnattributedEvidence rows that reach nobody. </text>
+                }
+                Work missing here may simply not have been collected.
+            </p>
+        }
+
+        @if (evidence.AbsenceIsInconclusive)
+        {
+            <p class="ops-banner ops-banner--info" role="status">
+                Nothing is recorded for this person <em>and</em> coverage is incomplete — so this is
+                &ldquo;we cannot say&rdquo;, not &ldquo;they contributed nothing&rdquo;.
+            </p>
+        }
+
+        @if (evidence.MappedAccounts.Count == 0)
+        {
+            <p class="ops-empty-state">
+                No source account has been approved as this person, so no evidence can be attributed to them.
+                An administrator approves mappings on the unidentified-accounts queue.
+            </p>
+        }
+        else
+        {
+            <p class="ops-empty-state">
+                Built from @evidence.MappedAccounts.Count approved
+                account@(evidence.MappedAccounts.Count == 1 ? "" : "s"):
+                @string.Join(", ", evidence.MappedAccounts.Select(a => a.ExternalLogin ?? a.ExternalActorId)).
+            </p>
+        }
+
+        @if (evidence.CountsByRole.Count > 0)
+        {
+            <ul>
+                @foreach (var role in evidence.CountsByRole.OrderBy(r => r.Key))
+                {
+                    <li><strong>@role.Value</strong> as @role.Key</li>
+                }
+            </ul>
+        }
+
+        @if (evidence.LanguageHints.Count > 0)
+        {
+            <p class="ops-empty-state">
+                Touched files classified as: @string.Join(", ", evidence.LanguageHints).
+                <strong>Unvalidated.</strong> This means &ldquo;participated in changes to files of this kind&rdquo;,
+                not &ldquo;is proficient&rdquo;, and it never changes a reviewed level.
+            </p>
+        }
+
+        @if (evidence.Evidence.Any(e => e.AuthorshipUnverified))
+        {
+            <p class="ops-empty-state">
+                A commit marked <span class="ops-chip">authorship not verified</span> names this person, but
+                nothing proves they made it: anyone can write a commit that names a colleague. Only a commit
+                they signed with a key the provider verified shows authorship, and a co-author trailer never does.
+                Pull requests and reviews are made from the person's own account, so they are not marked.
+            </p>
+        }
+
+        @if (evidence.EvidenceCount == 0)
+        {
+            <p class="ops-empty-state">No evidence rows are attributed to this person.</p>
+        }
+        else
+        {
+            <div class="ops-table-scroll">
+                <table class="ops-table">
+                    <caption class="ops-visually-hidden">Engineering evidence attributed to @Model.StaffName, with links to source</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">When</th>
+                            <th scope="col">Repository</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">What</th>
+                            <th scope="col">Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var row in evidence.Evidence)
+                    {
+                        <tr>
+                            <td>@row.OccurredAtUtc.ToString("yyyy-MM-dd")</td>
+                            <td>@row.RepositoryKey</td>
+                            <td>@row.SourceType</td>
+                            <td>
+                                @ProgrammePulse.Services.Shared.DisplayText.Words(row.Role)
+                                @if (row.AuthorshipUnverified)
+                                {
+                                    <span class="ops-chip">authorship not verified</span>
+                                }
+                            </td>
+                            <td>@row.Title</td>
+                            <td>
+                                @if (row.SourceUrl is not null)
+                                {
+                                    <a href="@row.SourceUrl" rel="noopener noreferrer nofollow" target="_blank">Open</a>
+                                }
+                                else
+                                {
+                                    <text>—</text>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+            <partial name="~/Views/StaffOps/_Pager.cshtml" model="evidence.EvidencePages" />
+            @if (evidence.Evidence.Count > 100)
+            {
+                <p class="ops-empty-state">Showing the most recent 100 of @evidence.Evidence.Count rows.</p>
+            }
+        }
+    </section>
+}
+
+@if (canDecide)
+{
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Record a skill for @Model.StaffName</h2>
+        <p class="ops-empty-state">
+            Recorded this way it is marked <strong>reviewer-recorded</strong>, not self-declared,
+            so anyone reading it can tell the person was not the one who claimed it. They can
+            still challenge it.
+        </p>
+        <form asp-controller="StaffSkills" asp-action="RecordForStaff" asp-route-staffKey="@Model.StaffKey" method="post" class="ops-form">
+            <label>
+                Skill key
+                <input type="text" name="skillKey" maxlength="128" required />
+            </label>
+            <label>
+                Level
+                <select name="proficiency" required>
+                    @foreach (var level in ProficiencyRubric.All)
+                    {
+                        <option value="@level">@level — @ProficiencyRubric.Describe(level)</option>
+                    }
+                </select>
+            </label>
+            <label>
+                Why are you recording this? (required)
+                <input type="text" name="reviewNote" maxlength="1000" required />
+            </label>
+            <label>
+                Review again by (optional)
+                <input type="date" name="reviewDueOn" />
+            </label>
+            <button type="submit" class="ops-button">Record</button>
+        </form>
+    </section>
+}

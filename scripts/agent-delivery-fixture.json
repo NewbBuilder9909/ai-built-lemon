@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "tenantId": "northstar-demo",
+  "asOfUtc": "2026-09-19T12:00:00Z",
+  "workItems": [
+    { "id": "W-1", "tenantId": "northstar-demo", "source": "ClickUp", "connectionId": "clickup-main", "externalId": "CU-101", "title": "Capacity forecast" },
+    { "id": "W-2", "tenantId": "northstar-demo", "source": "Jira", "connectionId": "jira-main", "externalId": "J-202", "title": "Unreviewed agent change" },
+    { "id": "W-3", "tenantId": "northstar-demo", "source": "Jira", "connectionId": "jira-main", "externalId": "J-203", "title": "Blocked delivery" }
+  ],
+  "runs": [
+    { "id": "R-1", "tenantId": "northstar-demo", "source": "Codex", "connectionId": "codex-team", "externalId": "run-1", "workItemId": "W-1", "actorType": "agent", "status": "completed", "startedUtc": "2026-09-16T09:00:00Z", "completedUtc": "2026-09-16T10:00:00Z" },
+    { "id": "R-2", "tenantId": "northstar-demo", "source": "Claude", "connectionId": "claude-team", "externalId": "run-2", "workItemId": "W-2", "actorType": "agent", "status": "completed", "startedUtc": "2026-09-17T09:00:00Z", "completedUtc": "2026-09-17T09:30:00Z" },
+    { "id": "R-3", "tenantId": "northstar-demo", "source": "human", "connectionId": "team-a", "externalId": "run-3", "workItemId": "W-3", "actorType": "human", "status": "blocked", "startedUtc": "2026-09-18T09:00:00Z" }
+  ],
+  "artifacts": [
+    { "id": "A-1", "tenantId": "northstar-demo", "runId": "R-1", "kind": "pullRequest", "url": "https://example.invalid/pr/1" },
+    { "id": "A-2", "tenantId": "northstar-demo", "runId": "R-2", "kind": "pullRequest", "url": "https://example.invalid/pr/2" }
+  ],
+  "decisions": [
+    { "id": "D-1", "tenantId": "northstar-demo", "artifactId": "A-1", "kind": "review", "status": "approved" },
+    { "id": "D-2", "tenantId": "northstar-demo", "artifactId": "A-1", "kind": "ci", "status": "passed" },
+    { "id": "D-3", "tenantId": "northstar-demo", "artifactId": "A-1", "kind": "release", "status": "deployed" },
+    { "id": "D-4", "tenantId": "northstar-demo", "artifactId": "A-1", "kind": "acceptance", "status": "accepted" },
+    { "id": "D-5", "tenantId": "northstar-demo", "artifactId": "A-2", "kind": "ci", "status": "passed" }
+  ],
+  "expectations": { "acceptedWorkItemIds": ["W-1"], "rejectedWorkItemIds": ["W-2", "W-3"] },
+  "measurements": []
+}

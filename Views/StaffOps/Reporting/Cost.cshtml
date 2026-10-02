@@ -1,0 +1,144 @@
+@using ProgrammePulse.Models.ViewModels.Reporting
+@model CostPageViewModel
+@{ ViewData["ReportActions"] = true; }
+@{
+    var summary = Model.Summary;
+    var programmeBudgets = Model.ProgrammeBudgets;
+    ViewData["ExportUrl"] = Url.Action("ExportCost", "StaffReporting", new
+    {
+        from = summary.PeriodStart.ToString("yyyy-MM-dd"),
+        to = summary.PeriodEnd.ToString("yyyy-MM-dd")
+    });
+}
+
+<partial name="~/Views/StaffOps/Reporting/_ReportingNav.cshtml" model="@("cost")" />
+
+<p class="ops-empty-state">
+    Period: @summary.PeriodStart.ToString("yyyy-MM-dd") to @summary.PeriodEnd.ToString("yyyy-MM-dd").
+    Admin-only — cost/rate data never appears on the main Reporting Hub page.
+</p>
+
+@if (summary.UnknownBillabilityHours > 0m)
+{
+    <p class="ops-banner ops-banner--info" role="status">@summary.UnknownBillabilityHours.ToString("0.##") hours have unknown billability. They can contribute to internal cost but are excluded from billable-hour totals.</p>
+}
+@if (summary.HasTempoDeletionCoverageGap)
+{
+    <p class="ops-banner ops-banner--info" role="status">Tempo historical deletion coverage is not verified. Verify recorded hours in Tempo before a cost decision.</p>
+}
+@if (summary.UndatedTimeEntryHours > 0m)
+{
+    <p class="ops-banner ops-banner--info" role="status">@summary.UndatedTimeEntryHours.ToString("0.##") recorded hours have no work date and cannot be assigned to this cost period.</p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@Localizer["Cost by Contributor"]</h2>
+    @if (summary.Rows.Count == 0)
+    {
+        <p class="ops-empty-state">@Localizer["No priced time entries in this period."]</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">@Localizer["Cost by contributor, including billable hours and total cost"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Localizer["Staff"]</th>
+                        <th scope="col">@Localizer["Logged (hrs)"]</th>
+                        <th scope="col">@Localizer["Billable (hrs)"]</th>
+                        <th scope="col">@Localizer["Total Cost"]</th>
+                        <th scope="col">@Localizer["Currency"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in summary.Rows)
+                    {
+                        <tr>
+                            <td>@row.StaffFullName</td>
+                            <td>@row.LoggedHours.ToString("0.##")</td>
+                            <td>@row.BillableHours.ToString("0.##")</td>
+                            <td>@row.TotalCost.ToString("N2")</td>
+                            <td>@row.Currency</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (summary.TotalsByCurrency.Count > 1)
+        {
+            <p class="ops-banner ops-banner--info" role="status">
+                Staff rates span @summary.TotalsByCurrency.Count currencies — totals are shown per currency below, not combined into one figure.
+            </p>
+            <ul>
+                @foreach (var total in summary.TotalsByCurrency)
+                {
+                    <li><strong>Total (@total.Currency): @total.TotalCost.ToString("N2")</strong></li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p><strong>Grand total: @summary.GrandTotalCost.ToString("N2") @summary.TotalsByCurrency.FirstOrDefault()?.Currency</strong></p>
+        }
+    }
+    @if (summary.UnpricedEntryHours > 0)
+    {
+        <p class="ops-banner ops-banner--info" role="status">
+            @summary.UnpricedEntryHours.ToString("0.##") logged hours could not be costed (no matching staff, no
+            entry timestamp, or no rate effective on that date) and are excluded from the total above.
+        </p>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@Localizer["Programme Budgets"]</h2>
+    <p class="ops-empty-state">Budget vs actual for a programme with no formal Contract Ops record — Contract Ops' own burn-down already covers the ones that have one. Cost to date is all-time, not scoped to the period above.</p>
+
+    @if (programmeBudgets.Count == 0)
+    {
+        <p class="ops-empty-state">@Localizer["No programmes yet — run a ClickUp sync to populate this page."]</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">@Localizer["Programme budgets versus cost to date"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Localizer["Programme"]</th>
+                        <th scope="col">@Localizer["Customer"]</th>
+                        <th scope="col">@Localizer["Budget"]</th>
+                        <th scope="col">@Localizer["Cost to date"]</th>
+                        <th scope="col">@Localizer["Burn %"]</th>
+                        <th scope="col">@Localizer["Set budget"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in programmeBudgets)
+                    {
+                        <tr class="@(row.BurnPercent > 100 ? "ops-table__row--overdue" : "")">
+                            <td>@row.ProgrammeName</td>
+                            <td>@(row.CustomerName ?? "—")</td>
+                            <td>@(row.BudgetAmount is decimal amount ? amount.ToString("N0") + " " + row.BudgetCurrency : "not set")</td>
+                            <td>@row.CostToDate.ToString("N0") @row.BudgetCurrency</td>
+                            <td>@(row.BurnPercent is decimal burn ? burn + "%" : "—")</td>
+                            <td>
+                                <form asp-controller="StaffPortfolioAdmin" asp-action="SetProgrammeBudget" method="post" class="ops-inline-form">
+                                    <input type="hidden" name="programmeKey" value="@row.ProgrammeKey" />
+                                    <input type="number" step="0.01" min="0" name="budgetAmount" value="@(row.BudgetAmount?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))" aria-label="Budget amount for @row.ProgrammeName" class="ops-input--amount" />
+                                    <input type="text" name="budgetCurrency" value="@row.BudgetCurrency" maxlength="8" aria-label="Budget currency for @row.ProgrammeName" class="ops-input--code" />
+                                    <button type="submit" class="ops-button">@Localizer["Save"]</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (programmeBudgets.Any(r => r.MismatchedCurrencyHours > 0))
+        {
+            <p class="ops-banner ops-banner--info" role="status">Some programmes have logged hours costed in a currency other than their budget currency — those hours are excluded from "Cost to date" above rather than summed across currencies.</p>
+        }
+    }
+</section>

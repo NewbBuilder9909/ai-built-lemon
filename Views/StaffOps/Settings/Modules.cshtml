@@ -1,0 +1,50 @@
+@using ProgrammePulse.Models.ViewModels.Tenancy
+@model ModulesPageViewModel
+
+<partial name="~/Views/StaffOps/Settings/_SettingsNav.cshtml" model="@("modules")" />
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <p class="ops-banner ops-banner--success" role="status" aria-live="polite">@Model.Message</p>
+}
+@if (!string.IsNullOrWhiteSpace(Model.Error))
+{
+    <p class="ops-banner ops-banner--error" role="alert">@Model.Error</p>
+}
+
+<section class="ops-panel" aria-labelledby="modules-heading">
+    <h2 class="ops-panel__heading" id="modules-heading">Modules</h2>
+    <p>Everything here starts switched off. Switching a module on shows it to every role that is allowed to use it.</p>
+    <ul class="ops-module-list">
+        @foreach (var row in Model.Rows)
+        {
+            <li class="ops-module@(row.IsOn ? " ops-module--on" : "")">
+                <div class="ops-module__text">
+                    <h3 class="ops-module__name">@row.Module.Name</h3>
+                    <p class="ops-module__summary">@row.Module.Summary</p>
+                    @if (!row.IsOn && !row.InPlan)
+                    {
+                        <p class="ops-module__note">Not in your plan.</p>
+                    }
+                    else if (!row.IsOn && !row.AvailableOnDeployment)
+                    {
+                        <p class="ops-module__note">Not available on this deployment.</p>
+                    }
+                </div>
+                <form method="post" asp-controller="StaffModules" asp-action="Set" asp-route-moduleKey="@row.Module.Key">
+                    <input type="hidden" name="on" value="@(row.IsOn ? "false" : "true")" />
+                    @if (row.IsOn)
+                    {
+                        <span class="ops-chip chip-validation--ok">On</span>
+                        <button type="submit" class="ops-button ops-button--secondary">Switch off<span class="ops-visually-hidden"> @row.Module.Name</span></button>
+                    }
+                    else
+                    {
+                        <span class="ops-chip">Off</span>
+                        <button type="submit" class="ops-button" disabled="@(!row.CanSwitchOn)">Switch on<span class="ops-visually-hidden"> @row.Module.Name</span></button>
+                    }
+                </form>
+            </li>
+        }
+    </ul>
+</section>

@@ -1,0 +1,168 @@
+@using ProgrammePulse.Models.ViewModels.Commercial
+@model PurchasePageViewModel
+@{ Layout = null; ViewData["Title"] = $"{Model.ProductName} | Weekly delivery evidence diagnostic"; }
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="description" content="Find the gaps behind your weekly programme report with a fixed-scope, evidence-led diagnostic." /><title>@ViewData["Title"]</title><link rel="stylesheet" href="/css/purchase.css" /><script src="/js/purchase.js" defer></script></head>
+<body>
+<header class="site-header"><a class="brand" href="/purchase">@Model.ProductName</a><nav aria-label="Page"><a href="#offer">Offer</a><a href="#example">Example</a><a href="#roi">ROI check</a>@if (Model.SelfServiceTrialEnabled) {<a href="#catalogue">Plans</a><a href="#start-trial">Start trial</a>}<a href="#brief">Prepare brief</a><a href="/staffops/account/login">Log in</a></nav></header>
+<main>
+<section class="hero"><div class="eyebrow">Fixed-scope weekly delivery evidence diagnostic</div><h1>Give your PMO or delivery lead a weekly review they can challenge with evidence.</h1><p>Before your next portfolio review, find out which figures in your weekly delivery report you can defend, and which commitments need an owner. From the exports you already have, without changing any tool.</p><a class="button" href="#offer">See the fixed-scope offer</a><p class="fine">This is an assisted diagnostic for a controlled pilot, not a self-service rollout. No API keys are needed for the diagnostic. Live integrations and production deployment are separately scoped.</p></section>
+
+<section class="section proposition"><div class="section-heading"><span class="step">The offer</span><div><h2>One weekly delivery review. One accountable owner. Evidence you can challenge.</h2><p>This is an assisted diagnostic for a PMO, delivery or COO-led review cycle rather than a promise to replace your delivery tools.</p></div></div><div class="outcome-grid"><article><strong>You provide</strong><p>A sanitised weekly pack, source exports and the definitions currently used by the reporting owner.</p></article><article><strong>We examine</strong><p>Freshness, missing mappings, unsupported totals, estimate-to-actual variance, ownership gaps and where apparent certainty outruns the evidence.</p></article><article><strong>You receive</strong><p>An evidence-led review, exception register, data limitations and a recommendation to proceed, correct or stop.</p></article></div></section>
+
+<section class="section" id="offer"><div class="section-heading"><span class="step">Price</span><div><h2>One diagnostic, one fixed fee</h2><p>Ten working days from receiving your exports to the playback. No system access, no API keys, no migration.</p></div></div>
+<div class="outcome-grid">
+<article><strong>Founding diagnostic@if (Model.DiagnosticFee > 0) {<text>: £@Model.DiagnosticFee.ToString("#,0") fixed</text>}</strong><p>For the first three organisations. Half on signature, half at the playback. Reviewed after three measured deliveries.</p></article>
+<article><strong>What you get</strong><p>An exception register where every finding shows how many records it affects out of how many, and which ones. A readiness band for the report. A board pack with an owner and a decision against each exception, and a recommendation to stop, repeat or connect.</p></article>
+<article><strong>Then, only if it earns it@if (Model.MonthlyRepeatFee > 0) {<text>: £@Model.MonthlyRepeatFee.ToString("#,0") a month</text>}</strong><p>Each cycle's exports re-checked before your review, with what moved since last time and which decisions didn't hold. Cancel with a month's notice.</p></article>
+</div>
+<p class="fine">Your exports go into a workspace used only for your organisation, columns we don't need are never stored, and everything is deleted on the date you set, confirmed in writing with record counts. No certification is claimed.</p>
+</section>
+
+<section class="section example" id="example"><div class="section-heading"><span class="step">Example</span><div><h2>What a useful finding looks like</h2><p>This example is synthetic. It demonstrates the decision format and is not a customer result.</p></div></div><div class="finding"><div class="finding__signal">Not decision-ready</div><div><h3>14 of 96 committed items have a status that can't be read as a stage</h3><p><strong>Observed:</strong> statuses such as "Waiting on client", "Parked" and "With legal" map to no stage, so this week's completion and overdue figures silently leave these items out.</p><p><strong>Also found:</strong> 61 of 412 recorded hours are linked to no work item, and 9 open items are past their due date.</p><p><strong>Decision:</strong> map the statuses at source (owner and date named in the review), or state the gap alongside the figures. Next week's check shows whether it was fixed.</p></div><dl><div><dt>Evidence</dt><dd>The source record id behind every item</dd></div><div><dt>Owner</dt><dd>Named in the recorded review</dd></div><div><dt>Readiness</dt><dd>A band with stated thresholds, never a score</dd></div></dl></div></section>
+
+<section class="section roi" id="roi" data-default-rate="@Model.DefaultLoadedHourlyRate" data-diagnostic-fee="@Model.DiagnosticFee" data-monthly-fee="@Model.MonthlyRepeatFee">
+<div class="section-heading"><span class="step">ROI check</span><div><h2>Work out whether this is worth buying — including what it costs you</h2><p>This models released capacity, not cash. Its values stay in your browser and are not submitted anywhere.</p></div></div>
+<div class="roi-grid">
+<form class="calculator" id="roi-calculator">
+    <fieldset><legend>What the cycle costs you today</legend>
+        <label>People preparing or checking the report<input type="number" id="roi-people" min="1" max="50" step="1" value="3" /></label>
+        <label>Hours per person, per reporting cycle<input type="number" id="roi-hours" min="0" max="80" step="0.5" value="4" /></label>
+        <label>Loaded hourly cost (£)<input type="number" id="roi-rate" min="0" max="1000" step="5" value="@Model.DefaultLoadedHourlyRate" /></label>
+        <label>Reporting cycles per year<input type="number" id="roi-cycles" min="1" max="365" step="1" value="48" /></label>
+    </fieldset>
+    <fieldset><legend>What the cycle would cost you with us</legend>
+        <label>Total hours per cycle afterwards — <em>including</em> correcting mappings, reconciling exceptions and reviewing the pack
+            <input type="number" id="roi-assisted" min="0" max="500" step="0.5" value="7" /></label>
+        <label>Of the hours released, what share gets redeployed to chargeable or otherwise valuable work? (%)
+            <input type="number" id="roi-realisation" min="0" max="100" step="5" value="50" /></label>
+        <label>One-off adoption effort — agreeing definitions, first mapping pass, onboarding (hours)
+            <input type="number" id="roi-adoption" min="0" max="500" step="1" value="10" /></label>
+    </fieldset>
+    <fieldset><legend>What you would pay us</legend>
+        <label>Diagnostic fee, one-off (£)<input type="number" id="roi-fee" min="0" max="100000" step="100" value="@Model.DiagnosticFee" /></label>
+        <label>Assisted repeat, per month (£) — enter 0 if you are only testing the diagnostic
+            <input type="number" id="roi-monthly" min="0" max="50000" step="50" value="@Model.MonthlyRepeatFee" /></label>
+    </fieldset>
+</form>
+<div class="roi-result" aria-live="polite">
+    <span>Preparation cost you carry today, per year</span><strong id="roi-current">£0</strong>
+    <span>Hours released per year, net of correction and review</span><strong id="roi-hours-released">0</strong>
+    <span>Realised capacity value <small>(released hours × realisation share)</small></span><strong id="roi-value">£0</strong>
+    <span>Year-one cost to you <small>(fees + your adoption effort)</small></span><strong id="roi-cost">£0</strong>
+    <span>Year-one net position</span><strong id="roi-net">£0</strong>
+    <p id="roi-verdict" class="roi-verdict"></p>
+    <p class="fine"><strong>Released hours are capacity, not cash.</strong> They become money only if that time is redeployed to chargeable work, or a hire is avoided — and only your finance team can confirm that happened. This figure is not a saving, not a return, and not a justification for any particular fee. Measure your real before-and-after hours over at least two comparable cycles before putting a number in a business case.</p>
+</div>
+</div></section>
+
+@if (Model.SelfServiceTrialEnabled)
+{
+<section class="section" id="catalogue"><div class="section-heading"><span class="step">Plans</span><div><h2>Plans for a connected workspace</h2><p>For teams moving from exports to live connections after a diagnostic. Each plan sets what the workspace includes; add-ons switch on further areas.</p></div></div>
+<div class="catalogue-grid">
+@foreach (var plan in Model.Plans)
+{
+    <article class="catalogue-card" data-plan-card="@plan.Key">
+        <div class="catalogue-card__eyebrow">@plan.DisplayName</div>
+        <h3>@plan.DisplayName</h3>
+        <p>@plan.Summary</p>
+        <div class="catalogue-card__price">£@plan.MonthlyPrice.ToString("0")<small>/month</small></div>
+        <div class="catalogue-card__setup">£@plan.SetupFee.ToString("0") setup</div>
+        <ul class="feature-list">
+            @foreach (var feature in plan.IncludedFeatures)
+            {
+                <li>@feature</li>
+            }
+        </ul>
+        <div class="catalogue-card__availability">@(plan.SelfServiceAvailable ? "Self-service trial available" : "Operator-assisted rollout")</div>
+    </article>
+}
+</div>
+<div class="section-heading section-heading--compact"><span class="step">Add-ons</span><div><h2>Cost per feature stays explicit</h2><p>These prices sit on top of the plan.</p></div></div>
+<div class="catalogue-grid catalogue-grid--modules">
+@foreach (var module in Model.Modules)
+{
+    <article class="catalogue-card catalogue-card--module">
+        <div class="catalogue-card__eyebrow">@module.DisplayName</div>
+        <h3>@module.DisplayName</h3>
+        <p>@module.Summary</p>
+        <div class="catalogue-card__price">£@module.MonthlyPrice.ToString("0")<small>/month</small></div>
+        <div class="catalogue-card__setup">£@module.SetupFee.ToString("0") setup</div>
+        <div class="catalogue-card__availability">@(module.SelfServiceAvailable ? "Self-service add-on" : "Contact us to enable")</div>
+    </article>
+}
+</div></section>
+
+<section class="section scope" id="start-trial"><div class="section-heading"><span class="step">Start</span><div><h2>Create a trial tenant and first admin account</h2><p>This provisions one tenant, stamps the first Admin member to it and turns on any selected self-service add-ons. Enterprise and reviewed evidence features stay operator-assisted.</p></div></div>
+@if (!string.IsNullOrWhiteSpace(Model.SignupSuccessMessage))
+{
+    <p class="ops-banner ops-banner--success">@Model.SignupSuccessMessage</p>
+}
+@if (Model.Signup.Errors.Count > 0)
+{
+    <div class="ops-banner ops-banner--error"><strong>Trial signup could not be completed.</strong><ul>
+        @foreach (var error in Model.Signup.Errors)
+        {
+            <li>@error</li>
+        }
+    </ul></div>
+}
+<div class="signup-grid">
+<form asp-controller="Purchase" asp-action="StartTrial" method="post" class="signup-form" id="trial-signup-form">
+    @Html.AntiForgeryToken()
+    <div class="signup-form__row"><label for="companyName">Organisation name</label><input type="text" id="companyName" name="companyName" maxlength="200" required value="@Model.Signup.CompanyName" /></div>
+    <div class="signup-form__row"><label for="shortCode">Workspace code</label><input type="text" id="shortCode" name="shortCode" maxlength="32" pattern="[a-z0-9-]{2,32}" required value="@Model.Signup.ShortCode" /></div>
+    <div class="signup-form__row"><label for="adminFullName">First admin name</label><input type="text" id="adminFullName" name="adminFullName" required value="@Model.Signup.AdminFullName" /></div>
+    <div class="signup-form__row"><label for="adminEmail">Admin email</label><input type="email" id="adminEmail" name="adminEmail" required value="@Model.Signup.AdminEmail" /></div>
+    <div class="signup-form__row"><label for="password">Password</label><input type="password" id="password" name="password" required autocomplete="new-password" /></div>
+    <div class="signup-form__row"><label for="confirmPassword">Confirm password</label><input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="new-password" /></div>
+    <fieldset class="signup-form__fieldset"><legend>Plan</legend>
+        @foreach (var plan in Model.Plans.Where(plan => plan.SelfServiceAvailable))
+        {
+            <label class="choice-card"><input type="radio" name="plan" value="@plan.Key" data-plan-monthly="@plan.MonthlyPrice" data-plan-setup="@plan.SetupFee" checked="@(string.Equals(Model.Signup.Plan, plan.Key, StringComparison.OrdinalIgnoreCase))" /> <span><strong>@plan.DisplayName</strong><small>£@plan.MonthlyPrice.ToString("0")/month · £@plan.SetupFee.ToString("0") setup</small></span></label>
+        }
+    </fieldset>
+    <fieldset class="signup-form__fieldset"><legend>Add-ons</legend>
+        @foreach (var module in Model.Modules.Where(module => module.SelfServiceAvailable))
+        {
+            var selected = Model.Signup.SelectedModules.Contains(module.FeatureKey, StringComparer.OrdinalIgnoreCase);
+            <label class="choice-card"><input type="checkbox" name="selectedModules" value="@module.FeatureKey" data-module-monthly="@module.MonthlyPrice" data-module-setup="@module.SetupFee" data-module-plan="@module.AvailableFromPlan" checked="@selected" /> <span><strong>@module.DisplayName</strong><small>£@module.MonthlyPrice.ToString("0")/month · £@module.SetupFee.ToString("0") setup</small></span></label>
+        }
+    </fieldset>
+    <button type="submit" class="button">Start @Model.TrialDays-day trial</button>
+</form>
+<div class="plan-card signup-summary" id="trial-quote">
+    <p class="eyebrow">Estimated quote</p>
+    <h3 id="trial-plan-name">Trial quote</h3>
+    <div class="signup-summary__money"><span>Monthly</span><strong id="trial-monthly">£0</strong></div>
+    <div class="signup-summary__money"><span>Setup</span><strong id="trial-setup">£0</strong></div>
+    <p id="trial-features">Choose a plan to see the current commercial shape.</p>
+    <p class="fine">This creates a trial tenant immediately. Pricing is configuration-driven and should be reviewed against measured delivery cost before broad launch.</p>
+</div>
+</div></section>
+}
+
+<section class="section scope" id="scope"><div class="section-heading"><span class="step">Pilot scope</span><div><h2>A bounded route from weekly review pain to a controlled pilot</h2><p>Each stage has an explicit decision. You do not need to commit to a platform rollout.</p></div></div><ol class="stages"><li><strong>Discovery</strong><span>Agree the report, its owner, the decision it supports, the sources, the definitions and the data boundary.</span></li><li><strong>Diagnostic</strong><span>Replay one representative period from sanitised exports and document every limitation.</span></li><li><strong>Decision</strong><span>Compare measured preparation time, exception quality and decision value; proceed only if the case is credible.</span></li><li><strong>Controlled pilot</strong><span>Connect approved sources only after security, access, retention and exit terms are agreed.</span></li></ol></section>
+
+<section class="section" id="brief"><div class="section-heading"><span class="step">Prepare</span><div><h2>Create a review brief</h2><p>Select what you use. This creates text for a conversation with the reporting owner; it does not connect an account or transmit data.</p></div></div><div class="tool-grid" id="tools">
+<label class="tool"><input type="checkbox" value="ClickUp" data-status="pilot" /><strong>ClickUp</strong><small>Tasks and delivery status</small><em>Pilot connector</em></label><label class="tool"><input type="checkbox" value="Jira" data-status="pilot" /><strong>Jira</strong><small>Issues and project work</small><em>Pilot connector</em></label><label class="tool"><input type="checkbox" value="Tempo" data-status="pilot" /><strong>Tempo</strong><small>Recorded time</small><em>Pilot connector</em></label><label class="tool"><input type="checkbox" value="Hub Planner" data-status="pilot" /><strong>Hub Planner</strong><small>Planned capacity</small><em>Pilot connector</em></label><label class="tool"><input type="checkbox" value="GitHub" data-status="validation" /><strong>GitHub</strong><small>Reviewed engineering evidence</small><em>Under validation</em></label><label class="tool"><input type="checkbox" value="Freshdesk" data-status="validation" /><strong>Freshdesk</strong><small>Support case trends</small><em>Under validation</em></label><label class="tool"><input type="checkbox" value="CSV or manual export" data-status="diagnostic" /><strong>CSV or export</strong><small>Start without granting API access</small><em>Diagnostic route</em></label></div>
+<fieldset class="boundary-choice"><legend>Preferred data boundary</legend><label><input type="radio" name="deployment" value="Sanitised export diagnostic" checked /> Sanitised export diagnostic</label><label><input type="radio" name="deployment" value="Vendor-operated controlled pilot" /> Vendor-operated controlled pilot</label><label><input type="radio" name="deployment" value="Customer-controlled deployment assessment" /> Customer-controlled deployment assessment</label></fieldset>
+<div class="plan-card"><p id="selection">No tools selected yet.</p><p id="deployment">Boundary: Sanitised export diagnostic</p><p id="readiness"></p><p id="roi-summary"></p><h3>What we would establish first</h3><ul><li>The recurring report, the decision it supports and the named reporting owner.</li><li>Current preparation effort and the cost of unresolved discrepancies.</li><li>Permitted data, retention, access and deletion route.</li></ul><div class="actions" data-enquiry-email="@Model.EnquiryEmail"><button class="button" id="copy-plan" type="button">Copy review brief</button>
+@if (Model.EnquiryConfigured)
+{
+    <a class="button button--secondary" id="email-plan" href="mailto:@Model.EnquiryEmail">Send to @Model.EnquiryEmail</a>
+}
+else
+{
+    <span class="button button--secondary button--disabled" id="email-plan-unavailable" role="note">Email enquiries are not configured on this site</span>
+}
+</div><span id="copy-status" role="status"></span>
+@if (!Model.EnquiryConfigured)
+{
+    <p class="fine">Copy the brief above and send it to your usual contact — this site has no enquiry address configured, so nothing here would reach us.</p>
+}
+</div></section>
+
+<section class="section trust"><h2>Commercial and security boundaries</h2><p>The diagnostic does not require production credentials. A connected pilot requires an authorised tenant administrator, least-privilege access, a defined data-processing purpose, retention and deletion route, and deployment-specific evidence.</p><p>Connector labels describe the current validation stage, not a guarantee of compatibility with every plan or configuration. Customer-controlled deployment requires a separate infrastructure and egress assessment. Do not use this page as evidence of broad self-service SaaS availability or a perimeter-only deployment claim.</p></section>
+</main><footer>@Model.ProductName. An assisted diagnostic and controlled-pilot proposition. <a href="/staffops/programme">Existing workspace</a></footer>
+</body></html>

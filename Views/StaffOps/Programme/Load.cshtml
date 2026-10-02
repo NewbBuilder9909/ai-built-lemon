@@ -1,0 +1,160 @@
+@using ProgrammePulse.Models.ViewModels
+@using ProgrammePulse.Services.ProgrammeOps
+@model DeliveryLoadReport
+
+@{ ViewData["ReportActions"] = true; }
+@{
+    var thresholds = Model.Thresholds;
+
+    var summaryCards = new[]
+    {
+        new KpiCardViewModel("Elevated this week", Model.ElevatedCount.ToString()),
+        new KpiCardViewModel("Elevated several weeks", Model.SustainedCount.ToString()),
+        new KpiCardViewModel("Logging stopped", Model.CoverageFellAwayCount.ToString()),
+        new KpiCardViewModel("Not assessed", Model.PeopleNotAssessed.ToString(), "too little history")
+    };
+
+    string SignalLabel(LoadSignal signal) => signal switch
+    {
+        LoadSignal.Elevated => "Elevated this week",
+        LoadSignal.Sustained => "Elevated several weeks running",
+        LoadSignal.CoverageFellAway => "Time logging stopped",
+        _ => signal.ToString()
+    };
+}
+
+<p class="ops-banner ops-banner--info" role="note">
+    <strong>This page finds people carrying too much at once. It cannot tell you who is performing well or badly.</strong>
+    It counts how many separate projects a person was active in each week and compares that with
+    <em>their own</em> recent normal — never with anyone else's. Nobody is ranked, scored or compared to a colleague here,
+    and a person working steadily does not appear on this page at all. If you need this to support a conversation about
+    someone's performance, it is the wrong page: it has no measure of how well anything was done.
+</p>
+
+<section class="ops-panel" aria-label="What this page is drawn from">
+    <h2 class="ops-panel__heading">Coverage</h2>
+    <p class="ops-empty-state">
+        Week commencing @Model.WeekLabel, the last complete week.
+        Findings are drawn from @Model.PeopleWithSufficientHistory of @Model.PeopleInScope active people —
+        the rest have fewer than @thresholds.MinimumBaselineWeeks weeks of their own history, so nothing is claimed about them.
+        @if (Model.Sources.Count > 0)
+        {
+            <text>Time data from: @string.Join(", ", Model.Sources).</text>
+        }
+        else
+        {
+            <text>No time source is connected, so this page has nothing to read.</text>
+        }
+    </p>
+
+    <section class="ops-kpi-row" aria-label="Delivery load summary">
+        @foreach (var card in summaryCards)
+        {
+            <partial name="~/Views/OperationsHub/Partials/_KpiCard.cshtml" model="card" />
+        }
+    </section>
+
+    @if (Model.PeopleWithoutTimeData > 0)
+    {
+        <p class="ops-empty-state">
+            @Model.PeopleWithoutTimeData active @(Model.PeopleWithoutTimeData == 1 ? "person has" : "people have")
+            no time data at all. That is a gap in what this page can see, not evidence that they are doing less.
+        </p>
+    }
+    @if (Model.PeopleInOversightRolesOnly > 0)
+    {
+        <p class="ops-empty-state">
+            Not counted: @Model.PeopleInOversightRolesOnly @(Model.PeopleInOversightRolesOnly == 1 ? "person" : "people")
+            in oversight-only roles (Board, Analyst or Platform Admin) with no recorded time or assigned work.
+        </p>
+    }
+</section>
+
+@if (!Model.IncludesPeople)
+{
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Who</h2>
+        <p class="ops-empty-state">
+            Your role sees the totals above but not who they refer to. Names are shown only to roles who can
+            actually reassign work, because a name is useful for relieving load and not much else.
+        </p>
+    </section>
+}
+else if (Model.Findings.Count == 0)
+{
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Findings</h2>
+        <p class="ops-empty-state">
+            Nobody is above their own normal this week. This page is empty when things are steady — an empty page is
+            the expected result, not a sign that data is missing. Check the coverage figures above if you are unsure.
+        </p>
+    </section>
+}
+else
+{
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Findings</h2>
+        <p class="ops-empty-state">
+            Listed alphabetically, deliberately: there is no "most loaded" ordering, because a list with a top has a
+            bottom, and the bottom of a list of people gets read as a judgement. People at or below their own normal
+            are not listed at all. "Their normal" is the median of their own last @thresholds.BaselineWeeks weeks;
+            a week counts as elevated at @thresholds.ElevationContexts projects above it.
+        </p>
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">
+                    People whose concurrent project count has risen against their own recent history,
+                    ordered by name
+                </caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Person</th>
+                        <th scope="col">Signal</th>
+                        <th scope="col">Projects this week</th>
+                        <th scope="col">Their own normal</th>
+                        <th scope="col">Weeks running</th>
+                        <th scope="col">Open projects assigned</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var row in Model.Findings)
+                {
+                    <tr>
+                        <th scope="row">@row.Name</th>
+                        <td>@SignalLabel(row.Signal)</td>
+                        <td>
+                            @if (row.CurrentContexts is null)
+                            {
+                                <span aria-label="No time logged this week">&mdash;</span>
+                            }
+                            else
+                            {
+                                @row.CurrentContexts
+                            }
+                        </td>
+                        <td>@row.BaselineContexts</td>
+                        <td>@(row.ConsecutiveWeeks == 0 ? "—" : row.ConsecutiveWeeks.ToString())</td>
+                        <td>@row.OpenAllocatedContexts</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.CoverageFellAwayCount > 0)
+        {
+            <p class="ops-empty-state">
+                <strong>"Time logging stopped"</strong> means someone who logged consistently has stopped, so there is no
+                honest count for this week. Treat it as a question to ask, never as a quieter week: logging is usually the
+                first thing to slip when someone is swamped, so reading silence as a lighter load would get this exactly
+                backwards.
+            </p>
+        }
+
+        <p class="ops-empty-state">
+            A count of projects is not a measure of effort, difficulty or contribution. Someone can be across six
+            projects lightly and one project punishingly. The useful next step is a conversation, and then one of:
+            move a project, add cover, or agree the load is temporary and fine.
+        </p>
+    </section>
+}

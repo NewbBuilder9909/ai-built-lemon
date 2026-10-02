@@ -1,0 +1,383 @@
+{
+  "scenario": "Patchwork",
+  "asOf": "2026-10-02",
+  "client": "Ostrevane Transit",
+  "programme": "Fares and Journeys Replatform",
+  "organisations": [
+    "Ostrevane Transit",
+    "Kelvaro Digital",
+    "Brantoft Systems",
+    "Dunmarrow Studio",
+    "Ombreton Labs"
+  ],
+  "files": [
+    {
+      "file": "ostrevane-milestone-plan.csv",
+      "organisation": "Ostrevane Transit",
+      "tool": "Spreadsheet (milestone plan)",
+      "format": "CSV, UK dates, RAG letters",
+      "extractedOn": "2026-10-02"
+    },
+    {
+      "file": "ostrevane-hubplanner-timesheet.csv",
+      "organisation": "Ostrevane Transit",
+      "tool": "Hub Planner",
+      "format": "Timesheet export CSV: booked against actual, h:mm, UK dates",
+      "extractedOn": "2026-10-02"
+    },
+    {
+      "file": "kelvaro-jira-work-items.csv",
+      "organisation": "Kelvaro Digital",
+      "tool": "Jira Cloud",
+      "format": "Export CSV (all fields), 2025 headers, seconds, dd/MMM/yy dates",
+      "extractedOn": "2026-10-02"
+    },
+    {
+      "file": "kelvaro-tempo-worklogs.csv",
+      "organisation": "Kelvaro Digital",
+      "tool": "Tempo Timesheets",
+      "format": "Logged time raw export, post-August-2024 column names",
+      "extractedOn": "2026-10-02"
+    },
+    {
+      "file": "brantoft-clickup-tasks.csv",
+      "organisation": "Brantoft Systems",
+      "tool": "ClickUp",
+      "format": "List export CSV, POSIX milliseconds and US month-first text",
+      "extractedOn": "2026-10-02"
+    },
+    {
+      "file": "brantoft-clickup-time-entries.csv",
+      "organisation": "Brantoft Systems",
+      "tool": "ClickUp",
+      "format": "Time tracking export CSV, milliseconds",
+      "extractedOn": "2026-10-02"
+    },
+    {
+      "file": "dunmarrow-monday-board.xlsx",
+      "organisation": "Dunmarrow Studio",
+      "tool": "monday.com",
+      "format": "Export board to Excel (.xlsx), groups as blocks, subitem rows",
+      "extractedOn": "2026-10-02"
+    },
+    {
+      "file": "dunmarrow-harvest-time.csv",
+      "organisation": "Dunmarrow Studio",
+      "tool": "Harvest",
+      "format": "Detailed time report CSV, decimal hours, cost columns removed",
+      "extractedOn": "2026-10-02"
+    },
+    {
+      "file": "ombreton-jira-issues.csv",
+      "organisation": "Ombreton Labs",
+      "tool": "Jira (older export)",
+      "format": "Export CSV, pre-2025 headers, repeated Log Work columns",
+      "extractedOn": "2026-09-11"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F01",
+      "title": "Committed work with no owner",
+      "kind": "evidence gap",
+      "visibleIn": "single tool (Jira)",
+      "files": [
+        "kelvaro-jira-work-items.csv"
+      ],
+      "records": [
+        "KEL-9",
+        "KEL-15",
+        "KEL-19"
+      ],
+      "figure": "3 of 14 open items in KEL Sprint 9",
+      "detail": "In the current sprint with no assignee."
+    },
+    {
+      "id": "F02",
+      "title": "Open work past its due date",
+      "kind": "delivery exception",
+      "visibleIn": "single tool (Jira)",
+      "files": [
+        "kelvaro-jira-work-items.csv"
+      ],
+      "records": [
+        "KEL-14",
+        "KEL-16",
+        "KEL-18",
+        "KEL-19"
+      ],
+      "figure": "4 of 16 open items",
+      "detail": "Due date before the export date and not Done (epics excluded)."
+    },
+    {
+      "id": "F03",
+      "title": "Committed work with no estimate",
+      "kind": "evidence gap",
+      "visibleIn": "single tool (Jira)",
+      "files": [
+        "kelvaro-jira-work-items.csv"
+      ],
+      "records": [
+        "KEL-15",
+        "KEL-17",
+        "KEL-21",
+        "KEL-24"
+      ],
+      "figure": "4 of 14 open items in KEL Sprint 9",
+      "detail": "Original Estimate is empty."
+    },
+    {
+      "id": "F04",
+      "title": "Past due with a status that has no standard meaning",
+      "kind": "evidence gap",
+      "visibleIn": "single tool (ClickUp)",
+      "files": [
+        "brantoft-clickup-tasks.csv"
+      ],
+      "records": [
+        "86c003fky",
+        "86c004a4t",
+        "86c004g8s"
+      ],
+      "figure": "3 of 20 tasks",
+      "detail": "Custom statuses (parked, awaiting client) can't be read as done or not done, so they don't show as overdue."
+    },
+    {
+      "id": "F05",
+      "title": "Time logged against items missing from the work-item export",
+      "kind": "evidence gap",
+      "visibleIn": "single vendor (Jira with Tempo)",
+      "files": [
+        "kelvaro-tempo-worklogs.csv",
+        "kelvaro-jira-work-items.csv"
+      ],
+      "records": [
+        "300156",
+        "300247",
+        "300611",
+        "300702",
+        "301066",
+        "301157"
+      ],
+      "figure": "6 worklogs, 22.5 hours",
+      "detail": "Worklogs point at KEL-7 and KEL-12, which are not in the Jira export (moved to another project or deleted)."
+    },
+    {
+      "id": "F06",
+      "title": "The same person paid twice for the same day",
+      "kind": "delivery exception",
+      "visibleIn": "across organisations",
+      "files": [
+        "kelvaro-tempo-worklogs.csv",
+        "brantoft-clickup-time-entries.csv"
+      ],
+      "records": [
+        "301300",
+        "301391",
+        "301755",
+        "301846",
+        "302210",
+        "302301",
+        "lhch",
+        "lhhm",
+        "lhz3",
+        "li48",
+        "lilp",
+        "liqu",
+        "Rafe Lindqvist"
+      ],
+      "figure": "6 days, 45 hours billed by each supplier",
+      "detail": "Rafe Lindqvist, seconded from Kelvaro to Brantoft on Thursdays and Fridays, has a full day in Kelvaro's Tempo and in Brantoft's ClickUp on the same days. Each supplier's data looks normal on its own."
+    },
+    {
+      "id": "F07",
+      "title": "Milestone reported green while the delivery data says otherwise",
+      "kind": "delivery exception",
+      "visibleIn": "across organisations",
+      "files": [
+        "ostrevane-milestone-plan.csv",
+        "kelvaro-jira-work-items.csv",
+        "dunmarrow-monday-board.xlsx"
+      ],
+      "records": [
+        "M3",
+        "KEL-18",
+        "KEL-19",
+        "KEL-20",
+        "KEL-21",
+        "KEL-29",
+        "7182640011"
+      ],
+      "figure": "M3 is G 6 days after its date; 5 open beta items, 2 overdue; design sign-off Stuck",
+      "detail": "The plan was last updated 2026-09-20 from a supplier update."
+    },
+    {
+      "id": "F08",
+      "title": "One milestone, two dates",
+      "kind": "delivery exception",
+      "visibleIn": "across organisations",
+      "files": [
+        "ostrevane-milestone-plan.csv",
+        "brantoft-clickup-tasks.csv"
+      ],
+      "records": [
+        "M5",
+        "86c00440u"
+      ],
+      "figure": "Plan 2026-10-14, supplier 2026-10-31 (17 days later)",
+      "detail": "The supplier's own task moved; the client's plan didn't."
+    },
+    {
+      "id": "F09",
+      "title": "Milestone marked complete on a supplier's stale data",
+      "kind": "evidence gap",
+      "visibleIn": "across organisations",
+      "files": [
+        "ostrevane-milestone-plan.csv",
+        "ombreton-jira-issues.csv"
+      ],
+      "records": [
+        "M6",
+        "OMB-4"
+      ],
+      "figure": "Plan says Complete; OMB-4 is In Progress; the export is 21 days old",
+      "detail": "Ombreton's export was taken three weeks before the others, and the plan was updated from a call, not the data."
+    },
+    {
+      "id": "F10",
+      "title": "Hours from someone nobody planned or assigned",
+      "kind": "evidence gap",
+      "visibleIn": "across organisations",
+      "files": [
+        "dunmarrow-harvest-time.csv",
+        "ostrevane-hubplanner-timesheet.csv",
+        "dunmarrow-monday-board.xlsx"
+      ],
+      "records": [
+        "Brandt"
+      ],
+      "figure": "12 entries, 48 hours",
+      "detail": "Teo Brandt, a contractor, appears only in Harvest: not in the client's planner, not on the board, where the illustration item has no owner."
+    },
+    {
+      "id": "F11",
+      "title": "One person, several names",
+      "kind": "reconciliation",
+      "visibleIn": "across organisations",
+      "files": [
+        "ostrevane-hubplanner-timesheet.csv",
+        "brantoft-clickup-tasks.csv",
+        "brantoft-clickup-time-entries.csv",
+        "ombreton-jira-issues.csv"
+      ],
+      "records": [
+        "Samuel Adeyemi",
+        "Sam Adeyemi",
+        "Jessica Carrow",
+        "Jess Carrow",
+        "hana.sato",
+        "ewan.teague"
+      ],
+      "figure": "3 naming schemes",
+      "detail": "The planner uses full names, ClickUp short names, and Ombreton's worklogs account names. No file carries an email that joins them."
+    },
+    {
+      "id": "F12",
+      "title": "Supplier time that can't be tied to a deliverable",
+      "kind": "evidence gap",
+      "visibleIn": "across organisations",
+      "files": [
+        "dunmarrow-harvest-time.csv",
+        "dunmarrow-monday-board.xlsx"
+      ],
+      "records": [],
+      "figure": "503.5 of 777.5 hours",
+      "detail": "Harvest records project and task type, not board items. Only notes that repeat a board item's name can be linked; the rest can't."
+    },
+    {
+      "id": "F13",
+      "title": "A supplier burning more than the client booked",
+      "kind": "delivery exception",
+      "visibleIn": "across organisations",
+      "files": [
+        "kelvaro-tempo-worklogs.csv",
+        "ostrevane-hubplanner-timesheet.csv"
+      ],
+      "records": [
+        "Rafe Lindqvist"
+      ],
+      "figure": "Last four weeks: 751 hours logged against 570 booked (32% over)",
+      "detail": "Includes 105 hours from Rafe Lindqvist, who isn't booked at all, and QA logged at full time against a half-time booking."
+    }
+  ],
+  "ingestionTraps": [
+    {
+      "id": "T1",
+      "title": "Renamed columns",
+      "files": [
+        "kelvaro-jira-work-items.csv",
+        "ombreton-jira-issues.csv",
+        "kelvaro-tempo-worklogs.csv"
+      ],
+      "detail": "Kelvaro's Jira says \"Work item key\" (2025), Ombreton's says \"Issue key\". Tempo says \"Logged Hours\" and \"Work Item Key\" (after August 2024)."
+    },
+    {
+      "id": "T2",
+      "title": "Five units for time",
+      "files": [
+        "kelvaro-jira-work-items.csv",
+        "brantoft-clickup-tasks.csv",
+        "ostrevane-hubplanner-timesheet.csv",
+        "dunmarrow-harvest-time.csv",
+        "dunmarrow-monday-board.xlsx"
+      ],
+      "detail": "Seconds (Jira), milliseconds (ClickUp), h:mm (Hub Planner), decimal hours (Harvest, Tempo), h:mm:ss (monday)."
+    },
+    {
+      "id": "T3",
+      "title": "Five date styles",
+      "files": [
+        "kelvaro-jira-work-items.csv",
+        "brantoft-clickup-tasks.csv",
+        "ostrevane-hubplanner-timesheet.csv",
+        "dunmarrow-harvest-time.csv",
+        "ostrevane-milestone-plan.csv"
+      ],
+      "detail": "02/Oct/26 9:00 AM (Jira), POSIX milliseconds and month-first text (ClickUp), dd/MM/yyyy (planner and plan), yyyy-MM-dd (Harvest, monday)."
+    },
+    {
+      "id": "T4",
+      "title": "Two columns, one meaning",
+      "files": [
+        "kelvaro-jira-work-items.csv",
+        "ombreton-jira-issues.csv"
+      ],
+      "detail": "Jira exports carry both a key (KEL-14) and a numeric id. Time tools refer to the key. \"Parent\" holds the parent's numeric id, not its key."
+    },
+    {
+      "id": "T5",
+      "title": "Repeated headers",
+      "files": [
+        "ombreton-jira-issues.csv"
+      ],
+      "detail": "One \"Log Work\" column per worklog, all with the same header, as \"comment;date;account;seconds\"."
+    },
+    {
+      "id": "T6",
+      "title": "A spreadsheet, not a table",
+      "files": [
+        "dunmarrow-monday-board.xlsx"
+      ],
+      "detail": "The monday export is .xlsx: board name, then each group as its own block with its own header row; subitems sit under their parent with a different header."
+    },
+    {
+      "id": "T7",
+      "title": "Names split or shortened",
+      "files": [
+        "dunmarrow-harvest-time.csv",
+        "brantoft-clickup-time-entries.csv"
+      ],
+      "detail": "Harvest splits First Name and Last Name; ClickUp uses short display names; Tempo and Jira use full names."
+    }
+  ]
+}

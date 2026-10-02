@@ -1,0 +1,68 @@
+@using ProgrammePulse.Models.ViewModels.ProgrammeOverview
+@model SourceConnectionsViewModel
+
+<partial name="~/Views/StaffOps/Programme/_DataNav.cshtml" model="@("connections")" />
+<a class="ops-button" href="/staffops/programme/oauth">Connect Jira or Tempo with OAuth</a>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@Model.Message</p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Source connections</h2>
+    <p class="ops-empty-state">
+        By default every sync uses this deployment's shared ClickUp/Hub Planner account. Set your
+        own credential below to sync your own account instead — the credential is encrypted at
+        rest and is never shown again once saved, only whether one is configured. Clearing a
+        connection reverts to the shared default, if one is configured for this deployment.
+    </p>
+</section>
+
+<section class="ops-panel" aria-label="ClickUp connection">
+    <h2 class="ops-panel__heading">ClickUp</h2>
+    @if (Model.ClickUp.HasOwnCredential)
+    {
+        <p class="ops-empty-state">Using this tenant's own connection (workspace @Model.ClickUp.ExternalAccountId).</p>
+        <form asp-controller="StaffSourceConnection" asp-action="ClearClickUp" method="post">
+            <button type="submit" class="ops-button">Clear ClickUp connection</button>
+        </form>
+    }
+    else
+    {
+        <p class="ops-empty-state">Using the shared default ClickUp account, if one is configured for this deployment.</p>
+    }
+    <form asp-controller="StaffSourceConnection" asp-action="SetClickUp" method="post" class="ops-filter-bar">
+        <div class="ops-filter-bar__field">
+            <label for="clickup-workspace-id">Workspace id</label>
+            <input id="clickup-workspace-id" name="workspaceId" type="text" required />
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="clickup-api-token">API token</label>
+            <input id="clickup-api-token" name="apiToken" type="password" autocomplete="off" required />
+        </div>
+        <button type="submit" class="ops-button">Save ClickUp connection</button>
+    </form>
+</section>
+
+<section class="ops-panel" aria-label="Hub Planner connection">
+    <h2 class="ops-panel__heading">Hub Planner</h2>
+    @if (Model.HubPlanner.HasOwnCredential)
+    {
+        <p class="ops-empty-state">Using this tenant's own connection.</p>
+        <form asp-controller="StaffSourceConnection" asp-action="ClearHubPlanner" method="post">
+            <button type="submit" class="ops-button">Clear Hub Planner connection</button>
+        </form>
+    }
+    else
+    {
+        <p class="ops-empty-state">Using the shared default Hub Planner account, if one is configured for this deployment.</p>
+    }
+    <form asp-controller="StaffSourceConnection" asp-action="SetHubPlanner" method="post" class="ops-filter-bar">
+        <div class="ops-filter-bar__field">
+            <label for="hubplanner-api-key">API key</label>
+            <input id="hubplanner-api-key" name="apiKey" type="password" autocomplete="off" required />
+        </div>
+        <button type="submit" class="ops-button">Save Hub Planner connection</button>
+    </form>
+</section>

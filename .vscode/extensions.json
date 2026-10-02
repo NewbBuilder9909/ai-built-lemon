@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "ms-dotnettools.csdevkit",
+        "ms-dotnettools.csharp",
+        "kevinjump.umbsense-vscode",
+        "snerpton.umbraco-log-viewer"
+    ]
+}

@@ -1,0 +1,175 @@
+@model StaffAdminDetailViewModel
+@{
+    var message = ViewData["Message"] as string;
+    var account = Model.Account;
+    var roles = account?.Roles ?? [];
+    var status = account is null ? "Login deleted"
+        : !Model.IsActive ? "Access suspended"
+        : account.IsLockedOut ? "Locked after wrong passwords"
+        : "Active";
+    var statusChip = status == "Active" ? "chip-validation--ok" : "chip-status--exception";
+}
+
+<partial name="~/Views/StaffOps/Settings/_SettingsNav.cshtml" model="@("people")" />
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+<section class="ops-panel" aria-labelledby="person-heading">
+    <div class="ops-panel__header">
+        <h2 class="ops-panel__heading" id="person-heading">@Model.FullName</h2>
+        <span class="ops-chip @statusChip">@status</span>
+    </div>
+    <div class="ops-detail-grid">
+        <div><strong>Email</strong><div>@Model.Email</div></div>
+        <div><strong>Job title</strong><div>@(Model.JobTitle ?? "—")</div></div>
+        <div><strong>Team</strong><div>@(Model.Team ?? "—")</div></div>
+        <div><strong>Roles</strong><div>@(roles.Count == 0 ? "—" : string.Join(", ", roles))</div></div>
+    </div>
+</section>
+
+@if (account is not null)
+{
+    <section class="ops-panel" aria-labelledby="access-heading">
+        <h2 class="ops-panel__heading" id="access-heading">Access</h2>
+
+        <form asp-controller="StaffAdmin" asp-action="SetRoles" asp-route-staffKey="@Model.StaffKey" method="post">
+            <fieldset class="ops-fieldset">
+                <legend>Roles</legend>
+                <div class="ops-checkbox-row">
+                    @foreach (var role in StaffRole.All)
+                    {
+                        var id = "role-" + role.Replace(" ", "-").ToLowerInvariant();
+                        <label for="@id" class="ops-checkbox">
+                            <input type="checkbox" id="@id" name="roles" value="@role" checked="@roles.Contains(role)" />
+                            @role
+                        </label>
+                    }
+                </div>
+            </fieldset>
+            <button type="submit" class="ops-button ops-button--secondary">Save roles</button>
+        </form>
+
+        <div class="ops-actions">
+            @if (Model.IsActive)
+            {
+                <form asp-controller="StaffAdmin" asp-action="PasswordReset" asp-route-staffKey="@Model.StaffKey" method="post">
+                    <button type="submit" class="ops-button ops-button--secondary">Create password reset link</button>
+                </form>
+            }
+            @if (account.IsLockedOut)
+            {
+                <form asp-controller="StaffAdmin" asp-action="Unlock" asp-route-staffKey="@Model.StaffKey" method="post">
+                    <button type="submit" class="ops-button ops-button--secondary">Unlock</button>
+                </form>
+            }
+            @if (!Model.IsSelf)
+            {
+                <form asp-controller="StaffAdmin" asp-action="SetAccess" asp-route-staffKey="@Model.StaffKey" method="post">
+                    <input type="hidden" name="active" value="@(Model.IsActive ? "false" : "true")" />
+                    <button type="submit" class="ops-button ops-button--secondary">@(Model.IsActive ? "Suspend access" : "Restore access")</button>
+                </form>
+            }
+        </div>
+    </section>
+}
+
+<section class="ops-panel" aria-labelledby="hours-heading">
+    <h2 class="ops-panel__heading" id="hours-heading">Hours and cost</h2>
+    <div class="ops-grid-2">
+        <form asp-controller="StaffAdmin" asp-action="SetWorkHours" asp-route-staffKey="@Model.StaffKey" method="post" class="ops-filter-bar">
+            <div class="ops-filter-bar__field">
+                <label for="defaultWorkHoursPerWeek">Hours per week</label>
+                <input type="number" step="0.5" min="0" id="defaultWorkHoursPerWeek" name="defaultWorkHoursPerWeek" value="@Model.DefaultWorkHoursPerWeek.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)" required />
+            </div>
+            <button type="submit" class="ops-button ops-button--secondary">Save hours</button>
+        </form>
+        <form asp-controller="StaffAdmin" asp-action="SetRate" asp-route-staffKey="@Model.StaffKey" method="post" class="ops-filter-bar">
+            <div class="ops-filter-bar__field">
+                <label for="costPerHour">Cost per hour@(Model.CurrentCostPerHour is { } rate ? $" (now {rate:0.00} {Model.CurrentRateCurrency})" : " (not set)")</label>
+                <input type="number" step="0.01" min="0" id="costPerHour" name="costPerHour" required />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="rateCurrency">Currency</label>
+                <input type="text" id="rateCurrency" name="rateCurrency" maxlength="3" value="@(Model.CurrentRateCurrency ?? "GBP")" required />
+            </div>
+            <button type="submit" class="ops-button ops-button--secondary">Save rate</button>
+        </form>
+    </div>
+    @if (Model.WorkHoursHistory.Count > 1 || Model.RateHistory.Count > 0)
+    {
+        <details class="ops-disclosure">
+            <summary>History</summary>
+            <p class="ops-empty-state">A change starts a new row; past periods keep the value that applied then.</p>
+            <div class="ops-table-scroll">
+                <table class="ops-table">
+                    <caption class="ops-visually-hidden">Hours and cost rate history for @Model.FullName</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">What</th>
+                            <th scope="col">Value</th>
+                            <th scope="col">From</th>
+                            <th scope="col">To</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var entry in Model.WorkHoursHistory)
+                        {
+                            <tr>
+                                <td>Hours per week</td>
+                                <td>@entry.HoursPerWeek.ToString("0.##")</td>
+                                <td class="is-nowrap">@entry.EffectiveFromUtc.ToString("yyyy-MM-dd")</td>
+                                <td class="is-nowrap">@(entry.EffectiveToUtc?.ToString("yyyy-MM-dd") ?? "current")</td>
+                            </tr>
+                        }
+                        @foreach (var entry in Model.RateHistory)
+                        {
+                            <tr>
+                                <td>Cost per hour</td>
+                                <td>@entry.CostPerHour.ToString("0.00") @entry.RateCurrency</td>
+                                <td class="is-nowrap">@entry.EffectiveFromUtc.ToString("yyyy-MM-dd")</td>
+                                <td class="is-nowrap">@(entry.EffectiveToUtc?.ToString("yyyy-MM-dd") ?? "current")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </details>
+    }
+</section>
+
+@if (Model.Mfa.Enabled is not null)
+{
+    <section class="ops-panel" aria-labelledby="mfa-heading">
+        <h2 class="ops-panel__heading" id="mfa-heading">Two-step sign-in</h2>
+        <p>
+            @(Model.Mfa.Enabled is true
+                ? $"Set up, with {Model.Mfa.RemainingRecoveryCodes} unused recovery code{(Model.Mfa.RemainingRecoveryCodes == 1 ? "" : "s")}."
+                : "Started but not finished.")
+            If they have lost their authenticator, resetting it makes them set up a new one at their next sign-in.
+        </p>
+        <form asp-controller="StaffAdmin" asp-action="ResetMfa" asp-route-staffKey="@Model.StaffKey" method="post">
+            <button type="submit" class="ops-button ops-button--secondary">Reset two-step sign-in</button>
+        </form>
+    </section>
+}
+
+<section class="ops-panel" aria-labelledby="delete-heading">
+    <h2 class="ops-panel__heading" id="delete-heading">Data and deletion</h2>
+    <div class="ops-actions">
+        <a class="ops-button ops-button--secondary" asp-controller="StaffAdmin" asp-action="Export" asp-route-staffKey="@Model.StaffKey">Export their data</a>
+    </div>
+    @if (!Model.IsSelf)
+    {
+        <form asp-controller="StaffAdmin" asp-action="Delete" asp-route-staffKey="@Model.StaffKey" method="post">
+            <p>Deleting removes their login and replaces their name and email everywhere with a placeholder. Hours, leave and cost history stay, unnamed. It can't be undone.</p>
+            <label for="delete-confirm" class="ops-checkbox">
+                <input type="checkbox" id="delete-confirm" name="confirm" value="true" required />
+                I understand this can't be undone
+            </label>
+            <button type="submit" class="ops-button ops-button--danger">Delete @Model.FullName</button>
+        </form>
+    }
+</section>

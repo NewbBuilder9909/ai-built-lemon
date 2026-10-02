@@ -1,0 +1,267 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Migration tasks generated from assessment report report-20260923210709 for the ProgrammePulse workspace.",
+  "tasks": [
+    {
+      "type": "transform",
+      "id": "001-transform-file-system-management",
+      "description": "File System Management Migration",
+      "requirements": "Replace local and network file I/O patterns with Azure-appropriate file and storage abstractions that support cloud hosting without relying on local disk or environment-specific file access.",
+      "reason": "The application contains local or network file I/O patterns that are incompatible with containerized and shared cloud hosting models.",
+      "dependencies": [],
+      "skills": [
+        { "name": "migration-file-system-management", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
+      "kbId": "file-system-management-prompt"
+    },
+    {
+      "type": "transform",
+      "id": "002-transform-performance-optimization",
+      "description": "Performance Optimization for Cloud",
+      "requirements": "Replace synchronous API usage with asynchronous or cloud-optimized calling patterns, while preserving runtime behavior and improving scalability for Azure-hosted execution.",
+      "reason": "Synchronous calls and blocking I/O reduce throughput and increase the risk of poor responsiveness under cloud autoscaling and shared infrastructure.",
+      "dependencies": ["001-transform-file-system-management"],
+      "skills": [
+        { "name": "migration-performance-optimization", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
+      "kbId": "performance-optimization-prompt"
+    },
+    {
+      "type": "transform",
+      "id": "003-transform-configuration-management",
+      "description": "Configuration Management Modernization",
+      "requirements": "Remove hardcoded URLs and local configuration assumptions by centralizing configuration in Azure-native configuration services and by removing environment-specific defaults from application code.",
+      "reason": "Hardcoded and local configuration values create drift between environments and are not suitable for Azure-hosted deployments.",
+      "dependencies": ["002-transform-performance-optimization"],
+      "skills": [
+        { "name": "migration-configuration-management", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
+      "kbId": "configuration-management-prompt"
+    },
+    {
+      "type": "transform",
+      "id": "004-transform-app-config-sdk",
+      "description": "Externalize appsettings to Azure App Configuration (SDK-based)",
+      "requirements": "Use Azure App Configuration with the SDK for dynamic refresh and centralized settings management, while keeping the application configurable per Azure environment without embedding values directly in source control or local config files.",
+      "reason": "Dynamic configuration management makes the app safer and more portable across Azure environments.",
+      "dependencies": ["003-transform-configuration-management"],
+      "skills": [
+        { "name": "migration-app-configuration-sdk", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
+      "kbId": "local-appsettings-to-azure-app-configuration"
+    },
+    {
+      "type": "transform",
+      "id": "005-transform-app-config-deployment",
+      "description": "Externalize appsettings to Azure App Configuration (deployment-only)",
+      "requirements": "Inject configuration values at deploy time through Azure deployment configuration while avoiding code-level configuration coupling so that environment-specific values remain outside source code and local settings files.",
+      "reason": "Some deployment scenarios require no runtime SDK dependency, but the application must still avoid hardcoded and local settings drift.",
+      "dependencies": ["004-transform-app-config-sdk"],
+      "skills": [
+        { "name": "migration-app-configuration-deployment", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
+      "kbId": "local-appsettings-to-azure-app-configuration-via-deployment"
+    },
+    {
+      "type": "transform",
+      "id": "006-transform-http-communication",
+      "description": "HTTP Communication Modernization",
+      "requirements": "Modernize outbound HTTP usage to cloud-safe patterns, including resilience, timeouts, retry logic, and environment-specific endpoint management for external services.",
+      "reason": "Applications hosted in Azure must behave predictably under external dependency latency, transient failures, and variable network conditions.",
+      "dependencies": ["005-transform-app-config-deployment"],
+      "skills": [
+        { "name": "migration-http-communication", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
+      "kbId": "http-communication-prompt"
+    },
+    {
+      "type": "transform",
+      "id": "007-transform-credential-hardening",
+      "description": "Migrate from plaintext credentials to secured credentials protected by Managed Identity and Azure Key Vault",
+      "requirements": "Replace plaintext credentials and embedded secrets with Azure Key Vault-backed secret retrieval and managed identity-based access to reduce exposure and align with Azure security requirements.",
+      "reason": "The application currently contains hardcoded sensitive data and connection-string patterns that are not acceptable in Azure-hosted environments.",
+      "dependencies": ["006-transform-http-communication"],
+      "skills": [
+        { "name": "migration-plaintext-credentials-to-keyvault", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
+      "kbId": "plaintext-credential-to-azure-keyvault"
+    },
+    {
+      "type": "transform",
+      "id": "008-transform-certificate-management",
+      "description": "Migrate certificate to Azure Key Vault",
+      "requirements": "Move certificate handling and retrieval to Azure Key Vault so certificates are no longer managed as local file or local runtime dependencies.",
+      "reason": "Local certificate management introduces operational risk and blocks secure Azure hosting practices.",
+      "dependencies": ["007-transform-credential-hardening"],
+      "skills": [
+        { "name": "migration-certificate-to-keyvault", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
+      "kbId": "certificate-to-azure-key-vault"
+    },
+    {
+      "type": "transform",
+      "id": "009-transform-windows-ad-to-entra",
+      "description": "Migrate from Windows AD to Microsoft Entra ID",
+      "requirements": "Replace Windows AD-based identity dependencies with Microsoft Entra ID integration and modern authentication patterns suitable for Azure-hosted applications.",
+      "reason": "Windows AD coupling is a platform dependency that does not suit cloud-hosted and multi-environment deployment.",
+      "dependencies": ["008-transform-certificate-management"],
+      "skills": [
+        { "name": "migration-windows-ad-to-entra-id", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
+      "kbId": "windows-ad-to-azure-ad"
+    },
+    {
+      "type": "transform",
+      "id": "010-transform-local-file-to-blob",
+      "description": "Migrate from local file system to Azure Blob Storage",
+      "requirements": "Move static content and object-style file data to Azure Blob Storage, preserving content access patterns while making storage resilient and cloud-native.",
+      "reason": "Local file storage does not scale or persist correctly across cloud-hosted instances and containers.",
+      "dependencies": ["009-transform-windows-ad-to-entra"],
+      "skills": [
+        { "name": "migration-local-file-to-azure-blob-storage", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
+      "kbId": "local-file-to-azure-blob-storage"
+    },
+    {
+      "type": "transform",
+      "id": "011-transform-local-file-to-file-share",
+      "description": "Migrate from local file system to Azure File Storage",
+      "requirements": "Move file-based workloads requiring SMB-like shared access to Azure File Storage while preserving the shared file semantics required by the application.",
+      "reason": "Some workloads require file-sharing semantics rather than object storage, and local file systems do not meet Azure hosting requirements.",
+      "dependencies": ["010-transform-local-file-to-blob"],
+      "skills": [
+        { "name": "migration-local-file-to-azure-file-storage", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
+      "kbId": "local-file-to-azure-file-storage"
+    },
+    {
+      "type": "transform",
+      "id": "012-transform-local-cache-to-redis",
+      "description": "Migrate from local cache to Azure Cache for Redis",
+      "requirements": "Replace local caching with Azure Cache for Redis to provide stable, shareable, and cloud-suitable cache storage across application instances.",
+      "reason": "A local cache does not scale across a multi-instance or containerized Azure deployment and risks inconsistent state.",
+      "dependencies": ["011-transform-local-file-to-file-share"],
+      "skills": [
+        { "name": "migration-local-cache-to-azure-redis-cache", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
+      "kbId": "local-cache-to-azure-redis-cache"
+    },
+    {
+      "type": "transform",
+      "id": "013-transform-serilog-to-opentelemetry",
+      "description": "Migrate from Serilog to OpenTelemetry on Application Insights",
+      "requirements": "Replace the current logging framework with OpenTelemetry instrumentation and Azure Monitor / Application Insights to align telemetry with Azure-native operational practices.",
+      "reason": "The application currently depends on Serilog patterns that are not aligned with the Azure monitoring model and reduce centralized operational visibility.",
+      "dependencies": ["012-transform-local-cache-to-redis"],
+      "skills": [
+        { "name": "migration-serilog-to-opentelemetry", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
+      "kbId": "serilog-to-opentelemetry"
+    },
+    {
+      "type": "transform",
+      "id": "014-transform-local-system-dependencies",
+      "description": "Local System Dependencies Migration",
+      "requirements": "Remove usage of local OS environment access, local filesystem assumptions, and host-specific dependencies to ensure the application works consistently on Azure infrastructure.",
+      "reason": "Local system dependencies will prevent the application from reliably running in a managed Azure environment.",
+      "dependencies": ["013-transform-serilog-to-opentelemetry"],
+      "skills": [
+        { "name": "migration-local-system-dependencies", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      },
+      "kbId": "local-system-dependencies-prompt"
+    },
+    {
+      "type": "security",
+      "id": "015-security-azure-hardening",
+      "description": "Security remediation and Azure hardening",
+      "requirements": "Validate and harden the application against the Azure security baseline by confirming secret management, identity configuration, network isolation, TLS configuration, and Azure Monitor integration are aligned with secure production deployment criteria.",
+      "reason": "The assessment surfaces multiple security and identity risks that must be closed before production cloud adoption.",
+      "dependencies": ["014-transform-local-system-dependencies"],
+      "skills": [
+        { "name": "security-remediation", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    }
+  ],
+  "metadata": {
+    "planName": "report-20260923210709",
+    "projectName": "ProgrammePulse",
+    "language": "dotnet",
+    "createdAt": "2026-09-23T20:07:09Z",
+    "version": "1.0"
+  }
+}

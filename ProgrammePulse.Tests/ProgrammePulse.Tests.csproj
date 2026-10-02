@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProgrammePulse.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Experience\professional-capacity-cases.json" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Persona journey contracts live outside the test project, next to the
+         other TestScenarios fixtures, so they read as product artefacts a
+         reviewer can inspect rather than as test-project internals. -->
+    <Content Include="..\TestScenarios\Northstar\**\*.json" LinkBase="TestScenarios\Northstar" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

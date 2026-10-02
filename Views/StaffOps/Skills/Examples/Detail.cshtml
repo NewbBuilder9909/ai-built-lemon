@@ -1,0 +1,102 @@
+@using ProgrammePulse.Models.SkillsEvidence
+@using ProgrammePulse.Services.SkillsEvidence
+@model ContributionExampleDetail
+
+<p><a asp-controller="StaffContributionExamples" asp-action="@(Model.IsOwn ? "Index" : "Staff")" asp-route-staffKey="@(Model.IsOwn ? (Guid?)null : Model.Current.StaffKey)">Back to examples</a></p>
+<h2>@Model.StaffName · @(Model.SkillName ?? "Previous skill assertion")</h2>
+<p><strong>@ProgrammePulse.Services.Shared.DisplayText.Words(Model.Current.Status)</strong> · Revision @Model.Current.Revision · @Model.Current.RecordedAtUtc.ToString("yyyy-MM-dd HH:mm") UTC</p>
+@if (Model.Error is not null)
+{
+    <p class="ops-banner ops-banner--warning" role="alert">@Model.Error</p>
+}
+@await Html.PartialAsync("~/Views/StaffOps/Skills/Examples/_Coverage.cshtml", Model.Coverage)
+@if (!Model.CanUseEvidence)
+{
+    <p class="ops-banner ops-banner--warning">This example's source is no longer eligible, or its skill assertion has changed. It remains a historical record and cannot be accepted as evidence for the current skill revision.</p>
+}
+@if (Model.Source is { } source)
+{
+    <p>@source.Repository · @source.Role · @source.OccurredAtUtc.ToString("yyyy-MM-dd") UTC
+        @if (source.AuthorshipUnverified)
+        {
+            <span class="ops-chip">authorship not verified</span>
+        }
+    </p>
+    @if (source.AuthorshipUnverified)
+    {
+        <p>This commit names the person but was not signed by them with a key the provider verified, so it does not prove they wrote it. Check it at source before relying on it.</p>
+    }
+    <p>@(source.Title ?? source.ExternalId)
+        @if (source.SourceUrl is not null)
+        {
+            <a href="@source.SourceUrl" target="_blank" rel="noopener noreferrer">Inspect source contribution</a>
+        }
+    </p>
+}
+<section class="ops-panel">
+    <h3>What the subject demonstrated</h3>
+    <p class="ops-pre-wrap">@Model.Current.DemonstrationNote</p>
+    <p>Declared AI tool: <strong>@(Model.Current.AiTool ?? "Unknown")</strong> · Workflow: @Model.Current.AiWorkflow.</p>
+    <p>This is a declaration about this contribution. It does not establish the amount of generated code or which other participants used AI.</p>
+    @if (Model.Current.DecisionNote is not null)
+    {
+        <h3>Review rationale</h3><p class="ops-pre-wrap">@Model.Current.DecisionNote</p>
+    }
+    <p>Accepting relevance does not validate or raise proficiency. The skill assertion remains @Model.Assertion?.Status at @Model.Assertion?.Proficiency.</p>
+</section>
+
+@if (Model.CanReview && Model.CanUseEvidence && Model.Current.Status == ContributionReviewStatus.Submitted)
+{
+    <section class="ops-panel"><h3>Review relevance</h3>
+        <form asp-controller="StaffContributionExamples" asp-action="Decide" asp-route-linkKey="@Model.Current.LinkKey" method="post">
+            <div asp-validation-summary="All" role="alert"></div>
+            <input asp-for="Decision.Revision" type="hidden" />
+            <p><label asp-for="Decision.Note">What does this example demonstrate, or why is it insufficient?</label>
+                <textarea asp-for="Decision.Note" required maxlength="1000" rows="4"></textarea>
+                <span asp-validation-for="Decision.Note"></span>
+            </p>
+            <button type="submit" name="Decision.Status" value="Accepted">Accept relevance</button>
+            <button type="submit" name="Decision.Status" value="Rejected">Reject with rationale</button>
+        </form>
+    </section>
+}
+@if (Model.CanDeclare)
+{
+    @if (Model.CanUseEvidence)
+    {
+        <section class="ops-panel"><h3>Correct and resubmit</h3>
+            <p>A correction creates a new submitted revision. The earlier decision stays in history.</p>
+            <form asp-controller="StaffContributionExamples" asp-action="Revise" asp-route-linkKey="@Model.Current.LinkKey" method="post">
+                <div asp-validation-summary="All" role="alert"></div>
+                <input asp-for="Form.Revision" type="hidden" />
+                <p><label asp-for="Form.DemonstrationNote">What did you demonstrate?</label>
+                    <textarea asp-for="Form.DemonstrationNote" required maxlength="1000" rows="4"></textarea>
+                    <span asp-validation-for="Form.DemonstrationNote"></span>
+                </p>
+                <p><label asp-for="Form.AiTool">AI tool involved (optional; blank means unknown)</label><input asp-for="Form.AiTool" maxlength="100" /></p>
+                <p><label asp-for="Form.AiWorkflow">Assistance workflow</label><select asp-for="Form.AiWorkflow" asp-items="Html.GetEnumSelectList<AiAssistanceWorkflow>()"></select></p>
+                <button type="submit">Submit corrected example</button>
+            </form>
+        </section>
+    }
+    @if (Model.Current.Status != ContributionReviewStatus.Withdrawn)
+    {
+        <form asp-controller="StaffContributionExamples" asp-action="Withdraw" asp-route-linkKey="@Model.Current.LinkKey" method="post">
+            <input type="hidden" name="revision" value="@Model.Current.Revision" />
+            <button type="submit">Withdraw example</button>
+        </form>
+    }
+}
+<section class="ops-panel"><h3>Revision history</h3>
+    <p>The latest 50 revisions are shown. A subject data export includes the full history.</p>
+    @if (Model.HasOlderHistory) { <p>Older revisions exist.</p> }
+    @foreach (var revision in Model.History)
+    {
+        <details>
+            <summary>Revision @revision.Revision · @revision.Status · @revision.RecordedAtUtc.ToString("yyyy-MM-dd HH:mm") UTC · @(revision.RecordedByStaffKey == Guid.Empty ? "Removed reviewer" : Model.ActorNames.GetValueOrDefault(revision.RecordedByStaffKey, "Former staff member")) (@(revision.RecordedByStaffKey == revision.StaffKey ? "subject" : "reviewer"))</summary>
+            <p class="ops-pre-wrap">@revision.DemonstrationNote</p>
+            <p>Declared tool: @(revision.AiTool ?? "Unknown") · @revision.AiWorkflow</p>
+            @if (revision.DecisionNote is not null) { <p class="ops-pre-wrap">@revision.DecisionNote</p> }
+        </details>
+    }
+</section>

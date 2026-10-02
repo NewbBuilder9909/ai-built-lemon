@@ -1,0 +1,34 @@
+@* Data: everything that gets delivery data in and makes it line up. Each
+   link is gated on the capability (and plan feature) its action enforces.
+   The model is the key of the current page. *@
+@model string
+@inject ProgrammePulse.Services.Staff.IStaffAuthorizationService StaffAuthorization
+@inject ProgrammePulse.Services.Tenancy.IFeatureGate FeatureGate
+@{
+    var canIntegrate = await StaffAuthorization.HasAsync(Capability.ManageIntegrations);
+    var canImport = canIntegrate && await FeatureGate.IsEnabledAsync(ProgrammePulse.Models.Tenancy.ProductFeature.FileImport);
+    var canMatch = await StaffAuthorization.HasAsync(Capability.ManageIdentityMappings);
+    var canCustomers = await StaffAuthorization.HasAsync(Capability.ManageCustomers);
+    string Css(string key) => key == Model ? "ops-subnav__link ops-subnav__link--active" : "ops-subnav__link";
+    string? Current(string key) => key == Model ? "page" : null;
+}
+<nav class="ops-subnav" aria-label="@Localizer["Nav.Data"]">
+    <ul>
+        @if (canImport)
+        {
+            <li><a class="@Css("import")" aria-current="@Current("import")" asp-controller="StaffFileImport" asp-action="Index">@Localizer["Nav.Import"]</a></li>
+        }
+        @if (canIntegrate)
+        {
+            <li><a class="@Css("connections")" aria-current="@Current("connections")" asp-controller="StaffSourceConnection" asp-action="Index">@Localizer["Nav.Connections"]</a></li>
+        }
+        @if (canMatch)
+        {
+            <li><a class="@Css("identities")" aria-current="@Current("identities")" asp-controller="StaffIdentity" asp-action="Index">@Localizer["Nav.PeopleToMatch"]</a></li>
+        }
+        @if (canCustomers)
+        {
+            <li><a class="@Css("customers")" aria-current="@Current("customers")" asp-controller="StaffCustomers" asp-action="Index">@Localizer["Nav.Customers"]</a></li>
+        }
+    </ul>
+</nav>

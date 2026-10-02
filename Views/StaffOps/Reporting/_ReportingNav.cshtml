@@ -1,0 +1,42 @@
+@* Section navigation shared by every reporting page, in place of a "Back
+   to Reporting Hub" button on each and a row of buttons on the hub. Each
+   link is gated on the capability its action enforces, so nobody is shown
+   a tab that refuses them, and each is a literal tag helper so ViewLinkTests
+   checks it still resolves. The model is the key of the current page. *@
+@model string
+@inject ProgrammePulse.Services.Staff.IStaffAuthorizationService StaffAuthorization
+@inject ProgrammePulse.Services.Tenancy.ITenantContext TenantContext
+@inject ProgrammePulse.Services.ProgrammeOps.IJiraTempoReconciliationQueryService JiraTempo
+@{
+    var canReport = await StaffAuthorization.HasAsync(ProgrammePulse.Models.Staff.Capability.ViewDeliveryReporting);
+    // Only a tenant with Jira or Tempo data gets the tab; the page itself 404s otherwise.
+    var tenantId = canReport ? await ProgrammePulse.Services.Tenancy.TenantContextExtensions.ResolveTenantIdAsync(TenantContext) : null;
+    var showJiraTempo = tenantId is { } tenant && await JiraTempo.IsAvailableAsync(tenant);
+    var canRisk = await StaffAuthorization.HasAsync(ProgrammePulse.Models.Staff.Capability.ViewProjectRisk);
+    var canCost = await StaffAuthorization.HasAsync(ProgrammePulse.Models.Staff.Capability.ViewCommercials);
+    string Css(string key) => key == Model ? "ops-subnav__link ops-subnav__link--active" : "ops-subnav__link";
+    string? Current(string key) => key == Model ? "page" : null;
+}
+@if (canReport)
+{
+    <nav class="ops-subnav" aria-label="@Localizer["Reporting.Pages"]">
+        <ul>
+            <li><a class="@Css("hub")" aria-current="@Current("hub")" asp-controller="StaffReporting" asp-action="Index">@Localizer["Reporting.Overview"]</a></li>
+            @if (canRisk)
+            {
+                <li><a class="@Css("raid")" aria-current="@Current("raid")" asp-controller="StaffRaid" asp-action="Raid">@Localizer["RAID register"]</a></li>
+            }
+            <li><a class="@Css("governance")" aria-current="@Current("governance")" asp-controller="StaffGovernance" asp-action="Governance">@Localizer["Governance"]</a></li>
+            <li><a class="@Css("trend")" aria-current="@Current("trend")" asp-controller="StaffReporting" asp-action="Trend">@Localizer["Trend"]</a></li>
+            <li><a class="@Css("alerts")" aria-current="@Current("alerts")" asp-controller="StaffReportingAlerts" asp-action="Alerts">@Localizer["Alerts"]</a></li>
+            @if (showJiraTempo)
+            {
+                <li><a class="@Css("jira-tempo")" aria-current="@Current("jira-tempo")" asp-controller="StaffJiraTempo" asp-action="Index">@Localizer["Reporting.JiraTempo"]</a></li>
+            }
+            @if (canCost)
+            {
+                <li><a class="@Css("cost")" aria-current="@Current("cost")" asp-controller="StaffReporting" asp-action="Cost">@Localizer["Reporting.Cost"]</a></li>
+            }
+        </ul>
+    </nav>
+}

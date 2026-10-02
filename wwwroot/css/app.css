@@ -1,0 +1,2509 @@
+/* Shared stylesheet — plain CSS, no framework.
+
+   One design system for every signed-in page: a dark navigation rail, a
+   calm neutral content area, and one accent colour. Every colour below
+   falls back to a Branding Ops --brand-* token (/staffops/branding/theme.css)
+   so a published branding change reaches every page without this file
+   changing; the literal after each comma is only the platform default.
+
+   Rules that keep pages readable rather than merely styled:
+   - Tables wrap. Only numbers, dates and status chips hold one line, so a
+     table fits its card at desktop widths instead of scrolling sideways.
+   - Links styled as buttons are secondary (outlined); a filled button is a
+     submit that changes something. A page has one primary action at most.
+   - Explanatory text is muted and roman, never italic.
+   - Colours are checked at 4.5:1 or better against the surfaces they sit on
+     (docs/accessibility.md). */
+
+:root {
+    --ops-sidebar-bg: var(--brand-secondary, #0f172a);
+    /* The rail's text follows the published secondary colour it sits on
+       (SidebarPalette picks light or dark text by contrast). */
+    --ops-sidebar-text: var(--brand-sidebar-text, #e2e8f0);
+    --ops-sidebar-muted: var(--brand-sidebar-muted, #a7b3c4);
+    --ops-sidebar-text-active: var(--brand-sidebar-active, #ffffff);
+    --ops-sidebar-hover-bg: var(--brand-sidebar-hover-bg, rgba(255, 255, 255, 0.07));
+    --ops-sidebar-active-bg: var(--brand-sidebar-active-bg, rgba(255, 255, 255, 0.12));
+    --ops-sidebar-rule: var(--brand-sidebar-rule, rgba(255, 255, 255, 0.12));
+
+    --ops-accent: var(--brand-accent, #2554c7);
+    --ops-accent-soft: #eef2ff;
+    --ops-content-bg: var(--brand-background, #f4f6f9);
+    --ops-card-bg: var(--brand-surface, #ffffff);
+    --ops-subtle-bg: #f8fafc;
+    --ops-border: #e2e8f0;
+    --ops-border-strong: #cbd5e1;
+    --ops-text: var(--brand-text, #0f172a);
+    /* 7.6:1 on white, 7.0:1 on the page background. */
+    --ops-text-muted: #475569;
+    /* 6.0:1 on white, 5.5:1 on the page background: the faintest text allowed. */
+    --ops-text-subtle: #5b6474;
+    --ops-focus-ring: #2563eb;
+
+    --ops-danger: #b91c1c;
+    --ops-danger-bg: #fef2f2;
+    --ops-danger-border: #fecaca;
+    --ops-warning-text: #854d0e;
+    --ops-warning-bg: #fffbeb;
+    --ops-warning-border: #fde68a;
+    --ops-success-text: #166534;
+    --ops-success-bg: #f0fdf4;
+    --ops-success-border: #bbf7d0;
+    --ops-info-text: #1e3a8a;
+    --ops-info-bg: #eff6ff;
+    --ops-info-border: #bfdbfe;
+
+    --ops-radius: var(--brand-radius, 8px);
+    --ops-radius-sm: 6px;
+    --ops-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    --ops-shadow-raised: 0 4px 12px rgba(15, 23, 42, 0.08);
+
+    --ops-space-1: 0.25rem;
+    --ops-space-2: 0.5rem;
+    --ops-space-3: 0.75rem;
+    --ops-space-4: 1rem;
+    --ops-space-5: 1.25rem;
+    --ops-space-6: 1.5rem;
+    --ops-space-8: 2rem;
+
+    --ops-font-size-xs: 0.75rem;
+    --ops-font-size-sm: 0.8125rem;
+    --ops-font-size-md: 0.875rem;
+    --ops-font-size-base: 0.9375rem;
+
+    --ops-content-max: 1400px;
+    --ops-nav-width: 248px;
+    color-scheme: light;
+}
+
+/* DarkModeEnabled is an org-wide Admin choice from Branding Ops, not a
+   per-user toggle, and there is deliberately no auto-derived dark palette:
+   the Admin's own Background/Surface/Text colours (flowing through --brand-*
+   above) are the dark palette. This switches native controls and scrollbars
+   and the neutral greys that have no brand token. */
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --ops-border: rgba(255, 255, 255, 0.14);
+    --ops-border-strong: rgba(255, 255, 255, 0.24);
+    --ops-subtle-bg: rgba(255, 255, 255, 0.04);
+    --ops-text-muted: #cbd5e1;
+    --ops-text-subtle: #b6c0cf;
+    --ops-accent-soft: rgba(255, 255, 255, 0.08);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--brand-font-family, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+    font-size: var(--ops-font-size-base);
+    background: var(--ops-content-bg);
+    color: var(--ops-text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    line-height: 1.3;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+}
+
+h2 {
+    font-size: 1.0625rem;
+}
+
+h3 {
+    font-size: 0.9375rem;
+    margin: var(--ops-space-5) 0 var(--ops-space-2);
+}
+
+p {
+    margin: 0 0 var(--ops-space-3);
+}
+
+p:last-child {
+    margin-bottom: 0;
+}
+
+a {
+    color: var(--ops-accent);
+    text-underline-offset: 2px;
+}
+
+code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.85em;
+    background: var(--ops-subtle-bg);
+    border: 1px solid var(--ops-border);
+    border-radius: 4px;
+    padding: 0.05rem 0.3rem;
+    overflow-wrap: anywhere;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid var(--ops-border);
+    margin: var(--ops-space-5) 0;
+}
+
+.ops-visually-hidden,
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.ops-skip-link {
+    position: absolute;
+    /* Logical, not "left": in a right-to-left page the left edge is the
+       scrollable one, so left:-999px widened the whole document. */
+    inset-inline-start: -999px;
+    top: 0;
+    background: var(--ops-accent);
+    color: #fff;
+    padding: 0.75rem 1rem;
+    z-index: 100;
+    border-end-end-radius: var(--ops-radius);
+}
+
+.ops-skip-link:focus {
+    inset-inline-start: 0;
+}
+
+:focus-visible {
+    outline: 3px solid var(--ops-focus-ring);
+    outline-offset: 2px;
+}
+
+/* ---- Layout shell ----------------------------------------------------- */
+
+.ops-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* The rail stays put while a long report scrolls, so navigation is never
+   5,000 pixels away. */
+.ops-nav {
+    width: var(--ops-nav-width);
+    flex-shrink: 0;
+    background: var(--ops-sidebar-bg);
+    color: var(--ops-sidebar-text);
+    padding: var(--ops-space-5) var(--ops-space-3) var(--ops-space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--ops-space-5);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.ops-nav__brand {
+    display: flex;
+    align-items: center;
+    gap: var(--ops-space-2);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    line-height: 1.3;
+    color: var(--ops-sidebar-text-active);
+    padding: 0 var(--ops-space-3);
+}
+
+.ops-nav__brand img {
+    max-height: 28px;
+    width: auto;
+}
+
+.ops-nav__mark {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--ops-accent);
+    color: #fff;
+    font-size: 0.8125rem;
+    font-weight: 700;
+}
+
+.ops-nav__toggle {
+    display: none;
+    background: none;
+    border: 1px solid var(--ops-sidebar-rule);
+    color: var(--ops-sidebar-text-active);
+    border-radius: var(--ops-radius-sm);
+    padding: 0.4rem 0.6rem;
+    font-size: 1rem;
+    align-self: flex-start;
+    cursor: pointer;
+}
+
+.ops-nav__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ops-space-1);
+}
+
+.ops-nav__group ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.ops-nav__group + .ops-nav__group {
+    margin-top: var(--ops-space-4);
+}
+
+.ops-nav__group-label {
+    display: block;
+    padding: 0 var(--ops-space-3) var(--ops-space-2);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    /* 6.9:1 on the default rail. */
+    color: var(--ops-sidebar-muted);
+}
+
+.ops-nav__link {
+    display: block;
+    padding: 0.4375rem var(--ops-space-3);
+    border-radius: var(--ops-radius-sm);
+    border-inline-start: 3px solid transparent;
+    color: var(--ops-sidebar-text);
+    text-decoration: none;
+    font-size: var(--ops-font-size-md);
+}
+
+.ops-nav__link:hover {
+    background: var(--ops-sidebar-hover-bg);
+    color: var(--ops-sidebar-text-active);
+}
+
+.ops-nav__link--active {
+    background: var(--ops-sidebar-active-bg);
+    border-inline-start-color: var(--ops-accent);
+    color: var(--ops-sidebar-text-active);
+    font-weight: 600;
+}
+
+.ops-nav__footer {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ops-space-3);
+    padding-top: var(--ops-space-4);
+    border-top: 1px solid var(--ops-sidebar-rule);
+}
+
+.ops-nav__user {
+    display: flex;
+    flex-direction: column;
+    padding: 0 var(--ops-space-3);
+    min-width: 0;
+}
+
+.ops-nav__user-name {
+    color: var(--ops-sidebar-text-active);
+    font-weight: 600;
+    font-size: var(--ops-font-size-md);
+    overflow-wrap: anywhere;
+}
+
+.ops-nav__user-role {
+    color: var(--ops-sidebar-muted);
+    font-size: var(--ops-font-size-xs);
+}
+
+.ops-nav__footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ops-space-2);
+    padding: 0 var(--ops-space-2) 0 var(--ops-space-3);
+}
+
+.ops-nav__footer-row .ops-nav__user {
+    padding: 0;
+}
+
+.ops-nav__footer form {
+    margin: 0;
+}
+
+.ops-nav__logout {
+    flex-shrink: 0;
+    white-space: nowrap;
+    background: none;
+    border: 1px solid var(--ops-sidebar-rule);
+    color: var(--ops-sidebar-text);
+    border-radius: var(--ops-radius-sm);
+    padding: 0.3rem 0.7rem;
+    font-size: var(--ops-font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.ops-nav__logout:hover {
+    background: var(--ops-sidebar-hover-bg);
+    color: var(--ops-sidebar-text-active);
+}
+
+.ops-nav__lang {
+    list-style: none;
+    margin: 0;
+    padding: 0 var(--ops-space-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ops-space-1);
+}
+
+.ops-nav__lang-link {
+    color: var(--ops-sidebar-text);
+    text-decoration: none;
+    font-size: var(--ops-font-size-sm);
+    padding: 0.2rem 0.45rem;
+    border-radius: 4px;
+}
+
+.ops-nav__lang-link:hover {
+    background: var(--ops-sidebar-hover-bg);
+    color: var(--ops-sidebar-text-active);
+}
+
+.ops-nav__lang-link--active {
+    background: var(--ops-sidebar-active-bg);
+    color: var(--ops-sidebar-text-active);
+    font-weight: 600;
+}
+
+.ops-content {
+    flex: 1;
+    min-width: 0;
+    padding: var(--ops-space-6) var(--ops-space-8) 3rem;
+}
+
+.ops-topbar,
+.ops-main {
+    max-width: var(--ops-content-max);
+    margin-inline: auto;
+}
+
+.ops-topbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ops-space-3) var(--ops-space-6);
+    margin-bottom: var(--ops-space-6);
+}
+
+.ops-topbar__title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.ops-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ops-space-5);
+}
+
+/* A short sentence under the title saying what the page answers. */
+.ops-page-lede {
+    margin: calc(-1 * var(--ops-space-3)) 0 0;
+    color: var(--ops-text-muted);
+    max-width: 72ch;
+}
+
+.ops-demo-banner {
+    background: var(--ops-warning-bg);
+    border: 1px solid var(--ops-warning-border);
+    color: var(--ops-warning-text);
+    border-radius: var(--ops-radius);
+    padding: 0.65rem 1rem;
+    font-size: var(--ops-font-size-md);
+    margin-bottom: var(--ops-space-5);
+}
+
+/* Section tabs (Views/StaffOps/Reporting/_ReportingNav.cshtml). They wrap
+   rather than scroll, so a phone never gets a sideways strip. */
+.ops-subnav {
+    border-bottom: 1px solid var(--ops-border);
+    margin-top: calc(-1 * var(--ops-space-2));
+}
+
+.ops-subnav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--ops-space-5);
+}
+
+.ops-subnav__link {
+    display: inline-block;
+    padding: var(--ops-space-2) 0;
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+    color: var(--ops-text-muted);
+    font-size: var(--ops-font-size-md);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.ops-subnav__link:hover {
+    color: var(--ops-text);
+    border-bottom-color: var(--ops-border-strong);
+}
+
+.ops-subnav__link--active {
+    color: var(--ops-text);
+    font-weight: 600;
+    border-bottom-color: var(--ops-accent);
+}
+
+/* ---- KPI cards -------------------------------------------------------- */
+
+.ops-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11.5rem, 1fr));
+    gap: var(--ops-space-4);
+}
+
+.ops-kpi-card {
+    background: var(--ops-card-bg);
+    border: 1px solid var(--ops-border);
+    border-radius: var(--ops-radius);
+    box-shadow: var(--ops-shadow);
+    padding: var(--ops-space-4) var(--ops-space-5);
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.ops-kpi-card__label {
+    font-size: var(--ops-font-size-sm);
+    font-weight: 500;
+    color: var(--ops-text-muted);
+}
+
+/* Proportional figures: tabular digits space a standalone number loosely. */
+.ops-kpi-card__value {
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.ops-kpi-card .ops-share {
+    margin-block-start: var(--ops-space-2);
+}
+
+.ops-kpi-card__sublabel {
+    font-size: var(--ops-font-size-sm);
+    color: var(--ops-text-subtle);
+}
+
+/* Inside a panel the figures sit on a tint rather than as cards in a card. */
+.ops-panel .ops-kpi-card {
+    background: var(--ops-subtle-bg);
+    box-shadow: none;
+}
+
+.ops-panel .ops-kpi-row {
+    margin: var(--ops-space-4) 0;
+}
+
+/* A KPI that needs attention: a red rule, not a red card. */
+.ops-kpi-card--alert {
+    border-top: 3px solid var(--ops-danger);
+}
+
+.ops-kpi-card--alert .ops-kpi-card__value {
+    color: var(--ops-danger);
+}
+
+/* ---- Panels ----------------------------------------------------------- */
+
+.ops-panel {
+    background: var(--ops-card-bg);
+    border: 1px solid var(--ops-border);
+    border-radius: var(--ops-radius);
+    box-shadow: var(--ops-shadow);
+    padding: var(--ops-space-5) var(--ops-space-6);
+    min-width: 0;
+}
+
+.ops-panel__heading {
+    margin: 0 0 var(--ops-space-4);
+    font-size: 1.0625rem;
+    font-weight: 600;
+}
+
+.ops-panel__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--ops-space-2) var(--ops-space-4);
+    margin-bottom: var(--ops-space-4);
+}
+
+.ops-panel__header .ops-panel__heading {
+    margin: 0;
+}
+
+.ops-panel__meta {
+    color: var(--ops-text-subtle);
+    font-size: var(--ops-font-size-sm);
+}
+
+/* A table directly under a panel heading shares the panel's frame rather
+   than drawing a second box inside it. */
+.ops-panel > .ops-table-scroll,
+.ops-panel > details > .ops-table-scroll {
+    border: 1px solid var(--ops-border);
+    box-shadow: none;
+}
+
+.ops-two-column {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: var(--ops-space-5);
+    align-items: start;
+}
+
+.ops-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr));
+    gap: var(--ops-space-5);
+    align-items: start;
+}
+
+/* Used both for "nothing here yet" and for a short explanation under a
+   heading; either way it is quiet text, not an italic aside. */
+.ops-empty-state {
+    color: var(--ops-text-muted);
+    font-size: var(--ops-font-size-md);
+    margin: 0 0 var(--ops-space-3);
+    max-width: 80ch;
+}
+
+.ops-empty-state:last-child {
+    margin-bottom: 0;
+}
+
+.ops-table-scroll + .ops-empty-state,
+.ops-table-collapse + .ops-empty-state {
+    margin-top: var(--ops-space-3);
+}
+
+/* ---- Attention list (things that need someone this week) --------------- */
+
+.ops-attention {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+    gap: var(--ops-space-3);
+}
+
+.ops-attention__item {
+    display: flex;
+    gap: var(--ops-space-3);
+    align-items: flex-start;
+    padding: var(--ops-space-3) var(--ops-space-4);
+    border: 1px solid var(--ops-border);
+    border-inline-start: 3px solid var(--ops-border-strong);
+    border-radius: var(--ops-radius-sm);
+    background: var(--ops-card-bg);
+    min-width: 0;
+}
+
+.ops-attention__item--high {
+    border-inline-start-color: var(--ops-danger);
+}
+
+.ops-attention__item--medium {
+    border-inline-start-color: #d97706;
+}
+
+.ops-attention__count {
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.2;
+    min-width: 1.75rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.ops-attention__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+    font-size: var(--ops-font-size-md);
+}
+
+.ops-attention__title {
+    font-weight: 600;
+}
+
+.ops-attention__detail {
+    color: var(--ops-text-muted);
+    overflow-wrap: anywhere;
+}
+
+/* ---- Findings (Evidence Check): one row each, opening to the records ---- */
+
+.ops-finding {
+    border: 1px solid var(--ops-border);
+    border-radius: var(--ops-radius-sm);
+    background: var(--ops-card-bg);
+    padding: 0;
+    margin-top: var(--ops-space-2);
+}
+
+.ops-finding > summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ops-space-2) var(--ops-space-4);
+    padding: var(--ops-space-3) var(--ops-space-4);
+    cursor: pointer;
+    list-style-position: inside;
+}
+
+.ops-finding > summary:hover {
+    background: var(--ops-subtle-bg);
+}
+
+.ops-finding[open] > summary {
+    border-bottom: 1px solid var(--ops-border);
+}
+
+.ops-finding > :not(summary) {
+    margin: var(--ops-space-3) var(--ops-space-4);
+}
+
+.ops-finding__title {
+    font-weight: 600;
+    flex: 1 1 18rem;
+}
+
+.ops-finding__figure {
+    color: var(--ops-text-muted);
+    font-size: var(--ops-font-size-md);
+    font-variant-numeric: tabular-nums;
+}
+
+/* A recorded review adds the decision to the row, so the meeting can scan
+   what is decided and by whom without opening anything. */
+.ops-finding__decision {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ops-space-2);
+    font-size: var(--ops-font-size-sm);
+    color: var(--ops-text-muted);
+}
+
+.ops-decision-form .ops-decision-form__note {
+    flex: 2 1 16rem;
+}
+
+.ops-decision-form .ops-actions {
+    align-self: end;
+    margin-top: 0;
+}
+
+/* A short qualifier inside a field's label. */
+.ops-field-hint {
+    font-size: var(--ops-font-size-xs);
+    color: var(--ops-text-subtle);
+}
+
+/* ---- Records (an action, a decision): a bordered item in a list -------- */
+
+.ops-record {
+    border: 1px solid var(--ops-border);
+    border-inline-start: 3px solid var(--ops-border-strong);
+    border-radius: var(--ops-radius-sm);
+    padding: var(--ops-space-3) var(--ops-space-4);
+    font-size: var(--ops-font-size-md);
+}
+
+.ops-record + .ops-record {
+    margin-top: var(--ops-space-3);
+}
+
+.ops-record--alert {
+    border-inline-start-color: var(--ops-danger);
+}
+
+.ops-record__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ops-space-2);
+    margin: 0 0 var(--ops-space-2);
+    font-size: var(--ops-font-size-base);
+}
+
+.ops-record p {
+    margin: 0 0 var(--ops-space-1);
+}
+
+.ops-record form {
+    margin-top: var(--ops-space-3);
+}
+
+.ops-history {
+    margin: var(--ops-space-2) 0 0;
+    padding-inline-start: 1.1rem;
+    font-size: var(--ops-font-size-sm);
+    color: var(--ops-text-muted);
+}
+
+/* A management row under a table row belongs to it: no hover, no divider
+   above, lighter padding. */
+.ops-table tbody tr.ops-table__row--sub:hover {
+    background: none;
+}
+
+.ops-table tr.ops-table__row--sub > td {
+    padding-top: 0;
+}
+
+/* ---- Status summary --------------------------------------------------- */
+
+.ops-status-summary {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ops-space-5);
+}
+
+.ops-status-summary__item {
+    display: flex;
+    align-items: center;
+    gap: var(--ops-space-2);
+}
+
+.ops-status-summary__count {
+    font-weight: 600;
+}
+
+.ops-status-summary__percent {
+    color: var(--ops-text-subtle);
+    font-size: var(--ops-font-size-md);
+}
+
+/* Freshness strip: where the figures come from, on one line. */
+.ops-source-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ops-space-2) var(--ops-space-5);
+    font-size: var(--ops-font-size-md);
+    color: var(--ops-text-muted);
+}
+
+.ops-source-strip strong {
+    color: var(--ops-text);
+    font-weight: 600;
+}
+
+.ops-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--ops-success-text);
+    margin-inline-end: 0.4rem;
+    vertical-align: middle;
+}
+
+.ops-dot--warn {
+    background: #d97706;
+}
+
+.ops-dot--error {
+    background: var(--ops-danger);
+}
+
+/* ---- Pipeline panel --------------------------------------------------- */
+
+.ops-pipeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.ops-pipeline__bar-track {
+    background: #e8ecf3;
+    border-radius: 999px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.ops-pipeline__bar {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--ops-accent);
+}
+
+.ops-pipeline__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.35rem;
+}
+
+.ops-pipeline__count {
+    color: var(--ops-text-subtle);
+    font-size: var(--ops-font-size-md);
+}
+
+/* ---- Activity feed ---------------------------------------------------- */
+
+.ops-activity-feed {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.ops-activity-feed__item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-size: var(--ops-font-size-md);
+}
+
+.ops-activity-feed__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--ops-text-subtle);
+}
+
+.ops-activity-feed__time {
+    color: var(--ops-text-subtle);
+    font-size: var(--ops-font-size-sm);
+    white-space: nowrap;
+}
+
+/* ---- Chips (status / stage / validation) ------------------------------- */
+
+.ops-chip {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+    font-size: var(--ops-font-size-xs);
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.chip-status--new, .chip-stage--new { background: #e0e7ff; color: #3730a3; }
+.chip-status--in-progress, .chip-stage--validating { background: #fef3c7; color: #92400e; }
+.chip-status--complete, .chip-stage--transformed { background: #dcfce7; color: #166534; }
+.chip-status--exception, .chip-stage--exception { background: #fee2e2; color: #991b1b; }
+
+.chip-validation--ok { background: #dcfce7; color: #166534; }
+.chip-validation--warning { background: #fef3c7; color: #92400e; }
+.chip-validation--error { background: #fee2e2; color: #991b1b; }
+
+.chip-severity--low { background: #dcfce7; color: #166534; }
+.chip-severity--medium { background: #fef3c7; color: #92400e; }
+.chip-severity--high { background: #ffedd5; color: #9a3412; }
+.chip-severity--critical { background: #fee2e2; color: #991b1b; }
+
+/* An undecided finding is an empty slot, not another warning colour. */
+.chip-decision--open { background: transparent; color: var(--ops-text-muted); box-shadow: inset 0 0 0 1px var(--ops-border-strong); }
+
+.ops-activity-feed__dot.chip-status--new, .ops-activity-feed__dot.chip-stage--new { background: #4338ca; }
+.ops-activity-feed__dot.chip-stage--validating { background: #b45309; }
+.ops-activity-feed__dot.chip-stage--transformed { background: #15803d; }
+.ops-activity-feed__dot.chip-stage--exception { background: #b91c1c; }
+
+/* ---- Forms, filter bars and buttons ------------------------------------ */
+
+.ops-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: var(--ops-space-3) var(--ops-space-4);
+    background: var(--ops-card-bg);
+    border: 1px solid var(--ops-border);
+    border-radius: var(--ops-radius);
+    box-shadow: var(--ops-shadow);
+    padding: var(--ops-space-4) var(--ops-space-5);
+}
+
+/* A filter bar inside a panel is a row of fields, not a card in a card,
+   with room before whatever follows it. */
+.ops-panel .ops-filter-bar {
+    background: none;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+    margin-bottom: var(--ops-space-4);
+}
+
+.ops-panel .ops-filter-bar:last-child {
+    margin-bottom: 0;
+}
+
+.ops-filter-bar__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    /* Flex items default to min-width:auto, so a file input or a select of
+       long email addresses could never shrink below its natural width and
+       widened the page on small phones (1.4.10). */
+    min-width: 0;
+    max-width: 100%;
+}
+
+.ops-filter-bar__field label,
+.ops-form label {
+    font-size: var(--ops-font-size-sm);
+    font-weight: 500;
+    color: var(--ops-text-muted);
+}
+
+.ops-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ops-space-3);
+    max-width: 44rem;
+}
+
+/* A column form's submit button keeps its own width instead of stretching
+   into a full-width bar. */
+.ops-form > .ops-button,
+.ops-form > button,
+.ops-form > div > .ops-button {
+    align-self: flex-start;
+}
+
+.ops-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+/* One look for every text field in the app, wherever it sits. */
+.ops-main input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not([type="submit"]):not([type="button"]),
+.ops-main select,
+.ops-main textarea,
+.ops-search input,
+.ops-login-form input {
+    min-height: 2.25rem;
+    padding: 0.4rem 0.65rem;
+    border: 1px solid var(--ops-border-strong);
+    border-radius: var(--ops-radius-sm);
+    font: inherit;
+    font-size: var(--ops-font-size-md);
+    background: var(--ops-card-bg);
+    color: var(--ops-text);
+    max-width: 100%;
+}
+
+.ops-main textarea {
+    min-height: 5rem;
+    line-height: 1.5;
+}
+
+.ops-main input:focus,
+.ops-main select:focus,
+.ops-main textarea:focus,
+.ops-search input:focus {
+    border-color: var(--ops-accent);
+}
+
+/* 24px: the WCAG 2.2 minimum target (2.5.8) on its own, whatever sits
+   next to it. */
+.ops-main input[type="checkbox"],
+.ops-main input[type="radio"] {
+    accent-color: var(--ops-accent);
+    width: 1.5rem;
+    height: 1.5rem;
+    margin: 0;
+    vertical-align: middle;
+}
+
+.ops-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 2.25rem;
+    background: var(--ops-accent);
+    color: #fff;
+    border: 1px solid var(--ops-accent);
+    border-radius: var(--ops-radius-sm);
+    padding: 0.4rem 0.9rem;
+    font: inherit;
+    font-size: var(--ops-font-size-md);
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: center;
+    cursor: pointer;
+    white-space: normal;
+}
+
+.ops-button:hover {
+    filter: brightness(1.08);
+}
+
+/* Links styled as buttons navigate; they are secondary so a page does not
+   become a row of competing filled buttons. A link that is the page's main
+   call to action opts back in with --primary. Without align-self, a link
+   that is a direct child of a column layout stretched into a full-width bar. */
+a.ops-button {
+    text-decoration: none;
+    align-self: flex-start;
+}
+
+.ops-button--secondary,
+a.ops-button:not(.ops-button--primary) {
+    background: var(--ops-card-bg);
+    color: var(--ops-text);
+    border-color: var(--ops-border-strong);
+    box-shadow: var(--ops-shadow);
+}
+
+.ops-button--secondary:hover,
+a.ops-button:not(.ops-button--primary):hover {
+    filter: none;
+    background: var(--ops-subtle-bg);
+    border-color: #94a3b8;
+}
+
+.ops-button--danger {
+    background: var(--ops-danger);
+    border-color: var(--ops-danger);
+    color: #fff;
+}
+
+.ops-button--small {
+    min-height: 2rem;
+    padding: 0.25rem 0.65rem;
+    font-size: var(--ops-font-size-sm);
+}
+
+.ops-button:disabled,
+.ops-button[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
+    filter: none;
+}
+
+/* Buttons inside a table row are that row's actions: small, and secondary
+   unless the row's one decision opts in with --primary (Approve, Link).
+   A column of filled buttons down a table was the loudest thing on
+   several pages. */
+.ops-table td .ops-button:not(.ops-button--primary):not(.ops-button--danger) {
+    background: var(--ops-card-bg);
+    color: var(--ops-text);
+    border-color: var(--ops-border-strong);
+    box-shadow: var(--ops-shadow);
+}
+
+.ops-table td .ops-button {
+    min-height: 2rem;
+    padding: 0.25rem 0.65rem;
+    font-size: var(--ops-font-size-sm);
+    white-space: nowrap;
+    overflow-wrap: normal;
+}
+
+/* A select and its button in one table cell (link a person, decide a
+   request). The select never grows past a readable width. */
+.ops-inline-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ops-space-2);
+    margin: 0;
+}
+
+/* Capped in rem, not a percentage: inside a table cell a percentage cannot
+   resolve, and the select grew to its longest option. */
+.ops-main .ops-inline-form select {
+    width: auto;
+    max-width: 16rem;
+    min-width: 0;
+}
+
+.ops-table td form {
+    margin: 0;
+}
+
+/* Per-row management forms folded behind a "Manage" disclosure, stacked
+   so an open row grows downward rather than widening the table. */
+.ops-manage {
+    margin: 0;
+}
+
+.ops-manage[open] {
+    min-width: 14rem;
+}
+
+.ops-manage-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: var(--ops-space-2);
+    padding: var(--ops-space-2) 0;
+    border-top: 1px solid var(--ops-border);
+}
+
+.ops-manage-form .ops-filter-bar__field {
+    flex: 1 1 8rem;
+}
+
+.ops-manage-form__modules {
+    border: 0;
+    padding: var(--ops-space-2) 0;
+    margin: 0;
+    display: grid;
+    gap: 0.35rem;
+    border-top: 1px solid var(--ops-border);
+}
+
+.ops-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ops-space-2);
+    align-items: center;
+    margin-top: var(--ops-space-4);
+}
+
+.ops-actions form {
+    margin: 0;
+}
+
+/* A row of links to related pages, as text rather than a wall of buttons. */
+.ops-link-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ops-space-2) var(--ops-space-5);
+    font-size: var(--ops-font-size-md);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ops-link-row a {
+    font-weight: 500;
+}
+
+/* A whole panel that folds: the heading is the summary. */
+.ops-panel__summary {
+    cursor: pointer;
+    list-style-position: outside;
+}
+
+.ops-panel__summary .ops-panel__heading {
+    display: inline;
+    margin: 0;
+}
+
+details[open] > .ops-panel__summary {
+    margin-bottom: var(--ops-space-4);
+}
+
+.ops-filter-bar__aside {
+    margin-inline-start: auto;
+    align-self: center;
+    font-size: var(--ops-font-size-md);
+    font-weight: 600;
+}
+
+/* A short list of guarantees or steps, each led by a bold phrase. */
+.ops-checklist {
+    margin: var(--ops-space-3) 0 0;
+    padding-inline-start: 1.2rem;
+    font-size: var(--ops-font-size-md);
+    display: grid;
+    gap: var(--ops-space-2);
+}
+
+/* A numbered step marker in a heading. */
+.ops-step {
+    display: inline-grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-inline-end: 0.35rem;
+    border-radius: 50%;
+    background: var(--ops-accent-soft);
+    color: var(--ops-accent);
+    font-size: var(--ops-font-size-sm);
+    font-weight: 700;
+    vertical-align: 0.1em;
+}
+
+.ops-disclosure {
+    margin-top: var(--ops-space-4);
+    font-size: var(--ops-font-size-md);
+}
+
+.ops-disclosure > summary,
+details.ops-panel > summary {
+    cursor: pointer;
+    color: var(--ops-accent);
+    font-weight: 600;
+}
+
+.ops-disclosure[open] > summary {
+    margin-bottom: var(--ops-space-3);
+}
+
+/* The reasons behind a programme's review signal, folded inside its cell. */
+.ops-reasons {
+    margin-top: var(--ops-space-1);
+    font-size: var(--ops-font-size-sm);
+}
+
+.ops-reasons ul {
+    margin: 0;
+    padding-inline-start: 1.1rem;
+}
+
+/* A panel that folds to its scope line: the meta sits beside the heading. */
+.ops-panel__summary .ops-panel__meta {
+    margin-inline-start: var(--ops-space-3);
+}
+
+.ops-attention + h3 {
+    margin-top: var(--ops-space-5);
+}
+
+.ops-onboarding__steps {
+    margin: 0.75rem 0 1rem;
+    padding-inline-start: 1.2rem;
+    line-height: 1.7;
+}
+
+.ops-onboarding__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ops-space-2);
+}
+
+.ops-progress {
+    display: inline-block;
+    width: 4.5rem;
+    height: 0.4rem;
+    margin-inline-end: 0.5rem;
+    border-radius: 999px;
+    background: #e8ecf3;
+    overflow: hidden;
+    vertical-align: middle;
+}
+
+.ops-progress__bar {
+    display: block;
+    height: 100%;
+    background: var(--ops-accent);
+}
+
+/* Standalone forms (e.g. login) outside a .ops-filter-bar wrapper. */
+
+.ops-login-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ops-space-4);
+}
+
+.ops-login-form .ops-button {
+    align-self: flex-start;
+}
+
+.ops-results-summary {
+    color: var(--ops-text-muted);
+    font-size: var(--ops-font-size-md);
+    margin: 0;
+}
+
+/* ---- Tables ----------------------------------------------------------- */
+
+.ops-table-scroll {
+    /* Still scrolls as a last resort (a genuinely wide table on a tablet),
+       but cells wrap, so at desktop widths the table fits. */
+    overflow-x: auto;
+    /* Containing block for .ops-visually-hidden labels inside table cells.
+       Without it those absolutely positioned labels resolve against the page,
+       escape this scroller's clipping and widen the whole document. */
+    position: relative;
+    background: var(--ops-card-bg);
+    border: 1px solid var(--ops-border);
+    border-radius: var(--ops-radius);
+    box-shadow: var(--ops-shadow);
+}
+
+.ops-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--ops-font-size-md);
+}
+
+.ops-table caption:not(.ops-visually-hidden) {
+    caption-side: top;
+    text-align: start;
+    padding: var(--ops-space-3) var(--ops-space-4);
+    font-weight: 600;
+}
+
+.ops-table th,
+.ops-table td {
+    padding: 0.625rem 0.875rem;
+    text-align: start;
+    vertical-align: top;
+    border-bottom: 1px solid var(--ops-border);
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+/* Words stay whole, so a narrow column never splits "Approved" into two
+   lines. The long unbroken tokens that used to set a table's width (ids,
+   URLs, JSON, email addresses) may break anywhere: code, links and
+   .ops-break are where they live. */
+.ops-table td code,
+.ops-table td a,
+.ops-table td .ops-break {
+    overflow-wrap: anywhere;
+}
+
+.ops-table tbody tr:last-child > * {
+    border-bottom: 0;
+}
+
+/* Prose cells (a run summary, an error, a description) keep enough width
+   to be read rather than wrapping one word per line. */
+.ops-table .ops-table__cell--wrap {
+    min-width: 12rem;
+}
+
+.ops-table thead th {
+    background: var(--ops-subtle-bg);
+    color: var(--ops-text-muted);
+    font-weight: 600;
+    font-size: var(--ops-font-size-xs);
+    letter-spacing: 0.01em;
+    line-height: 1.35;
+    vertical-align: bottom;
+}
+
+.ops-table thead th a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.ops-table thead th a:hover {
+    text-decoration: underline;
+}
+
+.ops-table tbody tr:hover {
+    background: var(--ops-subtle-bg);
+}
+
+.ops-table tbody th[scope="row"] {
+    font-weight: 600;
+}
+
+/* Numbers line up by place value and never break across lines; app.js
+   adds .is-num to columns that are mostly numeric, and a view may mark a
+   cell .num itself. Dates and chips (.is-nowrap) hold one line too. */
+.ops-table .num,
+.ops-table .is-num {
+    text-align: end;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.ops-table .is-nowrap {
+    white-space: nowrap;
+}
+
+/* A numeric column's header aligns with its figures but may wrap: a long
+   header is what pushed tables past their card. */
+.ops-table thead th.is-num,
+.ops-table thead th.num {
+    white-space: normal;
+}
+
+/* Secondary context under a cell's main value (the programme and project
+   under a workstream), so the table needs fewer columns. */
+.ops-cell-context {
+    display: block;
+    color: var(--ops-text-subtle);
+    font-size: var(--ops-font-size-xs);
+    font-weight: 400;
+    white-space: normal;
+}
+
+.ops-table .num .ops-cell-context,
+.ops-table .is-num .ops-cell-context {
+    white-space: nowrap;
+}
+
+.ops-table td .ops-cell-context.ops-break {
+    overflow-wrap: anywhere;
+}
+
+/* Labelled values in one cell (audit detail): "Rows 1832 · Run key 22d6…". */
+.ops-field {
+    display: inline-block;
+    margin-inline-end: var(--ops-space-3);
+    font-size: var(--ops-font-size-sm);
+}
+
+.ops-field__label {
+    color: var(--ops-text-subtle);
+}
+
+.ops-table__row-link {
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.ops-table__row-link:hover {
+    text-decoration: underline;
+}
+
+.ops-table__row--overdue {
+    background: var(--ops-danger-bg);
+}
+
+.ops-table tbody tr.ops-table__row--overdue:hover {
+    background: #fde8e8;
+}
+
+/* Rows folded by app.js stay folded at every width: the phone layout's
+   "tr { display: block }" would otherwise outrank the [hidden] default. */
+.ops-table tbody tr[hidden] {
+    display: none;
+}
+
+/* Long tables show their first rows and a "Show all" control (app.js). */
+.ops-table-collapse {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ops-space-3);
+    margin-top: var(--ops-space-2);
+    font-size: var(--ops-font-size-sm);
+    color: var(--ops-text-subtle);
+}
+
+.ops-table-collapse__button {
+    background: none;
+    border: 0;
+    padding: 0.25rem 0;
+    font: inherit;
+    font-weight: 600;
+    color: var(--ops-accent);
+    cursor: pointer;
+}
+
+.ops-table-collapse__button:hover {
+    text-decoration: underline;
+}
+
+/* ---- Banners ---------------------------------------------------------- */
+
+.ops-banner {
+    border-radius: var(--ops-radius-sm);
+    border: 1px solid var(--ops-info-border);
+    border-inline-start-width: 4px;
+    background: var(--ops-info-bg);
+    color: var(--ops-info-text);
+    padding: var(--ops-space-3) var(--ops-space-4);
+    margin: 0 0 var(--ops-space-4);
+    font-size: var(--ops-font-size-md);
+}
+
+.ops-main > .ops-banner,
+.ops-panel > .ops-banner:last-child {
+    margin-bottom: 0;
+}
+
+.ops-banner a {
+    color: inherit;
+    font-weight: 600;
+}
+
+.ops-banner--info {
+    background: var(--ops-info-bg);
+    border-color: var(--ops-info-border);
+    color: var(--ops-info-text);
+}
+
+.ops-banner--success {
+    background: var(--ops-success-bg);
+    border-color: var(--ops-success-border);
+    color: var(--ops-success-text);
+}
+
+.ops-banner--error {
+    background: var(--ops-danger-bg);
+    border-color: var(--ops-danger-border);
+    color: #991b1b;
+}
+
+/* Something is unreportable rather than broken — e.g. a commercial figure
+   held back because its cost attribution is contested. Distinct from
+   --error so a data-quality gap doesn't read as a system failure. */
+.ops-banner--warning {
+    background: var(--ops-warning-bg);
+    border-color: var(--ops-warning-border);
+    color: var(--ops-warning-text);
+}
+
+/* ---- Record detail ---------------------------------------------------- */
+
+.ops-back-link {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    gap: 0.25rem;
+    margin-bottom: var(--ops-space-2);
+    text-decoration: none;
+    font-size: var(--ops-font-size-md);
+    font-weight: 500;
+}
+
+.ops-back-link:hover {
+    text-decoration: underline;
+}
+
+.ops-record-header {
+    display: flex;
+    align-items: center;
+    gap: var(--ops-space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--ops-space-4);
+}
+
+.ops-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: var(--ops-space-4) var(--ops-space-8);
+    margin: 0;
+}
+
+.ops-detail-grid__item {
+    min-width: 0;
+}
+
+.ops-detail-grid__item dt {
+    font-size: var(--ops-font-size-sm);
+    font-weight: 500;
+    color: var(--ops-text-muted);
+    margin-bottom: 0.125rem;
+}
+
+.ops-detail-grid__item dd {
+    margin: 0;
+    font-size: var(--ops-font-size-base);
+    overflow-wrap: anywhere;
+}
+
+.ops-validation-list {
+    margin: 0;
+    padding-inline-start: 1.2rem;
+}
+
+/* ---- Responsive ------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+    .ops-content {
+        padding: var(--ops-space-5) var(--ops-space-5) 2.5rem;
+    }
+
+    .ops-panel {
+        padding: var(--ops-space-4) var(--ops-space-4);
+    }
+
+    /* Denser tables on laptops and tablets, so a wide one still fits. */
+    .ops-table th,
+    .ops-table td {
+        padding: 0.5rem 0.5rem;
+    }
+
+    .ops-table .ops-table__cell--wrap {
+        min-width: 10rem;
+    }
+
+    .ops-progress {
+        width: 2.5rem;
+    }
+
+    .ops-two-column {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Navigation collapses to the menu button on phones and on tablets in
+   portrait (768px): a sidebar there left reports under 530px wide, so
+   every table was cut off behind a scroll. Landscape tablets (1024px)
+   keep the rail. */
+@media (max-width: 900px) {
+    .ops-shell {
+        flex-direction: column;
+    }
+
+    .ops-nav {
+        width: 100%;
+        height: auto;
+        position: static;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--ops-space-3);
+        padding: var(--ops-space-3) var(--ops-space-4);
+    }
+
+    .ops-nav__toggle {
+        display: inline-flex;
+        margin-inline-start: auto;
+    }
+
+    .ops-nav__list {
+        flex-direction: column;
+        width: 100%;
+        display: none;
+    }
+
+    .ops-nav__list.is-open {
+        display: flex;
+    }
+
+    /* Language, the signed-in person and Log out live inside the menu once
+       it collapses, so the header is just the product name and the menu
+       button. */
+    .ops-nav__list:not(.is-open) ~ .ops-nav__footer {
+        display: none;
+    }
+
+    .ops-nav__footer {
+        width: 100%;
+    }
+
+    .ops-content {
+        padding: var(--ops-space-5) var(--ops-space-4) 2rem;
+    }
+
+    .ops-panel {
+        padding: var(--ops-space-4);
+    }
+}
+
+@media (max-width: 640px) {
+    .ops-topbar__title {
+        font-size: 1.3rem;
+    }
+
+    /* Card-collapse for every .ops-table. Each <td> gets a data-label
+       attribute (its column's header text) stamped on by app.js; the
+       ::before below turns that into a visible "field: value" row. The real
+       <thead> stays in the DOM — visually hidden, not display:none — so a
+       screen reader still gets real header cells. */
+    .ops-table-scroll {
+        overflow-x: visible;
+        border: none;
+        background: none;
+        box-shadow: none;
+    }
+
+    .ops-panel > .ops-table-scroll,
+    .ops-panel > details > .ops-table-scroll {
+        border: none;
+    }
+
+    .ops-table {
+        display: block;
+    }
+
+    .ops-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .ops-table tbody,
+    .ops-table tr {
+        display: block;
+        width: 100%;
+    }
+
+    .ops-table tbody tr {
+        margin-bottom: var(--ops-space-3);
+        background: var(--ops-card-bg);
+        border: 1px solid var(--ops-border);
+        border-radius: var(--ops-radius);
+        padding: 0.25rem 0.9rem;
+    }
+
+    .ops-table tbody tr:last-child {
+        margin-bottom: 0;
+    }
+
+    .ops-table td {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.125rem 1rem;
+        width: 100%;
+        min-width: 0;
+        padding: 0.4rem 0;
+        white-space: normal;
+        text-align: end;
+        overflow-wrap: anywhere;
+        border-bottom: 1px solid var(--ops-border);
+    }
+
+    .ops-table tbody tr > :last-child {
+        border-bottom: 0;
+    }
+
+    .ops-table .ops-table__cell--wrap {
+        min-width: 0;
+    }
+
+    /* Row-header cells (<th scope="row">) are the label already, so they
+       render as a plain block above their sibling <td>. */
+    .ops-table tbody th {
+        display: block;
+        width: 100%;
+        text-align: start;
+        font-size: var(--ops-font-size-sm);
+        color: var(--ops-text-muted);
+        border-bottom: none;
+        padding-bottom: 0.15rem;
+    }
+
+    .ops-table td:empty {
+        display: none;
+    }
+
+    .ops-table td[data-label]::before {
+        content: attr(data-label);
+        flex-shrink: 0;
+        font-weight: 600;
+        font-size: var(--ops-font-size-xs);
+        color: var(--ops-text-muted);
+        text-align: start;
+    }
+
+    .ops-table td:not([data-label]) {
+        justify-content: flex-start;
+        text-align: start;
+    }
+
+    .ops-table td:not([data-label]) > form,
+    .ops-table td:not([data-label]) > a.ops-button {
+        margin: 0 auto 0 0;
+    }
+
+    /* Long unbroken values (JSON details, emails, ids) wrap inside the card
+       instead of widening the page. */
+    .ops-table td code {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+    /* Actions inside a card take the card's width rather than their
+       natural width. */
+    .ops-table td form {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+
+    .ops-table td select {
+        width: 100%;
+    }
+
+    .ops-table__row--overdue > :first-child {
+        border-inline-start: none;
+    }
+
+    .ops-table tbody tr.ops-table__row--overdue {
+        border-inline-start: 4px solid var(--ops-danger);
+    }
+
+    .ops-kpi-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ops-space-3);
+    }
+
+    .ops-kpi-card {
+        padding: var(--ops-space-3) var(--ops-space-4);
+    }
+
+    .ops-kpi-card__value {
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .ops-kpi-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Language switcher outside the dark rail (the sign-in page), and the
+   select form used once more than three languages are offered. */
+.ops-login-lang .ops-nav__lang {
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.ops-login-lang .ops-nav__lang-link {
+    color: var(--ops-text-muted);
+}
+
+.ops-login-lang .ops-nav__lang-link--active {
+    background: var(--ops-border);
+    color: var(--ops-text);
+}
+
+.ops-nav__lang--select {
+    align-items: center;
+}
+
+.ops-nav__lang--select select {
+    padding: 0.25rem 0.4rem;
+    border-radius: var(--ops-radius-sm);
+    border: 1px solid var(--ops-border);
+    font-size: var(--ops-font-size-sm);
+}
+
+.ops-nav__lang--select button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* ---- Accessibility and small-screen hardening (WCAG 2.2 AA) ------------ */
+
+/* Flagged rows (overdue, over budget, failed) are marked by a bar as well
+   as a tint (1.4.1, and it survives greyscale print); app.js adds
+   screen-reader text. */
+.ops-table__row--overdue > :first-child {
+    border-inline-start: 3px solid var(--ops-danger);
+}
+
+/* Form controls never force the page wider than the screen (1.4.10). */
+.ops-main input,
+.ops-main select,
+.ops-main textarea {
+    max-width: 100%;
+}
+
+/* 2.5.8: file inputs rendered 21px tall on phones. */
+input[type="file"] {
+    min-height: 2rem;
+    padding: 0.25rem 0;
+    max-width: 100%;
+}
+
+/* A scroll region made focusable by app.js shows where focus is. */
+.ops-table-scroll[tabindex]:focus-visible {
+    outline: 3px solid var(--ops-focus-ring);
+    outline-offset: 2px;
+}
+
+/* Preformatted detail (audit JSON) wraps rather than widening the page. */
+.ops-main pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .ops-button,
+    .ops-nav__link,
+    .ops-table tbody tr {
+        transition: background-color 120ms ease, border-color 120ms ease, filter 120ms ease;
+    }
+}
+
+/* ---- Report sharing (Views/StaffOps/_ReportActions.cshtml) ------------- */
+
+.ops-report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ops-space-2);
+}
+
+.ops-report-actions[hidden] {
+    display: none;
+}
+
+.ops-report-actions .ops-button {
+    min-height: 2rem;
+    padding: 0.25rem 0.7rem;
+    font-size: var(--ops-font-size-sm);
+    font-weight: 500;
+}
+
+.ops-report-actions__note {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: var(--ops-font-size-xs);
+    color: var(--ops-text-subtle);
+}
+
+.ops-report-actions__status {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: var(--ops-font-size-sm);
+    font-weight: 500;
+    color: var(--ops-success-text);
+    text-align: end;
+}
+
+.ops-report-actions__status:empty {
+    display: none;
+}
+
+/* Screen: the provenance header exists only for print. */
+.ops-print-header {
+    display: none;
+}
+
+/* ---- Print and save-as-PDF: a report, not a screenshot of the app ------
+   Navigation, buttons and forms go; tables print in full (no scroll
+   clipping, collapsed rows restored) with their header row repeated on
+   every page; each printout carries organisation, generation time and
+   source address. */
+@page {
+    margin: 12mm 10mm;
+}
+
+@media print {
+    :root {
+        --ops-text-muted: #3f3d52;
+        --ops-text-subtle: #3f3d52;
+    }
+
+    body {
+        background: #fff;
+        color: #000;
+        font-size: 10.5pt;
+    }
+
+    .ops-nav,
+    .ops-skip-link,
+    .ops-report-actions,
+    .ops-actions,
+    .ops-disclosure > summary,
+    .ops-button,
+    .ops-table-collapse,
+    .ops-filter-bar button,
+    form:not(.ops-filter-bar) {
+        display: none !important;
+    }
+
+    .ops-disclosure > :not(summary) {
+        display: block !important;
+    }
+
+    .ops-table tbody tr[data-collapsed] {
+        display: table-row !important;
+    }
+
+    .ops-shell {
+        display: block;
+    }
+
+    .ops-content {
+        padding: 0;
+    }
+
+    .ops-topbar,
+    .ops-main {
+        max-width: none;
+    }
+
+    .ops-print-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 0.25rem 1rem;
+        padding-bottom: 0.4rem;
+        margin-bottom: 0.6rem;
+        border-bottom: 1px solid #000;
+        font-size: 8.5pt;
+        overflow-wrap: anywhere;
+        flex-basis: 100%;
+    }
+
+    .ops-panel,
+    .ops-kpi-card,
+    .ops-table-scroll {
+        box-shadow: none;
+        border-color: #999;
+    }
+
+    /* Panels may split across pages; headings stay with what follows them,
+       and rows and the KPI strip never split. */
+    .ops-kpi-row {
+        break-inside: avoid;
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .ops-panel__heading {
+        break-after: avoid;
+    }
+
+    .ops-table-scroll {
+        overflow: visible;
+    }
+
+    .ops-table {
+        font-size: 8.5pt;
+        width: 100%;
+    }
+
+    /* Wide tables (9+ columns, marked by app.js) print more compactly so
+       they fit portrait A4. Orientation is deliberately not forced: named
+       landscape pages don't reflow in Chrome, and leaving it unset keeps the
+       print dialog's landscape option, which does. */
+    .ops-table--wide {
+        font-size: 7.5pt;
+    }
+
+    .ops-table--wide th,
+    .ops-table--wide td {
+        padding: 0.25rem 0.3rem;
+    }
+
+    .ops-table thead {
+        display: table-header-group;
+    }
+
+    .ops-table tr {
+        break-inside: avoid;
+    }
+
+    .ops-table th,
+    .ops-table td {
+        padding: 0.3rem 0.45rem;
+    }
+
+    .ops-table thead th {
+        font-size: 7.5pt;
+        background: none;
+    }
+
+    /* Keep the flag colour and bar on paper; the bar also survives greyscale. */
+    .ops-table__row--overdue,
+    .ops-banner,
+    .ops-progress__bar {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
+}
+
+/* ---- Sign-in and MFA pages ------------------------------------------- */
+
+.ops-auth {
+    max-width: 24rem;
+    margin: 4rem auto;
+}
+
+.ops-auth--wide {
+    max-width: 28rem;
+}
+
+.ops-qr {
+    margin: var(--ops-space-4) 0;
+}
+
+.ops-secret {
+    font-size: 1.05rem;
+    letter-spacing: 0.05em;
+    word-break: break-all;
+}
+
+.ops-recovery-codes {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 1.05rem;
+    line-height: 1.8;
+    list-style: none;
+    padding: 0;
+}
+
+/* ---- Small utilities -------------------------------------------------- */
+
+/* Free text a person typed, with their line breaks kept. */
+.ops-pre-wrap {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.ops-input--amount {
+    width: 8rem;
+}
+
+.ops-input--code {
+    width: 4.5rem;
+}
+
+.ops-brand-asset {
+    max-height: 48px;
+    width: auto;
+}
+
+.ops-brand-asset--small {
+    max-height: 32px;
+}
+
+/* Branding preview: a panel rendered in the draft's own tokens. */
+.ops-brand-preview {
+    border: 1px solid var(--brand-secondary);
+    border-radius: var(--brand-radius);
+    background: var(--brand-background);
+    font-family: var(--brand-font-family);
+    padding: var(--ops-space-6);
+}
+
+.ops-brand-preview__header {
+    display: flex;
+    align-items: center;
+    gap: var(--ops-space-3);
+    background: var(--brand-surface);
+    border-radius: var(--brand-radius);
+    padding: var(--ops-space-4) var(--ops-space-5);
+}
+
+.ops-brand-preview__name {
+    color: var(--brand-text);
+    font-size: 1.2rem;
+}
+
+.ops-brand-preview__text {
+    color: var(--brand-text);
+    margin-top: var(--ops-space-4);
+}
+
+.ops-brand-preview__button {
+    background: var(--brand-primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--brand-radius);
+    padding: 0.5rem 1.1rem;
+    font-family: var(--brand-font-family);
+}
+
+.ops-brand-preview__button--accent {
+    background: var(--brand-accent);
+}
+
+/* A colour sample; the colour comes from the element's --swatch. */
+.ops-swatch {
+    display: inline-block;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 3px;
+    background: var(--swatch);
+    margin-inline-end: 0.4rem;
+    vertical-align: middle;
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.15);
+}
+
+/* Previous/next links under a paged list (Views/StaffOps/_Pager.cshtml). */
+.ops-pager {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ops-space-3);
+    margin-top: var(--ops-space-4);
+    font-size: var(--ops-font-size-md);
+}
+
+
+/* --- Search, the Review's top findings, settings and access (Oct 2026). --- */
+
+.ops-search {
+    display: flex;
+    align-items: center;
+    gap: var(--ops-space-2);
+    margin-inline-start: auto;
+}
+
+.ops-search input[type="search"] {
+    width: 16rem;
+    max-width: 100%;
+}
+
+.ops-result-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ops-result-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--ops-space-1) var(--ops-space-3);
+    padding: var(--ops-space-2) 0;
+    border-bottom: 1px solid var(--ops-border);
+}
+
+.ops-result-list li:last-child {
+    border-bottom: 0;
+}
+
+.ops-result-list__meta {
+    color: var(--ops-text-muted);
+    font-size: var(--ops-font-size-sm);
+}
+
+/* The few findings the Review leads with: the figure, what it is, who owns it. */
+.ops-top-findings {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ops-space-2);
+}
+
+.ops-top-finding {
+    display: grid;
+    grid-template-columns: 8.5rem 1fr auto;
+    align-items: center;
+    gap: var(--ops-space-4);
+    padding: var(--ops-space-3) var(--ops-space-4);
+    border: 1px solid var(--ops-border);
+    border-inline-start: 4px solid var(--ops-border-strong);
+    border-radius: var(--ops-radius-sm);
+    background: var(--ops-card-bg);
+}
+
+.ops-top-finding--alert {
+    border-inline-start-color: var(--ops-danger);
+}
+
+.ops-top-finding__figure {
+    font-size: 1.375rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.ops-top-finding__of {
+    display: block;
+    font-size: var(--ops-font-size-xs);
+    font-weight: 500;
+    color: var(--ops-text-muted);
+    white-space: normal;
+}
+
+.ops-top-finding__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.ops-top-finding__title {
+    font-weight: 600;
+}
+
+.ops-top-finding__meta {
+    font-size: var(--ops-font-size-sm);
+    color: var(--ops-text-muted);
+}
+
+.ops-top-finding__owner {
+    font-size: var(--ops-font-size-sm);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.ops-top-finding__owner--none {
+    color: var(--ops-danger);
+}
+
+.ops-method__list {
+    margin: var(--ops-space-2) 0 0;
+    padding-inline-start: 1.25rem;
+    color: var(--ops-text-muted);
+    font-size: var(--ops-font-size-md);
+}
+
+.ops-method__list li + li {
+    margin-top: var(--ops-space-2);
+}
+
+/* Settings → Modules. */
+.ops-module-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ops-module {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ops-space-3) var(--ops-space-6);
+    padding: var(--ops-space-4) 0;
+    border-bottom: 1px solid var(--ops-border);
+}
+
+.ops-module:last-child {
+    border-bottom: 0;
+}
+
+.ops-module__text {
+    flex: 1 1 22rem;
+    min-width: 0;
+}
+
+.ops-module__name {
+    margin: 0 0 0.125rem;
+    font-size: var(--ops-font-size-base);
+}
+
+.ops-module__summary,
+.ops-module__note {
+    margin: 0;
+    color: var(--ops-text-muted);
+    font-size: var(--ops-font-size-sm);
+}
+
+.ops-module form {
+    display: flex;
+    align-items: center;
+    gap: var(--ops-space-3);
+}
+
+/* People → Access. */
+.ops-fieldset {
+    border: 0;
+    margin: 0 0 var(--ops-space-3);
+    padding: 0;
+}
+
+.ops-fieldset legend {
+    font-weight: 600;
+    margin-bottom: var(--ops-space-2);
+}
+
+.ops-checkbox-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ops-space-2) var(--ops-space-5);
+}
+
+.ops-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ops-space-2);
+    font-weight: 500;
+}
+
+.ops-main .ops-checkbox input {
+    width: auto;
+}
+
+.ops-copy-field {
+    width: 100%;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: var(--ops-font-size-sm);
+}
+
+@media (max-width: 640px) {
+    .ops-search {
+        margin-inline-start: 0;
+        width: 100%;
+    }
+
+    .ops-search input[type="search"] {
+        flex: 1;
+        width: auto;
+    }
+
+    .ops-top-finding {
+        grid-template-columns: 1fr;
+        gap: var(--ops-space-1);
+    }
+}
+
+@media print {
+    .ops-search {
+        display: none;
+    }
+}

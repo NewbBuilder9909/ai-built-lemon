@@ -1,0 +1,34 @@
+@using ProgrammePulse.Controllers
+@using ProgrammePulse.Services.ProgrammeOps
+@model IReadOnlyList<ProjectEvidenceSummary>
+@*
+    Readiness per project, beside the portfolio band, so a "Use with
+    caveats" headline can't hide projects that are not decision-ready
+    (design and PMO data review, D3). Order is the check's own: not
+    decision-ready first, then by evidence gap records, then by name.
+*@
+@{
+    var notReady = Model.Count(p => p.Readiness == EvidenceReadiness.NotDecisionReady);
+    var caveats = Model.Count(p => p.Readiness == EvidenceReadiness.UseWithCaveats);
+    var headline = notReady > 0
+        ? $"{notReady} of {Model.Count} {(Model.Count == 1 ? "project is" : "projects are")} not decision-ready"
+        : caveats > 0
+            ? $"{caveats} of {Model.Count} {(Model.Count == 1 ? "project needs" : "projects need")} caveats"
+            : $"All {Model.Count} {(Model.Count == 1 ? "project is" : "projects are")} decision-ready";
+}
+@if (Model.Count > 0)
+{
+    <p class="ops-project-bands__headline"><strong>@headline</strong></p>
+    <ul class="ops-project-bands" aria-label="Readiness by project">
+        @foreach (var project in Model)
+        {
+            <li>
+                <span>
+                    @project.Project
+                    <span class="ops-project-bands__counts">@project.OpenItems open @(project.OpenItems == 1 ? "item" : "items") · @project.EvidenceGaps evidence gap @(project.EvidenceGaps == 1 ? "record" : "records") · @project.DeliveryExceptions exception @(project.DeliveryExceptions == 1 ? "record" : "records")</span>
+                </span>
+                <span class="ops-readiness ops-readiness--@StaffEvidenceCheckController.BandModifier(project.Readiness)">@StaffEvidenceCheckController.Label(project.Readiness)</span>
+            </li>
+        }
+    </ul>
+}

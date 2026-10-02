@@ -1,0 +1,131 @@
+@using ProgrammePulse.Models.ContractOps
+@using ProgrammePulse.Models.Programme
+@using ProgrammePulse.Models.ViewModels.ContractOps
+@model ContractsIndexPageViewModel
+
+@{
+    var rows = Model.Rows;
+    var customers = Model.Customers;
+    var message = ViewData["Message"] as string;
+}
+
+<partial name="~/Views/StaffOps/Contracts/_ContractsNav.cshtml" model="@("contracts")" />
+<p class="ops-page-lede">Commercial terms, contract documents and value against cost for each contract. Admin only.</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Commercial Position</h2>
+    @if (rows.Count == 0)
+    {
+        <p class="ops-empty-state">No contracts yet — add one below.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Every contract with commercial model, value, cost to date, and margin</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Reference</th>
+                        <th scope="col">Model</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Ceiling</th>
+                        <th scope="col">Cost to date</th>
+                        <th scope="col">Margin</th>
+                        <th scope="col">Margin %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in rows)
+                    {
+                        <tr class="@(!row.AttributionContested && row.Margin < 0 ? "ops-table__row--overdue" : "")">
+                            <td>@row.CustomerName</td>
+                            <td><a class="ops-table__row-link" asp-controller="StaffContract" asp-action="Detail" asp-route-contractKey="@row.ContractKey">@row.Reference</a></td>
+                            <td>@ProgrammePulse.Services.Shared.DisplayText.Words(row.CommercialModel)</td>
+                            <td>@ProgrammePulse.Services.Shared.DisplayText.Words(row.Status)</td>
+                            <td>@(row.ContractCeiling?.ToString("N0") ?? "—") @row.Currency</td>
+                            <td>@row.CumulativeCost.ToString("N0") @row.Currency</td>
+                            <td>
+                                @if (row.AttributionContested)
+                                {
+                                    <span title="Another contract for this customer overlaps this term, so both select the same hours. Open the contract for detail.">contested</span>
+                                }
+                                else
+                                {
+                                    @(row.Margin?.ToString("N0") ?? "—")
+                                    <small> (@MarginBasisText.ShortLabel(row.MarginBasis))</small>
+                                }
+                            </td>
+                            <td>@(row.MarginPercent is not null ? row.MarginPercent + "%" : "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">New Contract</h2>
+    @if (customers.Count == 0)
+    {
+        <p class="ops-empty-state">Add a customer on the <a asp-controller="StaffReporting" asp-action="Index">Reporting Hub</a> first.</p>
+    }
+    else
+    {
+        <form asp-controller="StaffContract" asp-action="Create" method="post" class="ops-filter-bar">
+            <div class="ops-filter-bar__field">
+                <label for="customerKey">Customer</label>
+                <select id="customerKey" name="customerKey" required>
+                    @foreach (var customer in customers)
+                    {
+                        <option value="@customer.CustomerKey">@customer.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="reference">Reference</label>
+                <input type="text" id="reference" name="reference" maxlength="256" placeholder="e.g. MSA-2026-01" required />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="commercialModel">Commercial model</label>
+                <select id="commercialModel" name="commercialModel">
+                    @foreach (CommercialModel modelOption in Enum.GetValues<CommercialModel>())
+                    {
+                        <option value="@modelOption">@ProgrammePulse.Services.Shared.DisplayText.Words(modelOption)</option>
+                    }
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="annualValue">Annual value (Ongoing)</label>
+                <input type="number" id="annualValue" name="annualValue" min="0" step="0.01" />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="totalContractValue">Total value (Fixed Price)</label>
+                <input type="number" id="totalContractValue" name="totalContractValue" min="0" step="0.01" />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="billRate">Bill rate/hr (T&amp;M)</label>
+                <input type="number" id="billRate" name="billRate" min="0" step="0.01" />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="currency">Currency</label>
+                <input type="text" id="currency" name="currency" maxlength="8" value="GBP" required />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="startDate">Start date</label>
+                <input type="date" id="startDate" name="startDate" required />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="endDate">End date</label>
+                <input type="date" id="endDate" name="endDate" required />
+            </div>
+            <button type="submit" class="ops-button">Create contract</button>
+        </form>
+    }
+</section>

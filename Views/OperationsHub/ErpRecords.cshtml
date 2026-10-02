@@ -1,0 +1,92 @@
+@model ErpRecordsListViewModel
+
+@{
+    var currentStatus = Model.StatusFilterOptions.FirstOrDefault(o => o.IsSelected)?.Value;
+    var currentValidation = Model.ValidationFilterOptions.FirstOrDefault(o => o.IsSelected)?.Value;
+
+    string SortDirFor(string column) =>
+        string.Equals(Model.SortColumn, column, StringComparison.OrdinalIgnoreCase) && Model.SortDirection == "asc"
+            ? "desc"
+            : "asc";
+
+    string SortIndicatorFor(string column) =>
+        string.Equals(Model.SortColumn, column, StringComparison.OrdinalIgnoreCase)
+            ? (Model.SortDirection == "asc" ? "▲" : "▼")
+            : "";
+}
+
+<form method="get" class="ops-filter-bar" role="search" aria-label="Filter ERP records">
+    <div class="ops-filter-bar__field">
+        <label for="q">@Localizer["Search"]</label>
+        <input type="search" id="q" name="q" value="@Model.SearchTerm" placeholder="ERP ID, customer, or work type" />
+    </div>
+    <div class="ops-filter-bar__field">
+        <label for="status">@Localizer["Status"]</label>
+        <select id="status" name="status">
+            @foreach (var option in Model.StatusFilterOptions)
+            {
+                <option value="@option.Value" selected="@(option.IsSelected ? "selected" : null)">@Localizer[option.Label]</option>
+            }
+        </select>
+    </div>
+    <div class="ops-filter-bar__field">
+        <label for="validation">@Localizer["Validation result"]</label>
+        <select id="validation" name="validation">
+            @foreach (var option in Model.ValidationFilterOptions)
+            {
+                <option value="@option.Value" selected="@(option.IsSelected ? "selected" : null)">@Localizer[option.Label]</option>
+            }
+        </select>
+    </div>
+    <input type="hidden" name="sort" value="@Model.SortColumn" />
+    <input type="hidden" name="dir" value="@Model.SortDirection" />
+    <button type="submit" class="ops-button">@Localizer["Apply"]</button>
+</form>
+
+<p class="ops-results-summary">@string.Format(Localizer["ShowingXOfY"], Model.Rows.Count, Model.TotalCount)</p>
+
+<div class="ops-table-scroll">
+    <table class="ops-table">
+        <caption class="ops-visually-hidden">@Localizer["Fictional ERP records with transformation and validation results"]</caption>
+        <thead>
+            <tr>
+                <th scope="col"><a asp-action="Index" asp-route-q="@Model.SearchTerm" asp-route-status="@currentStatus" asp-route-validation="@currentValidation" asp-route-sort="erpId" asp-route-dir="@SortDirFor("erpId")">@Localizer["ERP ID"] @SortIndicatorFor("erpId")</a></th>
+                <th scope="col"><a asp-action="Index" asp-route-q="@Model.SearchTerm" asp-route-status="@currentStatus" asp-route-validation="@currentValidation" asp-route-sort="customer" asp-route-dir="@SortDirFor("customer")">@Localizer["Customer / Account"] @SortIndicatorFor("customer")</a></th>
+                <th scope="col"><a asp-action="Index" asp-route-q="@Model.SearchTerm" asp-route-status="@currentStatus" asp-route-validation="@currentValidation" asp-route-sort="worktype" asp-route-dir="@SortDirFor("worktype")">@Localizer["Work Type"] @SortIndicatorFor("worktype")</a></th>
+                <th scope="col"><a asp-action="Index" asp-route-q="@Model.SearchTerm" asp-route-status="@currentStatus" asp-route-validation="@currentValidation" asp-route-sort="status" asp-route-dir="@SortDirFor("status")">@Localizer["Normalised Status"] @SortIndicatorFor("status")</a></th>
+                <th scope="col"><a asp-action="Index" asp-route-q="@Model.SearchTerm" asp-route-status="@currentStatus" asp-route-validation="@currentValidation" asp-route-sort="amount" asp-route-dir="@SortDirFor("amount")">@Localizer["Amount"] @SortIndicatorFor("amount")</a></th>
+                <th scope="col"><a asp-action="Index" asp-route-q="@Model.SearchTerm" asp-route-status="@currentStatus" asp-route-validation="@currentValidation" asp-route-sort="normaliseddate" asp-route-dir="@SortDirFor("normaliseddate")">@Localizer["Normalised UTC Date"] @SortIndicatorFor("normaliseddate")</a></th>
+                <th scope="col">@Localizer["Validation"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Rows.Count == 0)
+            {
+                <tr><td colspan="7" class="ops-empty-state">@Localizer["No records match the current filters."]</td></tr>
+            }
+            else
+            {
+                @foreach (var row in Model.Rows)
+                {
+                    <tr>
+                        <th scope="row"><a class="ops-table__row-link" asp-controller="ErpRecords" asp-action="Detail" asp-route-erpId="@row.ErpId">@row.ErpId</a></th>
+                        <td>@row.CustomerDisplay</td>
+                        <td>@row.WorkTypeDisplay</td>
+                        @* The source system's own value rides under the normalised one,
+                           so the transformation reads left to right in one cell. *@
+                        <td>
+                            <span class="ops-chip @row.NormalisedStatusCssClass">@Localizer[row.NormalisedStatusDisplay]</span>
+                            <span class="ops-cell-context">@Localizer["Raw Status"]: @row.RawStatusDisplay</span>
+                        </td>
+                        <td>@row.AmountDisplay</td>
+                        <td>
+                            @row.NormalisedUtcDateDisplay
+                            <span class="ops-cell-context">@Localizer["Source-System Date"]: @row.SourceDateDisplay</span>
+                        </td>
+                        <td><span class="ops-chip @row.Validation.CssClass">@row.Validation.Label</span></td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

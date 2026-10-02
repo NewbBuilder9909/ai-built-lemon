@@ -1,0 +1,17 @@
+@* Section navigation for Contract Ops, replacing the "Back to Commercial
+   Position" buttons and inline links on each page. Every page here is gated
+   on ManageContracts by its controller, which the layout's nav already
+   requires, so the tabs need no gate of their own. Literal tag helpers so
+   ViewLinkTests checks each still resolves. The model is the current key. *@
+@model string
+@{
+    string Css(string key) => key == Model ? "ops-subnav__link ops-subnav__link--active" : "ops-subnav__link";
+    string? Current(string key) => key == Model ? "page" : null;
+}
+<nav class="ops-subnav" aria-label="@Localizer["Contracts.Pages"]">
+    <ul>
+        <li><a class="@Css("contracts")" aria-current="@Current("contracts")" asp-controller="StaffContract" asp-action="Index">@Localizer["Contracts"]</a></li>
+        <li><a class="@Css("overview")" aria-current="@Current("overview")" asp-controller="StaffContract" asp-action="Overview">@Localizer["Contracts.Overview"]</a></li>
+        <li><a class="@Css("assurance")" aria-current="@Current("assurance")" asp-controller="StaffContractAssurance" asp-action="Portfolio">@Localizer["Contracts.Assurance"]</a></li>
+    </ul>
+</nav>

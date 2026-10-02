@@ -1,0 +1,45 @@
+@using System.Globalization
+@using ProgrammePulse.Services.ExecutiveReview
+@model ProgrammePulse.Models.ExecutiveReview.ExecutivePack
+@inject ProgrammePulse.Services.Staff.IStaffAuthorizationService DecisionAuthorization
+@{
+    var format = CultureInfo.GetCultureInfo(Model.Market.Settings.FormatCulture);
+    var zone = TimeZoneInfo.FindSystemTimeZoneById(Model.Market.Settings.TimeZoneId);
+    string LocalTime(DateTime time) => TimeZoneInfo.ConvertTimeFromUtc(time, zone).ToString("g", format);
+    var date = DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(Model.CapturedAtUtc, zone));
+    var fiscal = MarketConfiguration.FiscalYear(date, Model.Market.Settings.FiscalYearStartMonth);
+}
+<a asp-action="Index">@Localizer["Review.Title"]</a>
+<h2>@Model.Source</h2>
+<dl class="review-facts">
+    <dt>@Localizer["Review.Captured"]</dt><dd>@LocalTime(Model.CapturedAtUtc) (@Model.Market.Settings.TimeZoneId)</dd>
+    <dt>@Localizer["Review.Publication"]</dt><dd>@LocalTime(Model.PublishedAtUtc)</dd>
+    <dt>@Localizer["Review.Account"]</dt><dd>@Model.AccountAtCapture</dd>
+    <dt>@Localizer["Review.SettingsVersion"]</dt><dd>@Model.Market.Version</dd>
+    <dt>@Localizer["Review.FiscalYear"]</dt><dd>@fiscal.Start.ToString("d", format) - @fiscal.EndExclusive.AddDays(-1).ToString("d", format)</dd>
+    <dt>@Localizer["Review.Total"]</dt><dd>@Model.Total</dd>
+    <dt>@Localizer["Open"]</dt><dd>@Model.Open</dd>
+    <dt>@Localizer["Blocked"]</dt><dd>@Model.Blocked</dd>
+    <dt>@Localizer["Review.Overdue"]</dt><dd>@Model.Overdue</dd>
+    <dt>@Localizer["Review.NoDueDate"]</dt><dd>@Model.OpenWithoutDueDate / @Model.Open</dd>
+    <dt>@Localizer["Review.Unmapped"]</dt><dd>@Model.Unmapped / @Model.Total</dd>
+    <dt>@Localizer["Review.Verification"]</dt><dd>@Localizer["Review.NotReviewed"]</dd>
+</dl>
+<a class="ops-button" asp-action="Download" asp-route-packKey="@Model.PackKey">@Localizer["Review.Download"]</a>
+<a asp-controller="StaffExecutiveDecision" asp-action="Index">@Localizer["Decision.Queue"]</a>
+@if (await DecisionAuthorization.HasAsync(ProgrammePulse.Models.Staff.Capability.ManageStaff))
+{ <a asp-controller="StaffExecutiveData" asp-action="Index" asp-route-operation="WithdrawPack" asp-route-targetKey="@Model.PackKey">@Localizer["Review.Data.Operation.WithdrawPack"]</a> }
+@if (await DecisionAuthorization.HasAsync(ProgrammePulse.Models.Staff.Capability.ManageExecutiveDecisions))
+{ <a asp-controller="StaffExecutiveDecision" asp-action="New" asp-route-packKey="@Model.PackKey">@Localizer["Decision.New"]</a> }
+<h2>@Localizer["Review.Evidence"]</h2>
+<div class="ops-table-scroll">
+    <table class="ops-table">
+        <thead><tr><th>@Localizer["Review.Record"]</th><th>@Localizer["Review.Stage"]</th><th>@Localizer["Review.Due"]</th><th>@Localizer["Review.Updated"]</th></tr></thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr><td>@item.ExternalId</td><td>@Localizer[$"Review.Stage.{item.Stage}"]</td><td>@(item.DueAtUtc is DateTime due ? LocalTime(due) : Localizer["Review.Unknown"].Value)</td><td>@LocalTime(item.ObservedUpdatedAtUtc)</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

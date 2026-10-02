@@ -1,0 +1,45 @@
+@model (string TotpSecret, string OtpAuthUri)
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Set up two-factor authentication — @ProductBrand.Value.Name</title>
+    <link rel="stylesheet" href="~/css/app.css" />
+</head>
+<body>
+    <main class="ops-main ops-auth ops-auth--wide">
+        <div class="ops-panel">
+            <h1 class="ops-panel__heading">Set up two-factor authentication</h1>
+            <p>Admin accounts require an authenticator app (Google Authenticator, Microsoft Authenticator, 1Password, etc). Scan the code below with it, then enter the 6-digit code it shows you.</p>
+
+            <div id="qrcode" class="ops-qr" data-otpauth-uri="@Model.OtpAuthUri"></div>
+
+            <details>
+                <summary>Can't scan it? Enter the key manually</summary>
+                <p>
+                    <code class="ops-secret">@Model.TotpSecret</code>
+                </p>
+            </details>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <p class="ops-chip" role="alert">@ViewData.ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage</p>
+            }
+
+            <form asp-controller="StaffAccount" asp-action="MfaEnrollConfirm" method="post" class="ops-login-form">
+                <div class="ops-filter-bar__field">
+                    <label for="code">6-digit code</label>
+                    <input type="text" id="code" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required autofocus />
+                </div>
+                <button type="submit" class="ops-button">Confirm and sign in</button>
+            </form>
+        </div>
+    </main>
+    <script src="~/js/qrcode.js"></script>
+    <script src="~/js/mfa-enroll.js"></script>
+</body>
+</html>

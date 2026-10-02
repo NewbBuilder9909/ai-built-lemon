@@ -1,0 +1,30 @@
+{
+    // Point C# Dev Kit at the real solution explicitly. There are eight
+    // .csproj files in this tree: the two that ProgrammePulse.slnx lists, plus
+    // six full repo snapshots under .claude/worktrees/ and artifacts/security/
+    // that share the same project names and root namespace. Without this,
+    // Dev Kit auto-discovers and can bind to the wrong copy.
+    "dotnet.defaultSolution": "ProgrammePulse.slnx",
+    // Those snapshot trees are not projects and must not be watched — duplicate
+    // project identities plus their bin/obj churn are a known way to destabilise
+    // the project-system server. umbraco/Logs is excluded because Serilog writes
+    // to it continuously while the site runs.
+    "files.watcherExclude": {
+        "**/.claude/worktrees/**": true,
+        "**/artifacts/**": true,
+        "**/umbraco/Logs/**": true
+    },
+    // Work that exists on one machine only can be lost. On 26 Sep, 39 commits
+    // sat unpushed on a laptop for three days and were merged against an
+    // origin/main eight hours stale. Autofetch keeps the Graph view's origin/*
+    // current, and pushing after each commit puts every commit on GitHub
+    // (VS Code offers to publish a new branch on its first push).
+    "git.autofetch": true,
+    "git.postCommitCommand": "push",
+    "search.exclude": {
+        "**/.claude/worktrees": true,
+        "**/artifacts": true,
+        "**/bin": true,
+        "**/obj": true
+    }
+}

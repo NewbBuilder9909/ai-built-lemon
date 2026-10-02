@@ -1,0 +1,53 @@
+@model BrandingHistoryViewModel
+
+<a class="ops-back-link" asp-controller="StaffBranding" asp-action="Index">← Branding settings</a>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Version history</h2>
+
+    @if (Model.Versions.Count == 0)
+    {
+        <p class="ops-empty-state">No published branding versions yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Branding version history with rollback</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Status</th>
+                        <th scope="col">Company name</th>
+                        <th scope="col">Primary colour</th>
+                        <th scope="col">Effective from</th>
+                        <th scope="col">Effective to</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var version in Model.Versions)
+                    {
+                        <tr>
+                            <td><span class="ops-chip">@version.Status</span></td>
+                            <td>@version.CompanyName</td>
+                            <td>
+                                <span class="ops-swatch" style="--swatch: @version.PrimaryColour" aria-hidden="true"></span>
+                                @version.PrimaryColour
+                            </td>
+                            <td>@version.EffectiveFromUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@(version.EffectiveToUtc?.ToString("yyyy-MM-dd HH:mm") ?? "current")</td>
+                            <td>
+                                @if (version.Status == BrandingStatus.Archived)
+                                {
+                                    <form asp-controller="StaffBranding" asp-action="Rollback" asp-route-versionKey="@version.VersionKey" method="post">
+                                        <button type="submit" class="ops-button">Roll back to this version</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

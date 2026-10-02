@@ -1,0 +1,204 @@
+@using ProgrammePulse.Models.Programme
+@using ProgrammePulse.Models.ViewModels.Reporting
+@model RaidViewModel
+@{
+    var message = ViewData["Message"] as string;
+}
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--error" role="alert">@message</p>
+}
+
+@{ ViewData["ReportActions"] = true; }
+<partial name="~/Views/StaffOps/Reporting/_ReportingNav.cshtml" model="@("raid")" />
+<partial name="~/Views/StaffOps/Programme/_PortfolioScope.cshtml" model="Model.Scope" />
+<p class="ops-page-lede">Risks and issues by project. Team Leads and above can log them; each moves from Open through Mitigating or In progress to Closed or Resolved.</p>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@Localizer["Risks"]</h2>
+
+    @if (Model.ProjectOptions.Count == 0)
+    {
+        <p class="ops-empty-state">No projects yet. Import or sync delivery data before logging a risk.</p>
+    }
+    else
+    {
+        <form asp-controller="StaffRaid" asp-action="CreateRisk" method="post" class="ops-filter-bar">
+            <input type="hidden" name="programmeFilter" value="@Model.Scope.ProgrammeKey" />
+            <input type="hidden" name="customerFilter" value="@Model.Scope.CustomerKey" />
+            <div class="ops-filter-bar__field">
+                <label for="risk-project">Project</label>
+                <select id="risk-project" name="projectKey">
+                    @foreach (var project in Model.ProjectOptions)
+                    {
+                        <option value="@project.ProjectKey">@project.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="risk-title">Title</label>
+                <input type="text" id="risk-title" name="title" maxlength="256" required />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="risk-description">Description</label>
+                <input type="text" id="risk-description" name="description" maxlength="1024" />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="risk-severity">Severity</label>
+                <select id="risk-severity" name="severity">
+                    @foreach (SeverityLevel level in Enum.GetValues<SeverityLevel>())
+                    {
+                        <option value="@level">@ProgrammePulse.Services.Shared.DisplayText.Words(level)</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="ops-button">Log risk</button>
+        </form>
+    }
+
+    @if (Model.Risks.Count == 0)
+    {
+        <p class="ops-empty-state">@Localizer["No risks logged yet."]</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">@Localizer["Logged risks with severity and status"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Localizer["Project"]</th>
+                        <th scope="col">@Localizer["Title"]</th>
+                        <th scope="col">@Localizer["Severity"]</th>
+                        <th scope="col">@Localizer["Status"]</th>
+                        <th scope="col">@Localizer["Update"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var risk in Model.Risks)
+                    {
+                        <tr>
+                            <td>@risk.ProjectName</td>
+                            <td>
+                                @risk.Title
+                                @if (!string.IsNullOrWhiteSpace(risk.Description))
+                                {
+                                    <br /><span class="ops-empty-state">@risk.Description</span>
+                                }
+                            </td>
+                            <td><span class="ops-chip chip-severity--@risk.Severity.ToString().ToLowerInvariant()">@risk.Severity</span></td>
+                            <td>@ProgrammePulse.Services.Shared.DisplayText.Words(risk.Status)</td>
+                            <td>
+                                <form asp-controller="StaffRaid" asp-action="UpdateRiskStatus" method="post" class="ops-inline-form">
+                                    <input type="hidden" name="programmeFilter" value="@Model.Scope.ProgrammeKey" />
+                                    <input type="hidden" name="customerFilter" value="@Model.Scope.CustomerKey" />
+                                    <input type="hidden" name="riskKey" value="@risk.RiskKey" />
+                                    <select name="status" aria-label="Update status for @risk.Title">
+                                        @foreach (RiskStatus status in Enum.GetValues<RiskStatus>())
+                                        {
+                                            <option value="@status" selected="@(status == risk.Status ? "selected" : null)">@ProgrammePulse.Services.Shared.DisplayText.Words(status)</option>
+                                        }
+                                    </select>
+                                    <button type="submit" class="ops-button">@Localizer["Save"]</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@Localizer["Issues"]</h2>
+
+    @if (Model.ProjectOptions.Count > 0)
+    {
+        <form asp-controller="StaffRaid" asp-action="CreateIssue" method="post" class="ops-filter-bar">
+            <input type="hidden" name="programmeFilter" value="@Model.Scope.ProgrammeKey" />
+            <input type="hidden" name="customerFilter" value="@Model.Scope.CustomerKey" />
+            <div class="ops-filter-bar__field">
+                <label for="issue-project">Project</label>
+                <select id="issue-project" name="projectKey">
+                    @foreach (var project in Model.ProjectOptions)
+                    {
+                        <option value="@project.ProjectKey">@project.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="issue-title">Title</label>
+                <input type="text" id="issue-title" name="title" maxlength="256" required />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="issue-description">Description</label>
+                <input type="text" id="issue-description" name="description" maxlength="1024" />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="issue-severity">Severity</label>
+                <select id="issue-severity" name="severity">
+                    @foreach (SeverityLevel level in Enum.GetValues<SeverityLevel>())
+                    {
+                        <option value="@level">@ProgrammePulse.Services.Shared.DisplayText.Words(level)</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="ops-button">Log issue</button>
+        </form>
+    }
+
+    @if (Model.Issues.Count == 0)
+    {
+        <p class="ops-empty-state">@Localizer["No issues logged yet."]</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">@Localizer["Logged issues with severity and status"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Localizer["Project"]</th>
+                        <th scope="col">@Localizer["Title"]</th>
+                        <th scope="col">@Localizer["Severity"]</th>
+                        <th scope="col">@Localizer["Status"]</th>
+                        <th scope="col">@Localizer["Update"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var issue in Model.Issues)
+                    {
+                        <tr>
+                            <td>@issue.ProjectName</td>
+                            <td>
+                                @issue.Title
+                                @if (!string.IsNullOrWhiteSpace(issue.Description))
+                                {
+                                    <br /><span class="ops-empty-state">@issue.Description</span>
+                                }
+                            </td>
+                            <td><span class="ops-chip chip-severity--@issue.Severity.ToString().ToLowerInvariant()">@issue.Severity</span></td>
+                            <td>@ProgrammePulse.Services.Shared.DisplayText.Words(issue.Status)</td>
+                            <td>
+                                <form asp-controller="StaffRaid" asp-action="UpdateIssueStatus" method="post" class="ops-inline-form">
+                                    <input type="hidden" name="programmeFilter" value="@Model.Scope.ProgrammeKey" />
+                                    <input type="hidden" name="customerFilter" value="@Model.Scope.CustomerKey" />
+                                    <input type="hidden" name="issueKey" value="@issue.IssueKey" />
+                                    <select name="status" aria-label="Update status for @issue.Title">
+                                        @foreach (IssueStatus status in Enum.GetValues<IssueStatus>())
+                                        {
+                                            <option value="@status" selected="@(status == issue.Status ? "selected" : null)">@ProgrammePulse.Services.Shared.DisplayText.Words(status)</option>
+                                        }
+                                    </select>
+                                    <button type="submit" class="ops-button">@Localizer["Save"]</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

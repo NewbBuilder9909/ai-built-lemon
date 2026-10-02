@@ -1,0 +1,11 @@
+@model PasswordResetLinkViewModel
+
+<partial name="~/Views/StaffOps/Settings/_SettingsNav.cshtml" model="@("people")" />
+
+<section class="ops-panel" aria-labelledby="reset-heading">
+    <h2 class="ops-panel__heading" id="reset-heading">Password reset link for @Model.FullName</h2>
+    <p>Send this to them yourself. It works once, and stops working when they use it or when their password changes. This page won't show it again.</p>
+    <label for="reset-link" class="ops-visually-hidden">Reset link</label>
+    <input id="reset-link" class="ops-copy-field" type="text" readonly value="@Model.Link" />
+    <p><a asp-controller="StaffAdmin" asp-action="Detail" asp-route-staffKey="@Model.StaffKey">Back to @Model.FullName</a></p>
+</section>

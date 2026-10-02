@@ -1,0 +1,66 @@
+@model IReadOnlyList<LeaveRequestViewModel>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Request Leave</h2>
+    <form asp-controller="StaffPortal" asp-action="SubmitLeave" method="post" class="ops-filter-bar">
+        <div class="ops-filter-bar__field">
+            <label for="requestedFrom">From</label>
+            <input type="date" id="requestedFrom" name="requestedFrom" required />
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="requestedTo">To</label>
+            <input type="date" id="requestedTo" name="requestedTo" required />
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="type">Type</label>
+            <select id="type" name="type">
+                @foreach (var value in Enum.GetValues<LeaveType>())
+                {
+                    <option value="@value">@ProgrammePulse.Services.Shared.DisplayText.Words(value)</option>
+                }
+            </select>
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="notes">Notes</label>
+            <input type="text" id="notes" name="notes" />
+        </div>
+        <button type="submit" class="ops-button">Submit request</button>
+    </form>
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">My Leave Requests</h2>
+    @if (Model.Count == 0)
+    {
+        <p class="ops-empty-state">No leave requests yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Your leave requests and their status</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">From</th>
+                        <th scope="col">To</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var request in Model)
+                    {
+                        <tr>
+                            <td>@request.RequestedFrom.ToString("yyyy-MM-dd")</td>
+                            <td>@request.RequestedTo.ToString("yyyy-MM-dd")</td>
+                            <td>@ProgrammePulse.Services.Shared.DisplayText.Words(request.Type)</td>
+                            <td><span class="ops-chip">@request.Status</span></td>
+                            <td>@request.Notes</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

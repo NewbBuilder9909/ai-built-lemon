@@ -1,0 +1,254 @@
+@using ProgrammePulse.Models.SkillsEvidence
+@using ProgrammePulse.Models.ViewModels.ProgrammeOverview
+@using ProgrammePulse.Models.ViewModels.SkillsEvidence
+@model EvidenceConnectionsPageViewModel
+
+@{
+    var message = ViewData["Message"] as string;
+    var connections = Model.Connections;
+    EvidenceCoverageSummary? coverage = Model.Coverage;
+    var appConfigured = Model.AppConfigured;
+    var runStates = Model.RunStates ?? [];
+}
+
+<p class="ops-empty-state">
+    Admin-only. Read-only GitHub App installations and Azure DevOps organisations, limited to
+    repositories your organisation selects.
+    Evidence is metadata and links — commit and pull request records, who reviewed what — never
+    source code, diffs or file contents.
+    <a asp-controller="StaffEvidenceConnection" asp-action="Actors">Unidentified accounts</a>
+</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+@if (coverage is not null && coverage.IsUnverifiedReplay && connections.Count > 0)
+{
+    <p class="ops-banner ops-banner--info" role="status">
+        <strong>Not yet verified against a live installation.</strong>
+        No sync has completed cleanly for any connection, so anything shown in evidence views is
+        a fixture or sandbox replay and should be labelled as such to anyone who reads it.
+    </p>
+}
+
+@if (runStates.Count > 0)
+{
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Sync status</h2>
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Latest evidence sync status by source</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Source</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Last complete run</th>
+                        <th scope="col">Detail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var state in runStates)
+                {
+                    <tr class="@(state.CurrentDataMayBePartial ? "ops-table__row--overdue" : "")">
+                        <td>@state.DisplayName</td>
+                        <td>@state.StatusLabel</td>
+                        <td>@(state.LastPublishedAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "never")</td>
+                        <td>
+                            @if (state.IsRunning)
+                            {
+                                <text>@state.RunningStage (started @state.RunningSinceUtc?.ToString("HH:mm") UTC)</text>
+                            }
+                            else if (state.LastRunFailed)
+                            {
+                                <text>@state.PartialDataNote</text>
+                            }
+                            else
+                            {
+                                <text>@state.FreshnessLabel</text>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">What this collects, and what it never does</h2>
+    <ul>
+        <li>Default-branch commits, merged pull requests and reviews for the selected repositories.</li>
+        <li>Commit author, committer, co-author and reviewer are kept as <strong>separate roles</strong> — a
+            committer is often the person who squashed or merged, not the person who wrote the change.</li>
+        <li>Bots and service accounts are excluded from attribution to people.</li>
+        <li>An external account reaches somebody's record <strong>only</strong> when an administrator
+            approves the mapping. A matching email is shown as a suggestion, never acted on.</li>
+        <li>Nothing here raises a skill level, scores anyone, or ranks people. Evidence sits beside a
+            person's reviewed skills so a human can read both.</li>
+    </ul>
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Connections</h2>
+    @if (connections.Count == 0)
+    {
+        <p class="ops-empty-state">No evidence sources are connected.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Connected evidence sources, their granted account and coverage</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Account</th>
+                        <th scope="col">Host</th>
+                        <th scope="col">Repositories</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Credential</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var connection in connections)
+                {
+                    <tr class="@(connection.Status == EvidenceConnectionStatus.AccessLost ? "ops-table__row--overdue" : "")">
+                        <td>@connection.SourceAccountId</td>
+                        <td><code>@connection.ApiBaseUrl</code></td>
+                        <td>@connection.SelectedRepositories.Count</td>
+                        <td>
+                            @connection.Status
+                            @if (connection.Status == EvidenceConnectionStatus.AccessLost)
+                            {
+                                <text> — the grant no longer reads any selected repository. Reconnect.</text>
+                            }
+                        </td>
+                        <td>@(connection.ProtectedCredentialJson is null ? "None stored" : "Stored, encrypted")</td>
+                        <td>
+                            @if (connection.Provider == ProgrammePulse.Services.Integrations.AzureDevOps.AzureDevOpsHostPolicy.ProviderName)
+                            {
+                                <form asp-controller="StaffAzureDevOpsEvidence" asp-action="Sync" asp-route-connectionKey="@connection.ConnectionKey" method="post">
+                                    <button type="submit" class="ops-button">Run read-only sync</button>
+                                </form>
+                                <a class="ops-button" asp-controller="StaffAzureDevOpsEvidence" asp-action="Repositories" asp-route-connectionKey="@connection.ConnectionKey">Choose repositories</a>
+                            }
+                            else
+                            {
+                                <form asp-controller="StaffEvidenceConnection" asp-action="Sync" asp-route-connectionKey="@connection.ConnectionKey" method="post">
+                                    <button type="submit" class="ops-button">Run read-only sync</button>
+                                </form>
+                            }
+                            <form asp-controller="StaffEvidenceConnection" asp-action="Disconnect" asp-route-connectionKey="@connection.ConnectionKey" method="post">
+                                <button type="submit" class="ops-button">Disconnect</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@if (coverage is not null && coverage.Repositories.Count > 0)
+{
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Coverage</h2>
+        <p class="ops-empty-state">
+            What we can actually vouch for. A partial or permission-lost stream means evidence may be
+            missing — absence there is not evidence of absence.
+            @if (coverage.UnmappedActors > 0)
+            {
+                <strong>@coverage.UnmappedActors source accounts are unidentified</strong>
+                <text>, covering @coverage.UnattributedEvidence evidence rows that reach nobody's record.</text>
+            }
+        </p>
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Per-repository sync coverage and status</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Repository</th>
+                        <th scope="col">Stream</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Observed from</th>
+                        <th scope="col">Complete through</th>
+                        <th scope="col">Detail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var row in coverage.Repositories)
+                {
+                    <tr class="@(row.IsTrustworthy ? "" : "ops-table__row--overdue")">
+                        <td>@row.RepositoryKey</td>
+                        <td>@row.Stream</td>
+                        <td>@ProgrammePulse.Services.Shared.DisplayText.Words(row.Status)</td>
+                        <td>@(row.ObservedFromUtc?.ToString("yyyy-MM-dd") ?? "—")</td>
+                        <td>@(row.CompleteThroughUtc?.ToString("yyyy-MM-dd") ?? "not claimed")</td>
+                        <td>@(row.StatusDetail ?? "—")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Connect a GitHub organisation</h2>
+    @if (!appConfigured)
+    {
+        <p class="ops-empty-state">
+            The GitHub App is not configured on this deployment. An operator must set
+            <code>SkillsEvidence:GitHubAppSlug</code>, <code>:GitHubClientId</code> and
+            <code>:GitHubClientSecret</code> before a tenant can connect.
+        </p>
+    }
+    else
+    {
+        <form asp-controller="StaffEvidenceConnection" asp-action="StartGitHub" method="post" class="ops-form">
+            <label>
+                Organisation or user
+                <input type="text" name="organisation" maxlength="100" required />
+            </label>
+            <label>
+                API host (leave blank for github.com)
+                <input type="text" name="apiBaseUrl" maxlength="256" placeholder="@EvidenceHostPolicy.GitHubDotComApi" />
+            </label>
+            <p class="ops-empty-state">
+                You choose the repositories on GitHub during installation. Only hosts this deployment
+                allows can be used; the account you authorise is verified against what you type here.
+            </p>
+            <button type="submit" class="ops-button">Install the read-only app</button>
+        </form>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Connect an Azure DevOps organisation</h2>
+    <p class="ops-empty-state">
+        Azure DevOps Services (dev.azure.com) only. Use a personal access token with the
+        <strong>Code (Read)</strong> scope and nothing else, ideally owned by a dedicated read-only
+        account: the token reads what its owner can read. It is verified against the organisation
+        before it is stored, encrypted at rest, never shown again, and never replaced by a shared
+        deployment credential. You choose repositories on the next page, from the ones the token can read.
+    </p>
+    <form asp-controller="StaffAzureDevOpsEvidence" asp-action="Connect" method="post" class="ops-form">
+        <label>
+            Organisation (the part after dev.azure.com/)
+            <input type="text" name="organisation" maxlength="50" required />
+        </label>
+        <label>
+            Personal access token
+            <input type="password" name="accessToken" maxlength="256" required autocomplete="off" />
+        </label>
+        <label>
+            Token expires on (optional — syncs stop with a clear message after this date)
+            <input type="date" name="expiresOn" />
+        </label>
+        <button type="submit" class="ops-button">Verify and continue</button>
+    </form>
+</section>

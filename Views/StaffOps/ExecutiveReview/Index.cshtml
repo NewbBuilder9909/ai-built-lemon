@@ -1,0 +1,44 @@
+@model ProgrammePulse.Models.ExecutiveReview.ExecutiveReviewViewModel
+
+<a asp-controller="StaffExecutiveDecision" asp-action="Index">@Localizer["Decision.Queue"]</a>
+
+@if (Model.ErrorKey is string error)
+{
+    <p class="ops-empty-state" role="alert">@Localizer[error]</p>
+}
+@if (Model.CanCapture)
+{
+    <form asp-action="Capture" method="post" class="ops-filter-bar">
+        <div class="ops-filter-bar__field">
+            <label for="source">@Localizer["Review.Source"]</label>
+            <select name="source" id="source" required>
+                @foreach (var source in Model.Sources) { <option value="@source.Name">@source.DisplayName</option> }
+            </select>
+        </div>
+        <button type="submit" class="ops-button" disabled="@(Model.Sources.Count == 0)">@Localizer["Review.Capture"]</button>
+    </form>
+}
+<h2>@Localizer["Review.RecentPacks"]</h2>
+@if (Model.Packs.Count == 0)
+{
+    <p class="ops-empty-state">@Localizer["Review.NoPacks"]</p>
+}
+else
+{
+    <div class="ops-table-scroll">
+        <table class="ops-table">
+            <thead><tr><th>@Localizer["Review.CapturedUtc"]</th><th>@Localizer["Review.Source"]</th><th>@Localizer["Open"]</th><th>@Localizer["Blocked"]</th><th>@Localizer["Review.Overdue"]</th><th>@Localizer["Review.OpenChange"]</th></tr></thead>
+            <tbody>
+                @foreach (var pack in Model.Packs)
+                {
+                    var previous = Model.Packs.FirstOrDefault(p => p.PackKey == pack.PreviousPackKey);
+                    <tr>
+                        <td><a asp-action="Pack" asp-route-packKey="@pack.PackKey">@pack.CapturedAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</a></td>
+                        <td>@pack.Source</td><td>@pack.Open</td><td>@pack.Blocked</td><td>@pack.Overdue</td>
+                        <td>@(previous is null ? Localizer["Review.Unknown"].Value : (pack.Open - previous.Open).ToString("+0;-0;0"))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

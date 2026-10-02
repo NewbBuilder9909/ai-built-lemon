@@ -1,0 +1,306 @@
+@using ProgrammePulse.Models.SkillsEvidence
+@using ProgrammePulse.Models.Staff
+@using ProgrammePulse.Models.ViewModels.SkillsEvidence
+@model ContinuityPlanPageViewModel
+
+@{
+    var message = ViewData["Message"] as string;
+    var report = Model.Report;
+    var roster = Model.Roster;
+    var actions = Model.Actions;
+    var canManage = Model.CanManage;
+    var canRecordDecision = Model.CanRecordDecision;
+    var names = roster.ToDictionary(s => s.StaffKey, s => s.FullName);
+    var componentNames = report.Components.ToDictionary(c => c.ComponentKey, c => c.DisplayName);
+    static string Words(Enum value) => ProgrammePulse.Services.Shared.DisplayText.Words(value);
+}
+
+<p class="ops-page-lede">
+    Who owns each part of the product, who is approved to cover them, and what is being done about the gaps,
+    as at @report.AsOf.ToString("yyyy-MM-dd"). This is about the organisation's exposure, not anyone's performance.
+    @if (canRecordDecision)
+    {
+        <a asp-controller="StaffContinuity" asp-action="Processing">Evidence collection basis</a>
+    }
+</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+@if (report.Components.Count == 0)
+{
+    <p class="ops-banner ops-banner--info" role="status">
+        No components are mapped yet. Key-person coverage is published only once a manager has
+        declared what the components are and who owns them — a risk register built on guesses is
+        worse than none.
+    </p>
+}
+else if (!report.IsPublishable)
+{
+    <p class="ops-banner ops-banner--info" role="status">
+        <strong>Every component's ownership record is stale.</strong> Confirm them before treating
+        the findings below as current.
+    </p>
+}
+
+<section aria-label="Where the organisation is exposed">
+    <div class="ops-kpi-row">
+        <div class="ops-kpi-card@(report.UnownedComponents > 0 ? " ops-kpi-card--alert" : "")">
+            <span class="ops-kpi-card__label">Nobody accountable</span>
+            <span class="ops-kpi-card__value">@report.UnownedComponents</span>
+            <span class="ops-kpi-card__sublabel">components with no owner</span>
+        </div>
+        <div class="ops-kpi-card@(report.SinglePersonExposures > 0 ? " ops-kpi-card--alert" : "")">
+            <span class="ops-kpi-card__label">One person, no cover</span>
+            <span class="ops-kpi-card__value">@report.SinglePersonExposures</span>
+            <span class="ops-kpi-card__sublabel">of @report.Components.Count components</span>
+        </div>
+        <div class="ops-kpi-card">
+            <span class="ops-kpi-card__label">Ownership not confirmed</span>
+            <span class="ops-kpi-card__value">@report.ComponentsWithStaleReview</span>
+            <span class="ops-kpi-card__sublabel">in the last @ProficiencyRubric.DefaultReviewIntervalMonths months</span>
+        </div>
+        <div class="ops-kpi-card@(report.OverdueActions > 0 ? " ops-kpi-card--alert" : "")">
+            <span class="ops-kpi-card__label">Open actions</span>
+            <span class="ops-kpi-card__value">@report.OpenActions</span>
+            <span class="ops-kpi-card__sublabel">@report.OverdueActions overdue</span>
+        </div>
+    </div>
+    @if (report.SkillVocabularyUnaligned)
+    {
+        <p class="ops-empty-state">
+            Your skill taxonomy contains no component-kind skills, so the reviewed-skill column is
+            empty throughout. Add component skills with matching keys to line the two up — they are
+            deliberately separate vocabularies until you do.
+        </p>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Components</h2>
+    @if (report.Components.Count == 0)
+    {
+        <p class="ops-empty-state">Nothing mapped yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Component owners, approved cover, review currency and open actions</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Component</th>
+                        <th scope="col">Owner</th>
+                        <th scope="col">Approved cover</th>
+                        <th scope="col">Reviewed skill cover</th>
+                        <th scope="col">Last confirmed</th>
+                        <th scope="col">Open actions</th>
+                        <th scope="col">Continuity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var row in report.Components)
+                {
+                    <tr class="@(row.HasNoOwner || row.IsSinglePersonExposure ? "ops-table__row--overdue" : "")">
+                        <td>@row.DisplayName</td>
+                        <td>@(row.OwnerName ?? "—")</td>
+                        <td>
+                            @if (row.ApprovedBackups.Count == 0)
+                            {
+                                <text>None</text>
+                            }
+                            else
+                            {
+                                @string.Join(", ", row.ApprovedBackups.Select(b => b.Name))
+                            }
+                        </td>
+                        <td>@(row.ValidatedSkillCover?.ToString() ?? "not tracked")</td>
+                        <td>
+                            @(row.LastReviewedAtUtc?.ToString("yyyy-MM-dd") ?? "never")
+                            @if (!row.IsReviewCurrent)
+                            {
+                                <strong> (stale)</strong>
+                            }
+                        </td>
+                        <td>@row.OpenActions@(row.OverdueActions > 0 ? $" ({row.OverdueActions} overdue)" : "")</td>
+                        <td>
+                            @if (row.HasNoOwner)
+                            {
+                                <text>Nobody accountable</text>
+                            }
+                            else if (row.IsSinglePersonExposure)
+                            {
+                                <text>One person, no approved cover</text>
+                            }
+                            else
+                            {
+                                <text>Covered</text>
+                            }
+                            @if (row.BackupsLackValidatedSkill)
+                            {
+                                <br /><small>Approved cover holds no validated skill at cover level — the plan or the skills record is out of date.</small>
+                            }
+                        </td>
+                    </tr>
+                    @if (canManage)
+                    {
+                        <tr class="ops-table__row--sub">
+                            <td colspan="7">
+                                <details class="ops-disclosure ops-manage">
+                                <summary>Manage<span class="ops-visually-hidden"> @row.DisplayName</span>: confirm, approve cover or raise an action</summary>
+                                <form asp-controller="StaffContinuity" asp-action="ConfirmComponent" asp-route-componentKey="@row.ComponentKey" method="post" class="ops-manage-form">
+                                    <button type="submit" class="ops-button ops-button--secondary ops-button--small">Ownership still true</button>
+                                </form>
+                                <form asp-controller="StaffContinuity" asp-action="ApproveBackup" asp-route-componentKey="@row.ComponentKey" method="post" class="ops-form ops-manage-form">
+                                    <label>
+                                        Approve cover
+                                        <select name="staffKey" required>
+                                            <option value="">Choose a colleague…</option>
+                                            @foreach (var staff in roster.Where(s => s.StaffKey != row.OwnerStaffKey))
+                                            {
+                                                <option value="@staff.StaffKey">@staff.FullName</option>
+                                            }
+                                        </select>
+                                    </label>
+                                    <label>
+                                        What would they need in order to step in? (optional)
+                                        <input type="text" name="note" maxlength="1000" />
+                                    </label>
+                                    <button type="submit" class="ops-button">Approve</button>
+                                </form>
+                                <form asp-controller="StaffContinuity" asp-action="RaiseAction" method="post" class="ops-form ops-manage-form">
+                                    <input type="hidden" name="componentKey" value="@row.ComponentKey" />
+                                    <label>
+                                        Raise
+                                        <select name="type" required>
+                                            @foreach (var type in Enum.GetValues<CoverageActionType>())
+                                            {
+                                                <option value="@type">@Words(type)</option>
+                                            }
+                                        </select>
+                                    </label>
+                                    <label>
+                                        Owner
+                                        <select name="ownerStaffKey" required>
+                                            <option value="">Who will do it?</option>
+                                            @foreach (var staff in roster)
+                                            {
+                                                <option value="@staff.StaffKey">@staff.FullName</option>
+                                            }
+                                        </select>
+                                    </label>
+                                    <label>
+                                        What exposure does this address? (required)
+                                        <input type="text" name="rationale" maxlength="1000" required />
+                                    </label>
+                                    <label>
+                                        Due by (optional)
+                                        <input type="date" name="dueOn" />
+                                    </label>
+                                    <button type="submit" class="ops-button">Raise action</button>
+                                </form>
+                                </details>
+                            </td>
+                        </tr>
+                    }
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Actions</h2>
+    @if (actions.Count == 0)
+    {
+        <p class="ops-empty-state">Nothing raised yet.</p>
+    }
+    else
+    {
+        @foreach (var action in actions.OrderBy(a => a.Outcome).ThenBy(a => a.DueOn))
+        {
+            <article class="ops-record@(action.IsOverdueOn(report.AsOf) && action.IsOpen ? " ops-record--alert" : "")">
+                <h3 class="ops-record__title">
+                    @Words(action.Type) — @(componentNames.GetValueOrDefault(action.ComponentKey) ?? action.ComponentKey)
+                    <span class="ops-chip">@Words(action.Outcome)</span>
+                </h3>
+                <p>
+                    Owner: @(action.OwnerStaffKey is { } ownerKey
+                        ? names.GetValueOrDefault(ownerKey) ?? "(no longer on the roster)"
+                        : "unassigned — needs an owner").
+                    Raised @action.RaisedAtUtc.ToString("yyyy-MM-dd").
+                    @if (action.DueOn is { } due)
+                    {
+                        <text>Due @due.ToString("yyyy-MM-dd")@(action.IsOverdueOn(report.AsOf) ? " (overdue)" : "").</text>
+                    }
+                </p>
+                <p><strong>Why:</strong> @action.Rationale</p>
+                @if (action.EvidenceSnapshot is not null)
+                {
+                    <p><strong>Based on, at the time:</strong> @action.EvidenceSnapshot</p>
+                }
+                @if (action.OutcomeNote is not null)
+                {
+                    <p><strong>What happened:</strong> @action.OutcomeNote</p>
+                }
+                @if (canManage && action.IsOpen)
+                {
+                    <form asp-controller="StaffContinuity" asp-action="CloseAction" asp-route-actionKey="@action.ActionKey" method="post" class="ops-form">
+                        <label>
+                            Outcome
+                            <select name="outcome" required>
+                                <option value="@CoverageActionOutcome.Completed">Completed</option>
+                                <option value="@CoverageActionOutcome.Abandoned">Abandoned</option>
+                            </select>
+                        </label>
+                        <label>
+                            What actually happened? (required — &ldquo;done&rdquo; with no detail is not a follow-up)
+                            <input type="text" name="outcomeNote" maxlength="1000" required />
+                        </label>
+                        <button type="submit" class="ops-button">Close</button>
+                    </form>
+                }
+            </article>
+        }
+    }
+</section>
+
+@if (canManage)
+{
+    <details class="ops-panel">
+        <summary class="ops-panel__summary"><h2 class="ops-panel__heading">Declare a component</h2></summary>
+        <p class="ops-empty-state">
+            Ownership is declared, never inferred. The product could guess an owner from who commits
+            most, and deliberately does not: the person who touches something most often is frequently
+            the person who has been left holding it, which is the exposure this page exists to find.
+        </p>
+        <form asp-controller="StaffContinuity" asp-action="DeclareComponent" method="post" class="ops-form">
+            <label>
+                Name
+                <input type="text" name="displayName" maxlength="200" required />
+            </label>
+            <label>
+                Key (optional — derived from the name; match a component skill key to line the two up)
+                <input type="text" name="componentKey" maxlength="128" />
+            </label>
+            <label>
+                Owner (optional, but an unowned component is the most exposed kind)
+                <select name="ownerStaffKey">
+                    <option value="">Nobody yet</option>
+                    @foreach (var staff in roster)
+                    {
+                        <option value="@staff.StaffKey">@staff.FullName</option>
+                    }
+                </select>
+            </label>
+            <label>
+                What is it? (optional)
+                <input type="text" name="description" maxlength="1000" />
+            </label>
+            <button type="submit" class="ops-button">Declare</button>
+        </form>
+    </details>
+}

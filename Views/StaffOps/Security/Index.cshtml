@@ -1,0 +1,147 @@
+@using ProgrammePulse.Models.SecurityAssurance
+@using ProgrammePulse.Models.ViewModels.ContractOps
+@using ProgrammePulse.Models.ViewModels.SecurityAssurance
+@model SecurityToolsPageViewModel
+
+@{
+    var message = ViewData["Message"] as string;
+    var connection = Model.Connection;
+    var snapshot = Model.Snapshot;
+}
+
+<p class="ops-empty-state">
+    Admin-only. A read-only connection to the security tool that scans your repositories. @ProductBrand.Value.Name reads which
+    repositories it scans, how each one's pull-request gate is configured, and finding <em>metadata</em>: severity, status,
+    type, CVE or rule, package and dates. Never file paths, line numbers, code or issue titles. It never changes a setting
+    and never blocks a merge; blocking stays in the tool's own pull-request check.
+    <a asp-controller="StaffContractAssurance" asp-action="Portfolio">Contract assurance</a>
+</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Aikido</h2>
+    @if (connection is null || connection.Status == SecurityConnectionStatus.Disconnected)
+    {
+        <p class="ops-empty-state">Not connected. Contract assurance relies on attestations alone.</p>
+    }
+    else
+    {
+        <p>
+            Region <strong>@connection.Region</strong>, client id <code>@connection.ClientId</code>.
+            Status: <strong>@ProgrammePulse.Services.Shared.DisplayText.Words(connection.Status)</strong>.
+            Credential: @(connection.HasCredential ? "stored, encrypted" : "none stored").
+            @if (connection.Status == SecurityConnectionStatus.AccessLost)
+            {
+                <strong> The credential no longer reads Aikido. Reconnect it.</strong>
+            }
+        </p>
+        <p>
+            Last clean read: @(connection.LastSyncSucceededAtUtc?.ToString("yyyy-MM-dd HH:mm") + " UTC" ?? "never").
+            @if (!string.IsNullOrWhiteSpace(connection.LastSyncError))
+            {
+                <br /><strong>Last run:</strong> @connection.LastSyncError
+            }
+        </p>
+        <form asp-controller="StaffSecurity" asp-action="Sync" method="post">
+            <button type="submit" class="ops-button">Sync now</button>
+        </form>
+        <form asp-controller="StaffSecurity" asp-action="Disconnect" method="post">
+            <button type="submit" class="ops-button">Disconnect and delete the credential</button>
+        </form>
+    }
+
+    <h3>@(connection is null || connection.Status == SecurityConnectionStatus.Disconnected ? "Connect" : "Replace the credential")</h3>
+    <p id="aikido-hint" class="ops-empty-state">
+        In Aikido, a workspace admin creates a REST API client under Integrations with read-only scopes:
+        issues:read, repositories:read and reports:read. The credential is checked against Aikido before it is stored.
+    </p>
+    <form asp-controller="StaffSecurity" asp-action="Connect" method="post" class="ops-filter-bar" aria-describedby="aikido-hint" autocomplete="off">
+        <div class="ops-filter-bar__field">
+            <label for="aikido-region">Region</label>
+            <select id="aikido-region" name="region">
+                @foreach (var region in Model.Regions)
+                {
+                    <option value="@region" selected="@(connection?.Region == region)">@ProgrammePulse.Services.Shared.DisplayText.Words(region)</option>
+                }
+            </select>
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="aikido-client-id">Client id</label>
+            <input id="aikido-client-id" name="clientId" maxlength="200" required />
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="aikido-client-secret">Client secret</label>
+            <input id="aikido-client-secret" name="clientSecret" type="password" autocomplete="new-password" required />
+        </div>
+        <button type="submit" class="ops-button">Verify and connect</button>
+    </form>
+</section>
+
+@if (snapshot.Connected)
+{
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Repositories Aikido scans (@snapshot.Observations.Count)</h2>
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Repositories, their pull-request gate and outstanding High or Critical findings</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Repository</th>
+                        <th scope="col">Pull-request gate</th>
+                        <th scope="col">Last scanned (UTC)</th>
+                        <th scope="col">High or Critical, not closed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var o in snapshot.Observations.OrderBy(o => o.Repository.DisplayName, StringComparer.OrdinalIgnoreCase))
+                    {
+                        var findings = snapshot.OutstandingFindings.Where(f => f.Repository.SameRepositoryAs(o.Repository)).ToList();
+                        <tr>
+                            <td>@o.Repository.DisplayName</td>
+                            <td>@AssuranceLabels.Gate(o)</td>
+                            <td>@(o.LastScannedAtUtc?.ToString("yyyy-MM-dd") ?? "Never")</td>
+                            <td>
+                                @findings.Count
+                                @if (findings.Count > 0)
+                                {
+                                    <span>(@findings.Count(f => f.Status == SecurityFindingStatus.Open) open,
+                                    @findings.Count(f => f.Status == SecurityFindingStatus.Ignored) ignored,
+                                    @findings.Count(f => f.Status == SecurityFindingStatus.Snoozed) snoozed)</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <p class="ops-empty-state">
+            Ignored and snoozed findings count as not closed: in Aikido they are a team's choice, not a contractual risk
+            acceptance. Which repositories serve which customer comes from the declared repository links, not from Aikido.
+        </p>
+    </section>
+
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Pull-request check runs, last 90 days <span class="ops-chip">Unverified</span></h2>
+        <p class="ops-empty-state">
+            Aikido's check-run fields have not yet been read from a live gated pull request, so these are shown as a prompt,
+            not as evidence. This label stays until a probe run confirms them.
+        </p>
+        @if (snapshot.RecentCheckRuns.Count == 0)
+        {
+            <p class="ops-empty-state">No check runs recorded.</p>
+        }
+        else
+        {
+            <ul>
+                @foreach (var group in snapshot.RecentCheckRuns.GroupBy(r => r.Outcome).OrderBy(g => g.Key))
+                {
+                    <li>@group.Key: @group.Count()</li>
+                }
+            </ul>
+        }
+    </section>
+}

@@ -1,0 +1,264 @@
+@using ProgrammePulse.Models.ContractOps
+@using ProgrammePulse.Models.ViewModels.ContractOps
+@using ProgrammePulse.Services.ContractOps
+@model ContractObligationsPageViewModel
+
+<a class="ops-back-link" asp-controller="StaffContract" asp-action="Detail" asp-route-contractKey="@Model.Contract.ContractKey">← Back to contract</a>
+<a class="ops-button" asp-controller="StaffContractAssurance" asp-action="Portfolio">Contract assurance</a>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@Model.Message</p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@Model.Contract.Reference: @Model.CustomerName</h2>
+    <p class="ops-empty-state">
+        The clauses of this contract that have an engineering consequence, and whether the repositories that serve
+        @Model.CustomerName can show they are met. @ProductBrand.Value.Name reports; it never blocks a merge. Blocking stays in the
+        customer's own tooling (for example Aikido's pull-request check, required by branch protection). A repository
+        counts only if it is linked to one of this customer's projects, and an attestation lapses after
+        @RepositoryControlAttestation.ValidityDays days. Unknown and expired are never shown as met.
+    </p>
+    @if (Model.SecurityToolConnected)
+    {
+        <p class="ops-empty-state">
+            Observed from Aikido, last read @Model.SecurityToolSyncedAtUtc?.ToString("yyyy-MM-dd HH:mm") UTC. For a repository
+            Aikido scans, its own gate settings and findings replace any attestation; a repository with no gate configured
+            reads as not in place. Findings Aikido marks ignored or snoozed still count until they are closed: neither is a
+            contractual risk acceptance.
+        </p>
+    }
+    else
+    {
+        <p class="ops-empty-state">
+            No security tool is connected, so every repository relies on attestations.
+            <a asp-controller="StaffSecurity" asp-action="Index">Connect Aikido</a> to read gate settings and findings directly.
+        </p>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Obligations</h2>
+    @if (Model.Assessments.Count == 0)
+    {
+        <p class="ops-empty-state">No obligations recorded for this contract.</p>
+    }
+    @foreach (var assessment in Model.Assessments)
+    {
+        var o = assessment.Obligation;
+        <article class="ops-panel">
+            <h3>@o.ClauseReference: @AssuranceLabels.Kind(o)</h3>
+            <p>@o.Description</p>
+            <p><strong>@AssuranceLabels.Status(assessment.Status)</strong></p>
+            @if (assessment.Repositories.Count > 0)
+            {
+                <div class="ops-table-scroll">
+                    <table class="ops-table">
+                        <caption class="ops-visually-hidden">Repositories serving @Model.CustomerName for @o.ClauseReference</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Repository</th>
+                                <th scope="col">Serves</th>
+                                <th scope="col">@AssuranceLabels.Control(o.RequiredControl!.Value)</th>
+                                <th scope="col">Evidence</th>
+                                <th scope="col">Lapses (UTC)</th>
+                                <th scope="col">Findings not closed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var r in assessment.Repositories)
+                            {
+                                var outstanding = r.OutstandingFindings ?? [];
+                                <tr>
+                                    <td>@r.Repository.DisplayName</td>
+                                    <td>@string.Join("; ", r.Projects)</td>
+                                    <td>@AssuranceLabels.Repository(r.Status, r.Source)</td>
+                                    <td>
+                                        @if (r.Source == AssuranceSource.Observation && r.Observation is not null)
+                                        {
+                                            @:Aikido: @AssuranceLabels.Gate(r.Observation)
+                                            @(r.Observation.LastScannedAtUtc is { } scanned ? $"; last scanned {scanned:yyyy-MM-dd}" : "; never scanned")
+                                        }
+                                        else
+                                        {
+                                            @(r.Attestation?.EvidenceReference ?? "None recorded")
+                                        }
+                                    </td>
+                                    <td>@(r.Source == AssuranceSource.Observation ? "Read at each sync" : r.Attestation?.ExpiresAtUtc.ToString("yyyy-MM-dd") ?? "—")</td>
+                                    <td>
+                                        @if (r.Source != AssuranceSource.Observation)
+                                        {
+                                            @:Not observed
+                                        }
+                                        else if (outstanding.Count == 0)
+                                        {
+                                            @:None
+                                        }
+                                        else
+                                        {
+                                            @outstanding.Count
+                                            @(r.OverdueFindings > 0 ? $" ({r.OverdueFindings} past the {o.RemediationDays}-day deadline)" : "")
+                                            @:; oldest first detected @outstanding[0].FirstDetectedAtUtc.ToString("yyyy-MM-dd")
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                var unheld = assessment.Repositories.SelectMany(r => r.UnheldChecks ?? []).ToList();
+                if (unheld.Count > 0)
+                {
+                    <h4>Pull-request checks bypassed or timed out <span class="ops-chip">Unverified</span></h4>
+                    <p class="ops-empty-state">
+                        Read from Aikido's check-run report. These fields have not yet been confirmed against a live gated
+                        pull request, so treat them as a prompt to look, not as evidence of a breach.
+                    </p>
+                    <ul>
+                        @foreach (var run in unheld)
+                        {
+                            <li>@run.Repository.DisplayName: @run.Outcome on @run.StartedAtUtc.ToString("yyyy-MM-dd")@(run.CommitSha is { } sha ? $", commit {sha[..Math.Min(7, sha.Length)]}" : "")</li>
+                        }
+                    </ul>
+                }
+
+                var findings = assessment.Repositories.SelectMany(r => r.OutstandingFindings ?? []).ToList();
+                if (findings.Count > 0)
+                {
+                    <details>
+                        <summary>@findings.Count findings not closed at the contracted severity</summary>
+                        <div class="ops-table-scroll">
+                            <table class="ops-table">
+                                <caption class="ops-visually-hidden">Findings not closed for @o.ClauseReference</caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Repository</th>
+                                        <th scope="col">Severity</th>
+                                        <th scope="col">Aikido status</th>
+                                        <th scope="col">Type</th>
+                                        <th scope="col">CVE or rule</th>
+                                        <th scope="col">Package</th>
+                                        <th scope="col">First detected (UTC)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var f in findings)
+                                    {
+                                        <tr>
+                                            <td>@f.Repository.DisplayName</td>
+                                            <td>@ProgrammePulse.Services.Shared.DisplayText.Words(f.Severity)</td>
+                                            <td>@ProgrammePulse.Services.Shared.DisplayText.Words(f.Status)</td>
+                                            <td>@f.FindingType</td>
+                                            <td>@(f.CveId ?? f.RuleId ?? "—")</td>
+                                            <td>@(f.AffectedPackage ?? "—")</td>
+                                            <td>@f.FirstDetectedAtUtc.ToString("yyyy-MM-dd")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                }
+            }
+            <form asp-controller="StaffContractAssurance" asp-action="WithdrawObligation" asp-route-contractKey="@Model.Contract.ContractKey" asp-route-obligationKey="@o.ObligationKey" method="post">
+                <button type="submit" class="ops-button">Withdraw obligation</button>
+            </form>
+        </article>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Record an attestation</h2>
+    @if (Model.RepositoriesInScope.Count == 0)
+    {
+        <p class="ops-empty-state">
+            No repository is linked to @Model.CustomerName's projects yet. Link repositories on the
+            <a asp-controller="StaffCodeRepository" asp-action="Index">code repositories</a> page first.
+        </p>
+    }
+    else
+    {
+        <p id="attest-hint" class="ops-empty-state">
+            Record what the repository's engineering lead confirmed, and where the evidence is: a screenshot of the branch
+            rule, an export of the security tool's settings, and who confirmed it. A new attestation replaces the last one
+            for the same repository and control; the old one stays on record.
+        </p>
+        <form asp-controller="StaffContractAssurance" asp-action="Attest" asp-route-contractKey="@Model.Contract.ContractKey" method="post" class="ops-filter-bar" aria-describedby="attest-hint">
+            <div class="ops-filter-bar__field">
+                <label for="attest-repository">Repository</label>
+                <select id="attest-repository" name="repository" required>
+                    <option value="">Choose…</option>
+                    @foreach (var r in Model.RepositoriesInScope)
+                    {
+                        <option value="@r.Repository.Provider|@r.Repository.SourceAccountId|@r.Repository.RepositoryKey">@r.Repository.DisplayName</option>
+                    }
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="attest-control">Control</label>
+                <select id="attest-control" name="control">
+                    <option value="@RepositoryControl.SecurityCheckRequired">@AssuranceLabels.Control(RepositoryControl.SecurityCheckRequired)</option>
+                    <option value="@RepositoryControl.SecurityScanningEnabled">@AssuranceLabels.Control(RepositoryControl.SecurityScanningEnabled)</option>
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="attest-state">In place?</label>
+                <select id="attest-state" name="state">
+                    <option value="@ControlState.Enforced">Yes, in place</option>
+                    <option value="@ControlState.NotEnforced">No, not in place</option>
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="attest-evidence">Evidence and who confirmed it</label>
+                <input id="attest-evidence" name="evidenceReference" maxlength="512" required />
+            </div>
+            <button type="submit" class="ops-button">Record attestation</button>
+        </form>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Record an obligation</h2>
+    <form asp-controller="StaffContractAssurance" asp-action="AddObligation" asp-route-contractKey="@Model.Contract.ContractKey" method="post" class="ops-filter-bar">
+        <div class="ops-filter-bar__field">
+            <label for="ob-kind">Kind</label>
+            <select id="ob-kind" name="Kind">
+                <option value="@ObligationKind.SecurityFindingGate">Security finding gate</option>
+                <option value="@ObligationKind.DataResidency">Data residency</option>
+                <option value="@ObligationKind.Encryption">Encryption</option>
+                <option value="@ObligationKind.DesignControl">Design control</option>
+            </select>
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="ob-clause">Clause reference</label>
+            <input id="ob-clause" name="ClauseReference" maxlength="128" required />
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="ob-description">What it requires</label>
+            <input id="ob-description" name="Description" maxlength="1000" required />
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="ob-severity">Severity (security gates)</label>
+            <select id="ob-severity" name="SeverityThreshold">
+                <option value="">—</option>
+                <option value="@FindingSeverity.High">High and Critical</option>
+                <option value="@FindingSeverity.Critical">Critical only</option>
+            </select>
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="ob-action">Action (security gates)</label>
+            <select id="ob-action" name="Action">
+                <option value="">—</option>
+                <option value="@GateAction.Block">Block before merge</option>
+                <option value="@GateAction.RemediateWithin">Fix within a deadline</option>
+            </select>
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="ob-days">Deadline in days</label>
+            <input id="ob-days" name="RemediationDays" type="number" min="1" max="365" />
+        </div>
+        <button type="submit" class="ops-button">Record obligation</button>
+    </form>
+</section>

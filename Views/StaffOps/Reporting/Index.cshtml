@@ -1,0 +1,372 @@
+@using ProgrammePulse.Models.Programme
+@using ProgrammePulse.Models.ViewModels.Reporting
+@model ReportingHubPageViewModel
+
+@{ ViewData["ReportActions"] = true; }
+@{
+    var hub = Model.Hub;
+    var canViewCost = Model.CanViewCost;
+    var customers = Model.Customers;
+    var programmes = Model.Programmes;
+    var programmeFilter = Model.ProgrammeFilter;
+    var customerFilter = Model.CustomerFilter;
+    var openAlertCount = Model.OpenAlertCount;
+    var message = ViewData["Message"] as string;
+    // The CSV of the same figures goes with the other report actions in the
+    // page header, carrying the current filters.
+    ViewData["ExportUrl"] = Url.Action("Export", "StaffReporting", new
+    {
+        from = hub.PeriodStart.ToString("yyyy-MM-dd"),
+        to = hub.PeriodEnd.ToString("yyyy-MM-dd"),
+        programmeKey = programmeFilter,
+        customerKey = customerFilter
+    });
+    var caveats = new List<string>();
+    if (hub.HasTempoDeletionCoverageGap)
+    {
+        caveats.Add("Tempo historical deletion coverage is not verified. Recorded hours may include deletions outside an audited window; verify totals before a decision.");
+    }
+    if (hub.UndatedTimeEntryHours > 0m)
+    {
+        caveats.Add($"{hub.UndatedTimeEntryHours:0.##} recorded hours have no work date and cannot be assigned to a reporting period.");
+    }
+    if (hub.UnknownBillabilityHours > 0m)
+    {
+        caveats.Add($"{hub.UnknownBillabilityHours:0.##} recorded hours have unverified billability. Billable utilisation includes only known classifications.");
+    }
+}
+
+<partial name="~/Views/StaffOps/Reporting/_ReportingNav.cshtml" model="@("hub")" />
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--error" role="alert">@message</p>
+}
+
+<form method="get" class="ops-filter-bar" aria-label="Reporting period and scope">
+    <div class="ops-filter-bar__field">
+        <label for="from">@Localizer["From"]</label>
+        <input type="date" id="from" name="from" value="@hub.PeriodStart.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="ops-filter-bar__field">
+        <label for="to">@Localizer["To"]</label>
+        <input type="date" id="to" name="to" value="@hub.PeriodEnd.ToString("yyyy-MM-dd")" />
+    </div>
+    @if (programmes is { Count: > 0 })
+    {
+        <div class="ops-filter-bar__field">
+            <label for="programmeKey">@Localizer["Programme"]</label>
+            <select id="programmeKey" name="programmeKey">
+                <option value="">@Localizer["AllProgrammes"]</option>
+                @foreach (var programme in programmes)
+                {
+                    <option value="@programme.ProgrammeKey" selected="@(programme.ProgrammeKey == programmeFilter ? "selected" : null)">@programme.Name</option>
+                }
+            </select>
+        </div>
+    }
+    @if (customers is { Count: > 0 })
+    {
+        <div class="ops-filter-bar__field">
+            <label for="customerKey">@Localizer["Customer"]</label>
+            <select id="customerKey" name="customerKey">
+                <option value="">@Localizer["AllCustomers"]</option>
+                @foreach (var customer in customers)
+                {
+                    <option value="@customer.CustomerKey" selected="@(customer.CustomerKey == customerFilter ? "selected" : null)">@customer.Name</option>
+                }
+            </select>
+        </div>
+    }
+    <button type="submit" class="ops-button">@Localizer["Update"]</button>
+    @if (!string.IsNullOrWhiteSpace(hub.TeamFilter))
+    {
+        <span class="ops-empty-state">@string.Format(Localizer["ScopedToTeam"], hub.TeamFilter)</span>
+    }
+    else if (hub.TeamFilter is not null)
+    {
+        <span class="ops-empty-state">@Localizer["NoTeamScope"]</span>
+    }
+    @if (openAlertCount > 0)
+    {
+        <a class="ops-filter-bar__aside" asp-controller="StaffReportingAlerts" asp-action="Alerts">@Localizer["Alerts"] (@openAlertCount)</a>
+    }
+</form>
+
+<p><strong>Delivery scope:</strong> @hub.Scope.Label.
+    Delivery KPIs, effort variance and customer totals use this scope.
+    Contributor capacity remains team/organisation-wide across all programmes; unlinked hours, billability and undated-time warnings remain organisation-wide.</p>
+<p><a asp-controller="StaffProgrammeOverview" asp-action="Index" asp-route-programmeKey="@programmeFilter" asp-route-customerKey="@customerFilter">Programme health in this scope</a></p>
+<p>Cost summary, trend history and alerts retain their own organisation/team scope.</p>
+
+@if (caveats.Count == 1)
+{
+    <p class="ops-banner ops-banner--warning" role="status">@caveats[0]</p>
+}
+else if (caveats.Count > 1)
+{
+    <div class="ops-banner ops-banner--warning" role="status">
+        <strong>@Localizer["Reporting.Caveats"]</strong>
+        <ul class="ops-validation-list">
+            @foreach (var caveat in caveats)
+            {
+                <li>@caveat</li>
+            }
+        </ul>
+    </div>
+}
+
+<section class="ops-kpi-row" aria-label="Reporting key performance indicators">
+    @foreach (var card in hub.KpiCards)
+    {
+        <partial name="~/Views/OperationsHub/Partials/_KpiCard.cshtml" model="card" />
+    }
+</section>
+
+<section class="ops-panel">
+    <div class="ops-panel__header">
+        <h2 class="ops-panel__heading">@Localizer["Effort Variance (Estimated vs Actual)"]</h2>
+        <span class="ops-panel__meta">@Localizer["Hours.AllInHours"]</span>
+    </div>
+    <p>Effort variance is cumulative. Forecasts are unavailable until an approved remaining-effort estimate exists; workflow counts do not establish earned value or financial performance.</p>
+    @if (hub.EffortVariance.Count == 0)
+    {
+        <p class="ops-empty-state">@Localizer["No workstreams with work items yet."]</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">@Localizer["Effort variance by workstream: estimated hours versus actual logged hours"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Localizer["Workstream"]</th>
+                        <th scope="col">@Localizer["Hours.Estimated"]</th>
+                        <th scope="col">@Localizer["Hours.Coverage"]</th>
+                        <th scope="col">@Localizer["Hours.Actual"]</th>
+                        <th scope="col">@Localizer["Hours.Variance"]</th>
+                        <th scope="col">@Localizer["Hours.Baseline"]</th>
+                        <th scope="col">@Localizer["Hours.VsBaseline"]</th>
+                        <th scope="col">@Localizer["Hours.Forecast"]</th>
+                        <th scope="col">@Localizer["Hours.VsForecast"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in hub.EffortVariance)
+                    {
+                        <tr class="@(row.VarianceHours > 0 ? "ops-table__row--overdue" : "")">
+                            @* Programme and project ride under the workstream name:
+                               two fewer columns was what let this table fit. *@
+                            <td>
+                                @row.WorkstreamName
+                                <span class="ops-cell-context">@row.ProgrammeName › @row.ProjectName</span>
+                            </td>
+                            <td class="num">@row.EstimatedHours.ToString("0.#")</td>
+                            <td class="num">
+                                @(row.EstimateCoveragePercent)%
+                                @if (row.WorkItemsWithoutEstimate > 0)
+                                {
+                                    <span class="ops-cell-context">@row.WorkItemsWithoutEstimate @Localizer["without estimate"]</span>
+                                }
+                            </td>
+                            <td class="num">@row.ActualHours.ToString("0.#")</td>
+                            <td class="num">@row.VarianceHours.ToString("0.#")</td>
+                            @if (row.BaselineHours is decimal baselineHours)
+                            {
+                                <td class="num">@baselineHours.ToString("0.#")</td>
+                                <td class="num">@row.BaselineVarianceHours?.ToString("0.#")</td>
+                            }
+                            else
+                            {
+                                var estimatedDisplay = row.EstimatedHours.ToString("0.#");
+                                var lockLabel = $"Lock baseline for {row.WorkstreamName} at {estimatedDisplay} hours";
+                                <td colspan="2">
+                                    <form asp-controller="StaffGovernance" asp-action="LockBaseline" method="post">
+                                        <input type="hidden" name="programmeFilter" value="@programmeFilter" />
+                                        <input type="hidden" name="customerFilter" value="@customerFilter" />
+                                        <input type="hidden" name="from" value="@hub.PeriodStart.ToString("yyyy-MM-dd")" />
+                                        <input type="hidden" name="to" value="@hub.PeriodEnd.ToString("yyyy-MM-dd")" />
+                                        <input type="hidden" name="workstreamKey" value="@row.WorkstreamKey" />
+                                        <input type="hidden" name="baselineHours" value="@row.EstimatedHours" />
+                                        <button type="submit" class="ops-button ops-button--secondary ops-button--small" aria-label="@lockLabel">Lock baseline</button>
+                                    </form>
+                                </td>
+                            }
+                            @if (row.ForecastAtCompletionHours is decimal forecast)
+                            {
+                                <td class="num">@forecast.ToString("0.#")</td>
+                                <td class="num">@row.ForecastVarianceHours?.ToString("0.#")</td>
+                            }
+                            else
+                            {
+                                <td colspan="2"><span class="ops-cell-context">@(row.BaselineHours is null ? "needs a baseline" : "needs a closed item")</span></td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@* Record-level detail for whoever fixes the source mapping; a reader of the
+   report needs the total, so the rows start folded. *@
+<section class="ops-panel" aria-label="Unlinked recorded time">
+    @if (hub.UnlinkedTime.Count == 0)
+    {
+        <h2 class="ops-panel__heading">Unlinked recorded time</h2>
+        <p class="ops-empty-state">No unlinked dated time entries in this period.</p>
+    }
+    else
+    {
+        <details>
+            <summary class="ops-panel__summary">
+                <h2 class="ops-panel__heading">@string.Format(Localizer["Reporting.Unlinked"].Value, hub.UnlinkedTime.Count, hub.UnlinkedTime.Sum(r => r.DurationHours).ToString("0.##"))</h2>
+            </summary>
+            <p class="ops-empty-state">These source hours cannot be assigned to a work item. Project variance excludes them until the source issue or mapping is resolved.</p>
+            <div class="ops-table-scroll">
+                <table class="ops-table">
+                    <caption class="ops-visually-hidden">Unlinked time entries by source, work date and hours</caption>
+                    <thead><tr><th scope="col">Source</th><th scope="col">Source record ID</th><th scope="col">Work date</th><th scope="col">Hours</th><th scope="col">Person mapped</th></tr></thead>
+                    <tbody>
+                        @foreach (var row in hub.UnlinkedTime)
+                        {
+                            <tr><td>@row.Source</td><td>@row.ExternalId</td><td>@row.WorkDate.ToString("yyyy-MM-dd")</td><td>@row.DurationHours.ToString("0.##")</td><td>@(row.HasResolvedPerson ? "Yes" : "No")</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </details>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@Localizer["Team Capacity Summary"]</h2>
+    @if (hub.ExcludedOversightStaff is { Count: > 0 } excludedOversight)
+    {
+        @* Named rather than silently dropped: StaffRole.OversightOnly. *@
+        <p class="ops-empty-state">
+            Not counted as delivery capacity: @string.Join(", ", excludedOversight), who
+            @(excludedOversight.Count == 1 ? "holds" : "hold") only oversight roles (Board, Analyst or Platform Admin)
+            and recorded no time in this period. Recorded time would bring them back in.
+        </p>
+    }
+    @if (hub.TeamCapacitySubtotals.Count == 0)
+    {
+        <p class="ops-empty-state">@Localizer["No active staff in scope for this period."]</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">@Localizer["Capacity and residual availability, subtotalled by team"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Localizer["Team"]</th>
+                        <th scope="col">@Localizer["Contributors"]</th>
+                        <th scope="col">@Localizer["Baseline (hrs)"]</th>
+                        <th scope="col">@Localizer["Leave (hrs)"]</th>
+                        <th scope="col">@Localizer["Logged (hrs)"]</th>
+                        <th scope="col">@Localizer["Residual (hrs)"]</th>
+                        <th scope="col">@Localizer["Utilisation"]</th>
+                        <th scope="col">@Localizer["Billable Utilisation"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in hub.TeamCapacitySubtotals)
+                    {
+                        <tr class="@(row.ResidualCapacityHours < 0 ? "ops-table__row--overdue" : "")">
+                            <td>@row.TeamName</td>
+                            <td>@row.ContributorCount</td>
+                            <td>@row.BaselineHours.ToString("0.##")</td>
+                            <td>@row.LeaveHours.ToString("0.##")</td>
+                            <td>@row.LoggedHours.ToString("0.##")</td>
+                            <td>@row.ResidualCapacityHours.ToString("0.##")</td>
+                            <td>@(row.UtilisationPercent)%</td>
+                            <td>@(row.BillableUtilisationPercent)%</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@Localizer["Contributor Capacity & Residual"]</h2>
+    @if (hub.ContributorCapacity.Count == 0)
+    {
+        <p class="ops-empty-state">@Localizer["No active staff in scope for this period."]</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">@Localizer["Contributor capacity and residual availability by staff member"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Localizer["Staff"]</th>
+                        <th scope="col">@Localizer["Team"]</th>
+                        <th scope="col">@Localizer["Baseline (hrs)"]</th>
+                        <th scope="col">@Localizer["Leave (hrs)"]</th>
+                        <th scope="col">@Localizer["Logged (hrs)"]</th>
+                        <th scope="col">@Localizer["Residual (hrs)"]</th>
+                        <th scope="col">@Localizer["Utilisation"]</th>
+                        <th scope="col">@Localizer["Billable Utilisation"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in hub.ContributorCapacity)
+                    {
+                        <tr class="@(row.ResidualCapacityHours < 0 ? "ops-table__row--overdue" : "")">
+                            <td>@row.StaffFullName</td>
+                            <td>@(row.Team ?? "—")</td>
+                            <td>@row.BaselineHours.ToString("0.##")</td>
+                            <td>@row.LeaveHours.ToString("0.##")</td>
+                            <td>@row.LoggedHours.ToString("0.##")</td>
+                            <td>@row.ResidualCapacityHours.ToString("0.##")</td>
+                            <td>@(row.UtilisationPercent)%</td>
+                            <td>@(row.BillableUtilisationPercent)%</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@Localizer["Portfolio by Customer"]</h2>
+    @if (hub.CustomerRollup.Count == 0)
+    {
+        <p class="ops-empty-state">@Localizer["No programmes yet — run a ClickUp sync to populate this page."]</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">@Localizer["Portfolio rollup by customer"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Localizer["Customer"]</th>
+                        <th scope="col">@Localizer["Programmes"]</th>
+                        <th scope="col">@Localizer["Open Work Items"]</th>
+                        <th scope="col">@Localizer["Blocked"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in hub.CustomerRollup)
+                    {
+                        <tr>
+                            <td>@row.CustomerName</td>
+                            <td>@row.ProgrammeCount</td>
+                            <td>@row.OpenWorkItems</td>
+                            <td>@row.BlockedWorkItems</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+

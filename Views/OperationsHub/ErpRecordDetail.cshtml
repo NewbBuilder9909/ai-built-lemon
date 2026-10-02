@@ -1,0 +1,57 @@
+@model ErpRecordDetailViewModel
+
+<a class="ops-back-link" asp-controller="ErpRecords" asp-action="Index">&larr; @Localizer["BackToErpRecords"]</a>
+
+<section class="ops-panel" aria-labelledby="record-heading">
+    <div class="ops-record-header">
+        <h2 id="record-heading" class="ops-panel__heading">@Model.ErpId</h2>
+        <span class="ops-chip @Model.ProcessingStageCssClass">@Localizer["Pipeline:"] @Localizer[Model.ProcessingStageDisplay]</span>
+        <span class="ops-chip @Model.NormalisedStatusCssClass">@Localizer["Status:"] @Localizer[Model.NormalisedStatusDisplay]</span>
+    </div>
+
+    <dl class="ops-detail-grid">
+        <div class="ops-detail-grid__item">
+            <dt>@Localizer["Customer / Account"]</dt>
+            <dd>@Model.CustomerDisplay</dd>
+        </div>
+        <div class="ops-detail-grid__item">
+            <dt>@Localizer["Work Type"]</dt>
+            <dd>@Model.WorkTypeDisplay</dd>
+        </div>
+        <div class="ops-detail-grid__item">
+            <dt>@Localizer["Raw Status (source system)"]</dt>
+            <dd>@Model.RawStatusDisplay</dd>
+        </div>
+        <div class="ops-detail-grid__item">
+            <dt>@Localizer["Amount"]</dt>
+            <dd>@Model.AmountDisplay</dd>
+        </div>
+        <div class="ops-detail-grid__item">
+            <dt>@Localizer["Source-System Date"]</dt>
+            <dd>@Model.RawSourceDateDisplay</dd>
+        </div>
+        <div class="ops-detail-grid__item">
+            <dt>@Localizer["Normalised UTC Date"]</dt>
+            <dd>@Model.NormalisedUtcDateDisplay</dd>
+        </div>
+    </dl>
+</section>
+
+<section class="ops-panel" aria-labelledby="validation-heading">
+    <h2 id="validation-heading" class="ops-panel__heading">
+        @Localizer["Validation Result —"] <span class="ops-chip @Model.Validation.CssClass">@Model.Validation.Label</span>
+    </h2>
+    @if (Model.Validation.Messages.Count == 0)
+    {
+        <p class="ops-empty-state">@Localizer["No validation messages for this record."]</p>
+    }
+    else
+    {
+        <ul class="ops-validation-list">
+            @foreach (var message in Model.Validation.Messages)
+            {
+                <li>@message</li>
+            }
+        </ul>
+    }
+</section>

@@ -1,0 +1,171 @@
+@using ProgrammePulse.Models.SkillsEvidence
+@using ProgrammePulse.Models.Staff
+@using ProgrammePulse.Models.ViewModels.SkillsEvidence
+@model SuggestionsPageViewModel
+
+@{
+    var message = ViewData["Message"] as string;
+    var suggestions = Model.Suggestions;
+    var roster = Model.Roster;
+    var names = Model.Names;
+    var canDecide = Model.CanDecide;
+    var open = suggestions.Where(s => s.IsOpen).ToList();
+    var decided = suggestions.Where(s => !s.IsOpen).ToList();
+}
+
+<p class="ops-empty-state">
+    Proposals drawn from evidence already collected. <strong>Nothing here is a fact, and nothing
+    becomes one on its own.</strong> Every suggestion needs a person to accept it, and what
+    acceptance can create is deliberately limited — see below.
+    <a asp-controller="StaffContinuity" asp-action="Index">Key-person coverage</a>
+</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">What accepting can and cannot do</h2>
+    <ul>
+        <li>
+            Accepting a <strong>skill suggestion</strong> records an <em>unreviewed,
+            Awareness-level</em> claim — the weakest thing this system can express — which then
+            goes through exactly the same review as a skill somebody typed in themselves. It cannot
+            create a validated skill, and if there is already a record for that skill it is refused
+            outright, so it can never raise an existing level.
+        </li>
+        <li>
+            Accepting a <strong>coverage suggestion</strong> raises an action with an owner you
+            choose. It does not nominate anyone as cover — a person does that.
+        </li>
+        <li>
+            Nothing here can produce a confirmed root cause. A case relationship is a relationship;
+            only a reviewer, having looked, can say a change caused a case.
+        </li>
+    </ul>
+    <p class="ops-empty-state">
+        Confidence is a band, not a percentage. These are threshold rules over counted evidence —
+        @SuggestionThresholds.MinimumArtefactsForSkillTag artefacts for a suggestion at all,
+        @SuggestionThresholds.ModerateArtefacts for moderate, @SuggestionThresholds.StrongArtefacts for strong —
+        so &ldquo;why did it suggest that?&rdquo; has an answer you can check. A percentage would
+        imply a calibrated model, and there isn't one.
+    </p>
+    @if (canDecide)
+    {
+        <form asp-controller="StaffContinuity" asp-action="GenerateSuggestions" method="post">
+            <button type="submit" class="ops-button">Look for suggestions now</button>
+        </form>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Waiting for a decision (@open.Count)</h2>
+    @if (open.Count == 0)
+    {
+        <p class="ops-empty-state">Nothing is waiting. Suggestions appear after an evidence sync has run.</p>
+    }
+    else
+    {
+        @foreach (var suggestion in open)
+        {
+            <article class="ops-panel">
+                <h3>
+                    @suggestion.Kind — @suggestion.SubjectKey
+                    @if (suggestion.SubjectStaffKey is { } subject)
+                    {
+                        <text> for @(names.GetValueOrDefault(subject) ?? "(unknown)")</text>
+                    }
+                </h3>
+                <p>
+                    <strong>@suggestion.Confidence</strong> confidence, from
+                    @suggestion.EvidenceCount artefact@(suggestion.EvidenceCount == 1 ? "" : "s")
+                    between @suggestion.ObservedFrom.ToString("yyyy-MM-dd") and @suggestion.ObservedTo.ToString("yyyy-MM-dd").
+                </p>
+                <p>@suggestion.Rationale</p>
+
+                @if (suggestion.Citations.Count > 0)
+                {
+                    <p>
+                        Based on:
+                        @foreach (var citation in suggestion.Citations)
+                        {
+                            <a href="@citation" rel="noopener noreferrer nofollow" target="_blank">source</a>
+                            <text> </text>
+                        }
+                    </p>
+                }
+
+                @if (canDecide)
+                {
+                    <form asp-controller="StaffContinuity" asp-action="AcceptSuggestion" asp-route-suggestionKey="@suggestion.SuggestionKey" method="post" class="ops-form">
+                        @if (suggestion.Kind == SuggestionKind.CoverageGap)
+                        {
+                            <label>
+                                Who will own the action?
+                                <select name="actionOwnerStaffKey" required>
+                                    <option value="">Choose a colleague…</option>
+                                    @foreach (var staff in roster)
+                                    {
+                                        <option value="@staff.StaffKey">@staff.FullName</option>
+                                    }
+                                </select>
+                            </label>
+                        }
+                        <button type="submit" class="ops-button">Accept</button>
+                    </form>
+                    <form asp-controller="StaffContinuity" asp-action="DismissSuggestion" asp-route-suggestionKey="@suggestion.SuggestionKey" method="post" class="ops-form">
+                        <label>
+                            Why not? (optional)
+                            <input type="text" name="note" maxlength="1000" />
+                        </label>
+                        <button type="submit" class="ops-button">Dismiss</button>
+                    </form>
+                }
+            </article>
+        }
+    }
+</section>
+
+@if (decided.Count > 0)
+{
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Decided (@decided.Count)</h2>
+        <p class="ops-empty-state">
+            Kept so the same proposal is not raised again. A suggestion engine that nags is one
+            people learn to ignore, and an ignored queue hides the useful entries.
+        </p>
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Suggestions already accepted or dismissed</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Kind</th>
+                        <th scope="col">Subject</th>
+                        <th scope="col">Outcome</th>
+                        <th scope="col">Decided</th>
+                        <th scope="col">Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var suggestion in decided)
+                {
+                    <tr>
+                        <td>@ProgrammePulse.Services.Shared.DisplayText.Words(suggestion.Kind)</td>
+                        <td>
+                            @suggestion.SubjectKey
+                            @if (suggestion.SubjectStaffKey is { } subject)
+                            {
+                                <text> — @(names.GetValueOrDefault(subject) ?? "(unknown)")</text>
+                            }
+                        </td>
+                        <td>@ProgrammePulse.Services.Shared.DisplayText.Words(suggestion.Outcome)</td>
+                        <td>@(suggestion.DecidedAtUtc?.ToString("yyyy-MM-dd") ?? "—")</td>
+                        <td>@(suggestion.DecisionNote ?? "—")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}

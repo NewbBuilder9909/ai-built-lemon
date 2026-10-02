@@ -1,0 +1,35 @@
+@* Settings: people, branding, modules and the audit trail. Each link is
+   gated on the capability (and plan feature) its action enforces. The model
+   is the key of the current page. *@
+@model string
+@inject ProgrammePulse.Services.Staff.IStaffAuthorizationService StaffAuthorization
+@inject ProgrammePulse.Services.Tenancy.IFeatureGate FeatureGate
+@{
+    var canPeople = await StaffAuthorization.HasAsync(Capability.ManageStaff);
+    var canBranding = await StaffAuthorization.HasAsync(Capability.ManageBranding)
+        && await FeatureGate.IsEnabledAsync(ProgrammePulse.Models.Tenancy.ProductFeature.Branding);
+    var canModules = await StaffAuthorization.HasAsync(Capability.ManageModules);
+    var canAudit = await StaffAuthorization.HasAsync(Capability.ViewAudit);
+    string Css(string key) => key == Model ? "ops-subnav__link ops-subnav__link--active" : "ops-subnav__link";
+    string? Current(string key) => key == Model ? "page" : null;
+}
+<nav class="ops-subnav" aria-label="@Localizer["Nav.Settings"]">
+    <ul>
+        @if (canPeople)
+        {
+            <li><a class="@Css("people")" aria-current="@Current("people")" asp-controller="StaffAdmin" asp-action="Index">@Localizer["Nav.People"]</a></li>
+        }
+        @if (canBranding)
+        {
+            <li><a class="@Css("branding")" aria-current="@Current("branding")" asp-controller="StaffBranding" asp-action="Index">@Localizer["Branding"]</a></li>
+        }
+        @if (canModules)
+        {
+            <li><a class="@Css("modules")" aria-current="@Current("modules")" asp-controller="StaffModules" asp-action="Index">@Localizer["Nav.Modules"]</a></li>
+        }
+        @if (canAudit)
+        {
+            <li><a class="@Css("audit")" aria-current="@Current("audit")" asp-controller="StaffAdmin" asp-action="Audit">@Localizer["Nav.Audit"]</a></li>
+        }
+    </ul>
+</nav>

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "provider": "GitHub-or-Freshdesk",
+  "environment": "disposable-sandbox",
+  "buildCommit": "replace-with-tested-commit",
+  "testedAtUtc": "YYYY-MM-DDTHH:MM:SSZ",
+  "tester": "named-owner",
+  "result": "NotRun",
+  "scenarios": [
+    {
+      "id": "scenario-id",
+      "expected": "observable expected result",
+      "actual": "record after execution",
+      "result": "NotRun",
+      "evidenceReference": "path-or-controlled-link-without-secrets"
+    }
+  ],
+  "limitations": [],
+  "followUpOwner": "named-owner",
+  "reviewByUtc": "YYYY-MM-DDTHH:MM:SSZ"
+}

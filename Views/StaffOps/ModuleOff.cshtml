@@ -1,0 +1,17 @@
+@inject ProgrammePulse.Services.Staff.IStaffAuthorizationService StaffAuthorization
+@{
+    var module = ViewData["Message"] as string;
+    var canSwitch = await StaffAuthorization.HasAsync(Capability.ManageModules);
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@module is switched off</h2>
+    @if (canSwitch)
+    {
+        <p>You can switch it on for your organisation in <a asp-controller="StaffModules" asp-action="Index">Settings → Modules</a>.</p>
+    }
+    else
+    {
+        <p>Your administrator can switch it on if your organisation needs it.</p>
+    }
+</section>

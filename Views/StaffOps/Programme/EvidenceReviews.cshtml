@@ -1,0 +1,51 @@
+@using ProgrammePulse.Controllers
+@using ProgrammePulse.Services.ProgrammeOps
+@model IReadOnlyList<EvidenceReview>
+
+<a class="ops-back-link" href="/staffops/programme/evidence-check">← Evidence Check</a>
+
+<section class="ops-panel" aria-label="Recorded reviews">
+    <h2 class="ops-panel__heading">Recorded reviews</h2>
+    <p class="ops-empty-state">
+        Each row is the Evidence Check as it stood when it was recorded, with the decisions taken on it. Only the latest
+        review can take new decisions; earlier ones are the record of what the review knew at the time.
+    </p>
+    @if (Model.Count == 0)
+    {
+        <p class="ops-empty-state">No review recorded yet. Record the check from the Evidence Check page before your next review meeting.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Recorded Evidence Check reviews, newest first</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Recorded (UTC)</th>
+                        <th scope="col">Scope and period</th>
+                        <th scope="col">Readiness</th>
+                        <th scope="col">Evidence gaps</th>
+                        <th scope="col">Delivery exceptions</th>
+                        <th scope="col">Findings with an owner</th>
+                        <th scope="col">Decided this review</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var review in Model)
+                    {
+                        var findings = review.Findings;
+                        <tr>
+                            <td><a href="/staffops/programme/evidence-check/reviews/@review.ReviewKey">@review.RecordedAtUtc.ToString("yyyy-MM-dd HH:mm")</a></td>
+                            <td>@(review.Scope is { } s ? $"{s.Label}, {s.PeriodFrom:d MMM} to {s.PeriodTo:d MMM yyyy}" : "Whole organisation, all time")</td>
+                            <td>@StaffEvidenceCheckController.Label(review.Readiness)</td>
+                            <td>@findings.Count(f => f.Category == EvidenceFindingCategory.EvidenceGap)</td>
+                            <td>@findings.Count(f => f.Category == EvidenceFindingCategory.DeliveryException)</td>
+                            <td>@findings.Count(f => f.OwnerStaffKey is not null) of @findings.Count</td>
+                            <td>@findings.Count(f => f.DecidedAtUtc is not null && !f.CarriedForward) of @findings.Count</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

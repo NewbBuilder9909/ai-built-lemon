@@ -1,0 +1,175 @@
+@model BrandingAdminViewModel
+@{
+    var f = Model.Form;
+}
+
+<partial name="~/Views/StaffOps/Settings/_SettingsNav.cshtml" model="@("branding")" />
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@Model.Message</p>
+}
+
+@if (Model.ValidationErrors.Count > 0)
+{
+    <div class="ops-banner ops-banner--error" role="alert" aria-live="assertive">
+        <ul class="ops-validation-list">
+            @foreach (var error in Model.ValidationErrors)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+
+@if (Model.ValidationWarnings.Count > 0)
+{
+    <div class="ops-banner ops-banner--info" role="status" aria-live="polite">
+        <ul class="ops-validation-list">
+            @foreach (var warning in Model.ValidationWarnings)
+            {
+                <li>@warning</li>
+            }
+        </ul>
+    </div>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Branding settings</h2>
+    <p class="ops-empty-state">
+        @(Model.HasDraft ? "Editing an unpublished draft." : "No draft in progress — editing starts a new one.")
+        @(Model.HasPublished ? "" : " No branding has been published yet; the platform default theme is live.")
+    </p>
+
+    <form asp-controller="StaffBranding" asp-action="SaveDraft" method="post">
+        <div class="ops-detail-grid">
+            <div class="ops-filter-bar__field">
+                <label for="companyName">Company name</label>
+                <input type="text" id="companyName" name="companyName" maxlength="200" value="@f.CompanyName" required />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="tenantUiLabel">UI label (optional)</label>
+                <input type="text" id="tenantUiLabel" name="tenantUiLabel" maxlength="200" value="@f.TenantUiLabel" />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="primaryColour">Primary colour</label>
+                <input type="color" id="primaryColour" name="primaryColour" value="@f.PrimaryColour" required />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="secondaryColour">Secondary colour</label>
+                <input type="color" id="secondaryColour" name="secondaryColour" value="@f.SecondaryColour" required />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="accentColour">Accent colour</label>
+                <input type="color" id="accentColour" name="accentColour" value="@f.AccentColour" required />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="textColour">Text colour</label>
+                <input type="color" id="textColour" name="textColour" value="@f.TextColour" required />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="surfaceColour">Surface colour</label>
+                <input type="color" id="surfaceColour" name="surfaceColour" value="@f.SurfaceColour" required />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="backgroundColour">Background colour</label>
+                <input type="color" id="backgroundColour" name="backgroundColour" value="@f.BackgroundColour" required />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="borderRadiusPx">Border radius (px)</label>
+                <input type="number" id="borderRadiusPx" name="borderRadiusPx" min="0" max="32" value="@f.BorderRadiusPx" required />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="fontOption">Font</label>
+                <select id="fontOption" name="fontOption">
+                    @foreach (var option in Enum.GetValues<BrandingFontOption>())
+                    {
+                        <option value="@option" selected="@(option == f.FontOption)">@ProgrammePulse.Services.Shared.DisplayText.Words(option)</option>
+                    }
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="headerStyle">Header style</label>
+                <select id="headerStyle" name="headerStyle">
+                    @foreach (var option in Enum.GetValues<BrandingHeaderStyle>())
+                    {
+                        <option value="@option" selected="@(option == f.HeaderStyle)">@ProgrammePulse.Services.Shared.DisplayText.Words(option)</option>
+                    }
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="footerStyle">Footer style</label>
+                <select id="footerStyle" name="footerStyle">
+                    @foreach (var option in Enum.GetValues<BrandingFooterStyle>())
+                    {
+                        <option value="@option" selected="@(option == f.FooterStyle)">@ProgrammePulse.Services.Shared.DisplayText.Words(option)</option>
+                    }
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="darkModeEnabled">Dark mode</label>
+                <input type="checkbox" id="darkModeEnabled" name="darkModeEnabled" value="true" checked="@f.DarkModeEnabled" />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="isActive">Active</label>
+                <input type="checkbox" id="isActive" name="isActive" value="true" checked="@f.IsActive" />
+            </div>
+        </div>
+        <p>
+            <button type="submit" class="ops-button">Save draft</button>
+        </p>
+    </form>
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Logo &amp; favicon</h2>
+    <div class="ops-detail-grid">
+        <div>
+            <strong>Logo</strong>
+            <div>
+                @if (f.LogoUrl is not null)
+                {
+                    <img src="@f.LogoUrl" alt="Current logo" class="ops-brand-asset" />
+                }
+                else
+                {
+                    <span class="ops-empty-state">No logo uploaded.</span>
+                }
+            </div>
+            <form asp-controller="StaffBranding" asp-action="UploadLogo" method="post" enctype="multipart/form-data">
+                <label for="logo-file">Logo image (PNG or JPEG)</label>
+                <input type="file" id="logo-file" name="file" accept="image/png,image/jpeg" required />
+                <button type="submit" class="ops-button">Upload logo</button>
+            </form>
+        </div>
+        <div>
+            <strong>Favicon</strong>
+            <div>
+                @if (f.FaviconUrl is not null)
+                {
+                    <img src="@f.FaviconUrl" alt="Current favicon" class="ops-brand-asset ops-brand-asset--small" />
+                }
+                else
+                {
+                    <span class="ops-empty-state">No favicon uploaded.</span>
+                }
+            </div>
+            <form asp-controller="StaffBranding" asp-action="UploadFavicon" method="post" enctype="multipart/form-data">
+                <label for="favicon-file">Favicon image (PNG)</label>
+                <input type="file" id="favicon-file" name="file" accept="image/png" required />
+                <button type="submit" class="ops-button">Upload favicon</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Publish &amp; history</h2>
+    <p>
+        <a class="ops-button" asp-controller="StaffBranding" asp-action="Preview">Preview draft</a>
+        <a class="ops-button" asp-controller="StaffBranding" asp-action="History">Version history</a>
+    </p>
+    <form asp-controller="StaffBranding" asp-action="Publish" method="post">
+        <button type="submit" class="ops-button" disabled="@(!Model.HasDraft)">Publish draft</button>
+    </form>
+</section>

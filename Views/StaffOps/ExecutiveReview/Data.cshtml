@@ -1,0 +1,91 @@
+@using ProgrammePulse.Models.ExecutiveReview
+@model ExecutiveDataPage
+
+<a asp-controller="StaffAdmin" asp-action="Index">@Localizer["Admin"]</a>
+@if (Model.ErrorKey is string error) { <p role="alert">@Localizer[error]</p> }
+@if (Model.Receipt is { } receipt)
+{
+    <p role="status">@Localizer["Review.Data.Completed"] <span class="review-data-key">@receipt.OperationKey</span></p>
+    <dl class="review-facts">
+        <dt>@Localizer["Review.Data.Operation"]</dt><dd>@Localizer[$"Review.Data.Operation.{receipt.Operation}"]</dd>
+        <dt>@Localizer["Review.CapturedUtc"]</dt><dd>@receipt.CompletedAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</dd>
+        <dt>@Localizer["Decision.Queue"]</dt><dd>@receipt.Counts.Decisions</dd>
+        <dt>@Localizer["Review.Data.Versions"]</dt><dd>@receipt.Counts.DecisionVersions</dd>
+        <dt>@Localizer["Review.RecentPacks"]</dt><dd>@receipt.Counts.Packs</dd>
+        <dt>@Localizer["Review.MarketSettings"]</dt><dd>@receipt.Counts.MarketVersions</dd>
+        <dt>@Localizer["Review.Data.Audit"]</dt><dd>@receipt.Counts.AuditEvents</dd>
+    </dl>
+}
+<dl class="review-facts">
+    <dt>@Localizer["Review.Data.RetentionDays"]</dt>
+    <dd>@(Model.RetentionDays == 0 ? Localizer["Review.Data.Disabled"].Value : Model.RetentionDays.ToString())</dd>
+</dl>
+
+@if (Model.Preview is { } preview)
+{
+    <h2>@Localizer["Review.Data.Preview"]</h2>
+    <dl class="review-facts">
+        <dt>@Localizer["Review.Data.Operation"]</dt><dd>@Localizer[$"Review.Data.Operation.{preview.Request.Operation}"]</dd>
+        <dt>@Localizer["Review.Data.Target"]</dt><dd>@preview.Request.TargetKey</dd>
+        <dt>@Localizer["Review.Data.Reason"]</dt><dd>@Localizer[$"Review.Data.Reason.{preview.Request.Reason}"]</dd>
+        <dt>@Localizer["Decision.Queue"]</dt><dd>@preview.Counts.Decisions</dd>
+        <dt>@Localizer["Review.Data.Versions"]</dt><dd>@preview.Counts.DecisionVersions</dd>
+        <dt>@Localizer["Review.RecentPacks"]</dt><dd>@preview.Counts.Packs</dd>
+        <dt>@Localizer["Review.MarketSettings"]</dt><dd>@preview.Counts.MarketVersions</dd>
+        <dt>@Localizer["Review.Data.Audit"]</dt><dd>@preview.Counts.AuditEvents</dd>
+        @if (preview.RetentionCutoffUtc is DateTime cutoff)
+        { <dt>@Localizer["Review.Data.Cutoff"]</dt><dd>@cutoff.ToString("yyyy-MM-dd HH:mm:ss") UTC</dd> }
+    </dl>
+    <p role="alert">@Localizer["Review.Data.Irreversible"]</p>
+    <form asp-action="Apply" method="post" class="review-data-confirm">
+        <input type="hidden" name="Operation" value="@preview.Request.Operation" />
+        <input type="hidden" name="TargetKey" value="@preview.Request.TargetKey" />
+        <input type="hidden" name="Reason" value="@preview.Request.Reason" />
+        <input type="hidden" name="confirmationToken" value="@preview.ConfirmationToken" />
+        <label><input type="checkbox" name="confirmed" value="true" required /> @Localizer["Review.Data.Confirm"]</label>
+        <div class="review-actions">
+            <button class="ops-button" type="submit">@Localizer["Review.Data.Apply"]</button>
+            <a asp-action="Index">@Localizer["Decision.Cancel"]</a>
+        </div>
+    </form>
+}
+else
+{
+    <form asp-action="Preview" method="post" class="review-decision-form" data-lifecycle-form>
+        <div>
+            <label for="operation">@Localizer["Review.Data.Operation"]</label>
+            <select id="operation" name="Operation" required>
+                <option value="">@Localizer["Review.Data.Select"]</option>
+                @foreach (var operation in Enum.GetValues<ExecutiveDataOperation>())
+                { <option value="@operation" selected="@(Model.Input?.Operation == operation)" disabled="@(operation == ExecutiveDataOperation.ApplyRetention && Model.RetentionDays == 0)">@Localizer[$"Review.Data.Operation.{operation}"]</option> }
+            </select>
+        </div>
+        <div data-lifecycle-target>
+            <label for="target">@Localizer["Review.Data.Target"]</label>
+            <input id="target" name="TargetKey" type="text" value="@Model.Input?.TargetKey" autocomplete="off" />
+        </div>
+        <div>
+            <label for="reason">@Localizer["Review.Data.Reason"]</label>
+            <select id="reason" name="Reason" required>
+                <option value="">@Localizer["Review.Data.Select"]</option>
+                @foreach (var reason in Enum.GetValues<ExecutiveDataReason>())
+                { <option value="@reason" selected="@(Model.Input?.Reason == reason)">@Localizer[$"Review.Data.Reason.{reason}"]</option> }
+            </select>
+        </div>
+        <div><button class="ops-button" type="submit">@Localizer["Review.Data.Preview"]</button></div>
+    </form>
+}
+
+<h2>@Localizer["Review.Data.Audit"]</h2>
+<div class="ops-table-scroll">
+    <table class="ops-table">
+        <thead><tr><th>@Localizer["Review.CapturedUtc"]</th><th>@Localizer["Review.Data.Operation"]</th><th>@Localizer["Review.Data.Target"]</th><th>@Localizer["Review.Data.Reason"]</th><th>@Localizer["Review.Data.Versions"]</th></tr></thead>
+        <tbody>
+            @foreach (var entry in Model.Events)
+            {
+                <tr><td>@entry.RecordedAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</td><td>@Localizer[$"Review.Data.Operation.{entry.Operation}"]</td><td class="review-data-key">@entry.TargetKey</td><td>@Localizer[$"Review.Data.Reason.{entry.Reason}"]</td><td>@entry.Counts.DecisionVersions</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+<script src="~/js/executive-data.js" defer></script>

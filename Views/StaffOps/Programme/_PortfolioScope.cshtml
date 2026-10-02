@@ -1,0 +1,38 @@
+@model ProgrammePulse.Models.ViewModels.ProgrammeOverview.PortfolioScopeViewModel
+@inject ProgrammePulse.Services.Tenancy.IModuleGate ModuleGate
+@{
+    // The other reports in this scope belong to the Reporting hub module.
+    var reportingOn = await ModuleGate.IsOnAsync(ProgrammePulse.Models.Tenancy.ProductModules.Reporting);
+}
+<form method="get" class="ops-filter-bar" aria-label="Portfolio scope">
+    <div class="ops-filter-bar__field">
+        <label for="scope-programme">Programme</label>
+        <select id="scope-programme" name="programmeKey">
+            <option value="">All programmes</option>
+            @foreach (var option in Model.Programmes)
+            {
+                <option value="@option.Key" selected="@(option.Key == Model.ProgrammeKey)">@option.Name</option>
+            }
+        </select>
+    </div>
+    <div class="ops-filter-bar__field">
+        <label for="scope-customer">Customer</label>
+        <select id="scope-customer" name="customerKey">
+            <option value="">All customers</option>
+            @foreach (var option in Model.Customers)
+            {
+                <option value="@option.Key" selected="@(option.Key == Model.CustomerKey)">@option.Name</option>
+            }
+        </select>
+    </div>
+    <button type="submit" class="ops-button ops-button--secondary">Show</button>
+</form>
+@if (reportingOn)
+{
+    <nav class="ops-actions" aria-label="Reports in this scope">
+        <a asp-controller="StaffProgrammeOverview" asp-action="Index" asp-route-programmeKey="@Model.ProgrammeKey" asp-route-customerKey="@Model.CustomerKey">Programme health</a>
+        <a asp-controller="StaffReporting" asp-action="Index" asp-route-programmeKey="@Model.ProgrammeKey" asp-route-customerKey="@Model.CustomerKey">Delivery reporting</a>
+        <a asp-controller="StaffRaid" asp-action="Raid" asp-route-programmeKey="@Model.ProgrammeKey" asp-route-customerKey="@Model.CustomerKey">Risks and issues</a>
+        <a asp-controller="StaffGovernance" asp-action="Governance" asp-route-programmeKey="@Model.ProgrammeKey" asp-route-customerKey="@Model.CustomerKey">Governance</a>
+    </nav>
+}

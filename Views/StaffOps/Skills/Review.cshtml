@@ -1,0 +1,88 @@
+@using ProgrammePulse.Models.SkillsEvidence
+@using ProgrammePulse.Models.ViewModels.SkillsEvidence
+@model SkillReviewQueueViewModel
+
+@{
+    var message = ViewData["Message"] as string;
+    var canDecide = Model.CanDecide;
+}
+
+<p class="ops-empty-state">
+    Claims waiting on a decision, and corrections people have raised against a decision
+    already made. Challenges are listed first. Every decision needs a reason the person
+    can read — <a asp-controller="StaffSkills" asp-action="Coverage">coverage summary</a>.
+</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+@await Html.PartialAsync("~/Views/StaffOps/Skills/_Rubric.cshtml")
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Waiting for review (@Model.Items.Count)</h2>
+    @if (Model.Items.Count == 0)
+    {
+        <p class="ops-empty-state">Nothing is waiting for a decision.</p>
+    }
+    else
+    {
+        @foreach (var item in Model.Items)
+        {
+            var key = item.Assertion.AssertionKey;
+            <article class="ops-record">
+                <h3 class="ops-record__title">
+                    @item.StaffName — @item.SkillName
+                    @if (item.IsChallenge)
+                    {
+                        <span class="ops-chip chip-status--in-progress">Correction raised</span>
+                    }
+                </h3>
+                <p>
+                    Claims <strong>@ProgrammePulse.Services.Shared.DisplayText.Words(item.Assertion.Proficiency)</strong>
+                    (@ProficiencyRubric.Describe(item.Assertion.Proficiency)),
+                    @(item.Assertion.Origin == AssertionOrigin.SelfDeclared ? "self-declared" : "recorded by a reviewer")
+                    on @item.Assertion.RecordedAtUtc.ToString("yyyy-MM-dd").
+                    <a asp-controller="StaffSkills" asp-action="Portfolio" asp-route-staffKey="@item.Assertion.StaffKey">Full record<span class="ops-visually-hidden"> for @item.StaffName</span></a>
+                </p>
+                @if (item.Assertion.EvidenceNote is not null)
+                {
+                    <p class="ops-cell-context">They said: “@item.Assertion.EvidenceNote”</p>
+                }
+                @if (item.IsChallenge && item.Assertion.ReviewNote is not null)
+                {
+                    <p class="ops-cell-context">The decision being challenged: “@item.Assertion.ReviewNote”</p>
+                }
+
+                @if (canDecide)
+                {
+                    @* One form, two outcomes: both need a reason the person can read. *@
+                    <form asp-controller="StaffSkills" asp-action="Validate" asp-route-assertionKey="@key" method="post" class="ops-manage-form ops-decision-form">
+                        <div class="ops-filter-bar__field">
+                            <label for="level-@key">Level</label>
+                            <select id="level-@key" name="proficiency" required>
+                                @foreach (var level in ProficiencyRubric.All)
+                                {
+                                    <option value="@level" selected="@(level == item.Assertion.Proficiency)">@ProgrammePulse.Services.Shared.DisplayText.Words(level)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="ops-filter-bar__field ops-decision-form__note">
+                            <label for="reason-@key">Reason, which @item.StaffName will read</label>
+                            <input type="text" id="reason-@key" name="reviewNote" maxlength="1000" required />
+                        </div>
+                        <div class="ops-filter-bar__field">
+                            <label for="due-@key">Review again by <span class="ops-field-hint">(default @ProficiencyRubric.DefaultReviewIntervalMonths months)</span></label>
+                            <input type="date" id="due-@key" name="reviewDueOn" />
+                        </div>
+                        <div class="ops-actions">
+                            <button type="submit" class="ops-button">Validate<span class="ops-visually-hidden"> @item.SkillName for @item.StaffName</span></button>
+                            <button type="submit" class="ops-button ops-button--secondary" asp-controller="StaffSkills" asp-action="Reject" asp-route-assertionKey="@key">Reject<span class="ops-visually-hidden"> @item.SkillName for @item.StaffName</span></button>
+                        </div>
+                    </form>
+                }
+            </article>
+        }
+    }
+</section>

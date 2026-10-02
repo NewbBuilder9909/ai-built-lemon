@@ -1,0 +1,16 @@
+@{
+    var signedIn = Context.User.Identity?.IsAuthenticated == true;
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@Localizer["AccessDenied.Heading"]</h2>
+    <p class="ops-empty-state">@Localizer["AccessDenied.Body"]</p>
+    @if (signedIn)
+    {
+        <p><a class="ops-button" href="/staffops/home">@Localizer["Go to your home page"]</a></p>
+    }
+    else
+    {
+        <p><a class="ops-button" href="/staffops/account/login">@Localizer["Log in"]</a></p>
+    }
+</section>

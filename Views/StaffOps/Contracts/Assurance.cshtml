@@ -1,0 +1,105 @@
+@using ProgrammePulse.Models.ViewModels.ContractOps
+@using ProgrammePulse.Services.ContractOps
+@model AssurancePortfolioViewModel
+
+<partial name="~/Views/StaffOps/Contracts/_ContractsNav.cshtml" model="@("assurance")" />
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">What this shows</h2>
+    <p class="ops-empty-state">
+        Every recorded contract obligation, as of @Model.AsOfUtc.ToString("yyyy-MM-dd HH:mm") UTC, gaps first. For each
+        repository serving a customer it shows whether the control the contract needs is in place: observed from the
+        security tool where it scans the repository, otherwise from a dated attestation. Review monthly and before each
+        customer governance meeting.
+    </p>
+    @if (Model.SecurityToolConnected)
+    {
+        <p class="ops-empty-state">
+            Aikido last read @Model.SecurityToolSyncedAtUtc?.ToString("yyyy-MM-dd HH:mm") UTC. It still cannot show that no
+            High or Critical finding was ever merged into a repository Aikido does not scan; those stay attested or unknown.
+        </p>
+    }
+    else
+    {
+        <p class="ops-empty-state">
+            No security tool is connected, so this rests on attestations alone.
+            <a asp-controller="StaffSecurity" asp-action="Index">Connect Aikido</a> to observe gate settings and findings.
+        </p>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Repositories needing attention (@Model.RepositoriesNeedingAttention.Count)</h2>
+    @if (Model.RepositoriesNeedingAttention.Count == 0)
+    {
+        <p class="ops-empty-state">No repository in scope of an active obligation is unknown, lapsed, overdue or not in place.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Repositories whose required control is not shown to be in place</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Repository</th>
+                        <th scope="col">Control needed</th>
+                        <th scope="col">State</th>
+                        <th scope="col">Contracts that need it</th>
+                        <th scope="col">Lapsed or lapses (UTC)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.RepositoriesNeedingAttention)
+                    {
+                        <tr>
+                            <td>@row.Repository.DisplayName</td>
+                            <td>@AssuranceLabels.Control(row.Control)</td>
+                            <td>@AssuranceLabels.Repository(row.Status, row.Source)</td>
+                            <td>@string.Join(", ", row.Contracts)</td>
+                            <td>@(row.AttestationExpiresAtUtc?.ToString("yyyy-MM-dd") ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Obligations</h2>
+    @if (Model.Rows.Count == 0)
+    {
+        <p class="ops-empty-state">No obligations are recorded. Record them from each contract's obligations page.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Contract obligations and how each stands</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Contract</th>
+                        <th scope="col">Clause</th>
+                        <th scope="col">Requires</th>
+                        <th scope="col">Position</th>
+                        <th scope="col">In place / not / unknown</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.Rows)
+                    {
+                        <tr>
+                            <td>@row.CustomerName</td>
+                            <td><a asp-controller="StaffContractAssurance" asp-action="Obligations" asp-route-contractKey="@row.ContractKey">@row.ContractReference</a></td>
+                            <td>@row.Obligation.ClauseReference</td>
+                            <td>@AssuranceLabels.Kind(row.Obligation)</td>
+                            <td>@AssuranceLabels.Status(row.Status)</td>
+                            <td>@row.Enforced / @row.NotEnforced / @row.UnknownOrExpired</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

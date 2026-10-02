@@ -1,0 +1,41 @@
+@model ProgrammePulse.Models.ViewModels.ProgrammeOverview.OAuthConnectionsViewModel
+@{
+    var message = ViewData["Message"] as string;
+    var jiraStatus = Model.JiraStatus;
+    var tempoStatus = Model.TempoStatus;
+}
+
+<partial name="~/Views/StaffOps/Programme/_DataNav.cshtml" model="@("connections")" />
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status">@message</p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Jira Cloud</h2>
+    <p>@jiraStatus. Select the Jira site and project IDs approved for reporting. This grants read access only.</p>
+    <p id="jira-projects-hint">
+        Using Tempo without Jira issues? Leave the project IDs empty. Jira is then connected for identity only: it tells
+        Tempo which site its worklogs belong to and who logged them, and no issues are imported. Tempo hours then show as
+        not linked to an issue until you add projects.
+    </p>
+    <form method="post" action="/staffops/programme/oauth/jira/start" class="ops-filter-bar">
+        @Html.AntiForgeryToken()
+        <label>Atlassian cloud ID <input name="cloudId" type="text" required /></label>
+        <label>Project IDs, comma separated (optional) <input name="projectIds" type="text" aria-describedby="jira-projects-hint" /></label>
+        <button type="submit" class="ops-button">Connect Jira with OAuth</button>
+    </form>
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Tempo Timesheets Cloud</h2>
+    <p>@tempoStatus. A Tempo administrator must create an OAuth application and register this deployment's callback URL.</p>
+    <form method="post" action="/staffops/programme/oauth/tempo/start" class="ops-filter-bar">
+        @Html.AntiForgeryToken()
+        <label>Jira site URL <input name="jiraSiteUrl" type="url" placeholder="https://example.atlassian.net" required /></label>
+        <label>Tempo client ID <input name="clientId" type="text" autocomplete="off" required /></label>
+        <label>Tempo client secret <input name="clientSecret" type="password" autocomplete="off" required /></label>
+        <button type="submit" class="ops-button">Connect Tempo with OAuth</button>
+    </form>
+</section>

@@ -1,0 +1,44 @@
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    string NavClass(string controllerName) =>
+        string.Equals(currentController, controllerName, StringComparison.OrdinalIgnoreCase)
+            ? "ops-nav__link ops-nav__link--active"
+            : "ops-nav__link";
+
+}
+<!DOCTYPE html>
+<html lang="@ProgrammePulse.Services.Localization.CultureMarkup.Lang" dir="@ProgrammePulse.Services.Localization.CultureMarkup.Dir">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] — @ProductBrand.Value.Name</title>
+    <link rel="stylesheet" href="~/css/app.css" />
+</head>
+<body data-flag-label="@Localizer["Flagged"]" data-scroll-label="@Localizer["Scrollable table"]">
+    <a class="ops-skip-link" href="#main-content">@Localizer["Skip to main content"]</a>
+    <div class="ops-shell">
+        <nav class="ops-nav" aria-label="Primary">
+            <div class="ops-nav__brand">@ProductBrand.Value.Name demo</div>
+            <button type="button" class="ops-nav__toggle" aria-controls="ops-nav-list" aria-expanded="false">
+                <span class="ops-visually-hidden">@Localizer["Toggle navigation"]</span>
+                <span aria-hidden="true">☰</span>
+            </button>
+            <ul class="ops-nav__list" id="ops-nav-list">
+                <li><a class="@NavClass("OperationsHub")" asp-controller="OperationsHub" asp-action="Index">@Localizer["Dashboard"]</a></li>
+                <li><a class="@NavClass("ErpRecords")" asp-controller="ErpRecords" asp-action="Index">@Localizer["ERP Records"]</a></li>
+            </ul>
+            <partial name="~/Views/Shared/_LanguageSwitcher.cshtml" />
+        </nav>
+        <div class="ops-content">
+            <header class="ops-topbar">
+                <h1 class="ops-topbar__title">@ViewData["Title"]</h1>
+            </header>
+            <partial name="~/Views/OperationsHub/Partials/_DemoDataBanner.cshtml" />
+            <main id="main-content" class="ops-main" tabindex="-1">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+    <script src="~/js/app.js"></script>
+</body>
+</html>

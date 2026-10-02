@@ -1,0 +1,511 @@
+@using ProgrammePulse.Models.ViewModels.ProgrammeOverview
+@using ProgrammePulse.Models.Tenancy
+@model ProgrammeOverviewPageViewModel
+@inject ProgrammePulse.Services.Tenancy.IModuleGate ModuleGate
+
+@{ ViewData["ReportActions"] = true; ViewData["ExportUrl"] = Url.Action("Export", "StaffProgrammeOverview", new { programmeKey = Model.Overview.Scope.ProgrammeKey, customerKey = Model.Overview.Scope.CustomerKey }); }
+@{
+    var overview = Model.Overview;
+    var coverage = overview.PlannedCoverage;
+    // Sources that have actually run for this tenant. A source that never has
+    // is an unconnected product, not a freshness fact — listing four rows of
+    // "never" above a customer's imported data read as "your data isn't here".
+    var activeSources = Model.Sources.Where(s => s.HasActivity).ToList();
+    var activeSourceNames = activeSources.Select(s => s.Source).ToHashSet(StringComparer.Ordinal);
+    var hasDeliveryData = overview.WorkstreamStatuses.Count > 0;
+    var refreshableSources = Model.SyncSources.Where(s => activeSourceNames.Contains(s.Source)).ToList();
+    var firstSyncSources = Model.SyncSources.Where(s => !activeSourceNames.Contains(s.Source)).ToList();
+
+    // The workstream breakdown names the programme only when there is more than one.
+    var showProgrammeColumn = overview.WorkstreamStatuses.Select(r => r.ProgrammeName).Distinct().Count() > 1;
+
+    // What someone should act on this week, each with the figure behind it.
+    // Overdue follows the one rule every page uses (WorkItemDueDate).
+    var overdueMilestones = overview.Milestones.Where(m => m.IsOverdue).ToList();
+    var blockedItems = overview.WorkstreamStatuses.Sum(r => r.BlockedItems);
+    var blockedWorkstreams = overview.WorkstreamStatuses.Count(r => r.BlockedItems > 0);
+    var overdueItems = overview.WorkstreamStatuses.Sum(r => r.OverdueItems);
+    // Workload and bookings belong to the Delivery load module, which is benched until switched on.
+    var showLoad = await ModuleGate.IsOnAsync(ProductModules.DeliveryLoad);
+    var showRepositories = await ModuleGate.IsOnAsync(ProductModules.Contracts);
+    var overBooked = showLoad
+        ? overview.PlannedAllocations.Where(r => r.IsBookedOverCapacity).OrderByDescending(r => r.BookedHoursPerWeek - r.CapacityHoursPerWeek).ToList()
+        : [];
+    var failedSources = activeSources.Where(s => s.LastRunFailed).ToList();
+    var hasAttention = overdueMilestones.Count > 0 || blockedItems > 0 || overdueItems > 0 || overBooked.Count > 0
+        || Model.UnresolvedIdentityCount > 0 || failedSources.Count > 0 || overview.PastDueWithUnreadableStatus > 0;
+    // Overdue by days late, on one scale for every band.
+    var ageScale = Math.Max(1, overview.OverdueByAge.Select(b => b.Total).DefaultIfEmpty(0).Max());
+
+    string Hours(decimal value) => value.ToString("0.#");
+}
+
+@* What needs acting on, then programmes and milestones. Sources and sync
+   controls fold away at the foot. No headline tiles: they repeated the
+   attention list one panel down. *@
+<partial name="~/Views/StaffOps/Programme/_PortfolioScope.cshtml" model="Model.Overview.Scope" />
+
+@if (!string.IsNullOrWhiteSpace(Model.SyncMessage))
+{
+    <p class="ops-banner ops-banner--success" role="status" aria-live="polite">@Model.SyncMessage</p>
+}
+@if (!string.IsNullOrWhiteSpace(Model.SyncError))
+{
+    <p class="ops-banner ops-banner--error" role="alert" aria-live="assertive">@Model.SyncError</p>
+}
+
+@if (!hasDeliveryData && activeSources.Count == 0)
+{
+    <section class="ops-panel ops-onboarding" aria-label="Get started">
+        <h2 class="ops-panel__heading">Bring in your delivery data</h2>
+        @if (Model.CanSync)
+        {
+            <p>
+                This page shows workstream progress, overdue milestones and who is carrying outstanding
+                work, from your own task and timesheet data. The quickest start needs no credentials:
+                export your tasks and recorded time as CSV from any tool or spreadsheet and upload them.
+            </p>
+            <ol class="ops-onboarding__steps">
+                <li><strong>Upload work items</strong> — one row per task, with its status and due date.</li>
+                <li><strong>Upload time entries</strong> — who recorded how many hours, against which task.</li>
+                <li><strong>Match anyone the file names but we can't place</strong> — they are queued, never dropped.</li>
+            </ol>
+            <p class="ops-onboarding__actions">
+                <a class="ops-button ops-button--primary" asp-controller="StaffFileImport" asp-action="Index">Import delivery data</a>
+                <a class="ops-button" asp-controller="StaffSourceConnection" asp-action="Index">Connect a tool instead</a>
+            </p>
+        }
+        else
+        {
+            <p class="ops-empty-state">
+                No delivery data has been loaded for your organisation yet. Once your administrator imports
+                or connects it, workstream progress and milestones appear here.
+            </p>
+        }
+    </section>
+}
+else
+{
+@* Where the figures come from, on one line. Detail and sync controls are at
+   the foot of the page. *@
+<p class="ops-source-strip" aria-label="Data sources and freshness">
+    @if (activeSources.Count == 0)
+    {
+        <span><span class="ops-dot ops-dot--warn" aria-hidden="true"></span>No source has completed a publication yet, so coverage is unknown.</span>
+    }
+    @foreach (var source in activeSources)
+    {
+        <span>
+            <span class="ops-dot @(source.LastRunFailed ? "ops-dot--error" : source.IsRunning ? "ops-dot--warn" : "")" aria-hidden="true"></span>
+            <strong>@source.DisplayName</strong>
+            @source.StatusLabel.ToLowerInvariant()@(source.LastPublishedAtUtc is { } published ? $" {published:yyyy-MM-dd HH:mm} UTC" : "") · @source.FreshnessLabel
+        </span>
+    }
+    <a href="#data-sources">Data sources</a>
+</p>
+
+<section class="ops-panel" aria-labelledby="attention-heading">
+    <div class="ops-panel__header">
+        <h2 class="ops-panel__heading" id="attention-heading">Needs attention</h2>
+        <a asp-controller="StaffEvidenceCheck" asp-action="Index">Can these figures be trusted?</a>
+    </div>
+    @if (!hasAttention)
+    {
+        <p class="ops-empty-state">Nothing is overdue, blocked or over-booked, and everyone in the source data is matched to a profile.</p>
+    }
+    else
+    {
+        <ul class="ops-attention">
+            @if (failedSources.Count > 0)
+            {
+                <li class="ops-attention__item ops-attention__item--high">
+                    <span class="ops-attention__count">@failedSources.Count</span>
+                    <span class="ops-attention__body">
+                        <span class="ops-attention__title">Source run failed</span>
+                        <span class="ops-attention__detail">@string.Join(", ", failedSources.Select(s => s.DisplayName)). Figures may be partial; see <a href="#data-sources">data sources</a>.</span>
+                    </span>
+                </li>
+            }
+            @if (overdueMilestones.Count > 0)
+            {
+                <li class="ops-attention__item ops-attention__item--high">
+                    <span class="ops-attention__count">@overdueMilestones.Count</span>
+                    <span class="ops-attention__body">
+                        <span class="ops-attention__title">Overdue @(overdueMilestones.Count == 1 ? "milestone" : "milestones")</span>
+                        <span class="ops-attention__detail">@string.Join("; ", overdueMilestones.Take(3).Select(m => m.Title))@(overdueMilestones.Count > 3 ? "; …" : "")</span>
+                    </span>
+                </li>
+            }
+            @if (overBooked.Count > 0)
+            {
+                <li class="ops-attention__item ops-attention__item--high">
+                    <span class="ops-attention__count">@overBooked.Count</span>
+                    <span class="ops-attention__body">
+                        <span class="ops-attention__title">Booked beyond contracted hours</span>
+                        <span class="ops-attention__detail">@string.Join("; ", overBooked.Take(3).Select(r => $"{r.StaffFullName}: {Hours(r.BookedHoursPerWeek!.Value)} h/week booked against {Hours(r.CapacityHoursPerWeek)}"))</span>
+                    </span>
+                </li>
+            }
+            @if (blockedItems > 0)
+            {
+                <li class="ops-attention__item ops-attention__item--medium">
+                    <span class="ops-attention__count">@blockedItems</span>
+                    <span class="ops-attention__body">
+                        <span class="ops-attention__title">Blocked work @(blockedItems == 1 ? "item" : "items")</span>
+                        <span class="ops-attention__detail">Across @blockedWorkstreams @(blockedWorkstreams == 1 ? "workstream" : "workstreams").</span>
+                    </span>
+                </li>
+            }
+            @if (overdueItems > 0)
+            {
+                <li class="ops-attention__item ops-attention__item--medium">
+                    <span class="ops-attention__count">@overdueItems</span>
+                    <span class="ops-attention__body">
+                        <span class="ops-attention__title">Open work past its due date</span>
+                        <span class="ops-attention__detail">Including overdue milestones.</span>
+                    </span>
+                </li>
+            }
+            @if (overview.PastDueWithUnreadableStatus > 0)
+            {
+                <li class="ops-attention__item ops-attention__item--medium">
+                    <span class="ops-attention__count">@overview.PastDueWithUnreadableStatus</span>
+                    <span class="ops-attention__body">
+                        <span class="ops-attention__title">Past due, but the status can't be read</span>
+                        <span class="ops-attention__detail">Not counted as overdue until their status is mapped to a stage.</span>
+                    </span>
+                </li>
+            }
+            @if (Model.UnresolvedIdentityCount > 0)
+            {
+                <li class="ops-attention__item ops-attention__item--medium">
+                    <span class="ops-attention__count">@Model.UnresolvedIdentityCount</span>
+                    <span class="ops-attention__body">
+                        <span class="ops-attention__title">@(Model.UnresolvedIdentityCount == 1 ? "Person" : "People") not matched to a staff profile</span>
+                        <span class="ops-attention__detail">
+                            Their work is missing from the workload figures.
+                            @if (Model.CanSync)
+                            {
+                                <a asp-controller="StaffIdentity" asp-action="Index">Review the identity queue</a>
+                            }
+                        </span>
+                    </span>
+                </li>
+            }
+        </ul>
+        @if (overdueItems > 0)
+        {
+            <h3>How late, and is anyone named against it?</h3>
+            @* One scale for every band, so a longer bar is more items. The count
+               is written beside each bar, and the owner split in the words. *@
+            <div class="ops-stack-rows">
+                @foreach (var band in overview.OverdueByAge)
+                {
+                    <span>@band.Label</span>
+                    <span class="ops-stack" aria-hidden="true">
+                        @if (band.WithOwner > 0)
+                        {
+                            <span class="ops-stack__segment ops-stack__segment--primary" style="--share: @ProgrammePulse.Controllers.StaffEvidenceCheckController.SharePercent(band.WithOwner, ageScale)"></span>
+                        }
+                        @if (band.WithoutOwner > 0)
+                        {
+                            <span class="ops-stack__segment ops-stack__segment--secondary" style="--share: @ProgrammePulse.Controllers.StaffEvidenceCheckController.SharePercent(band.WithoutOwner, ageScale)"></span>
+                        }
+                    </span>
+                    <span>@band.Total @(band.Total == 1 ? "item" : "items")@(band.WithoutOwner > 0 ? $", {band.WithoutOwner} with no owner" : "")</span>
+                }
+            </div>
+            <ul class="ops-legend" aria-hidden="true">
+                <li class="ops-key" style="--key: var(--ops-viz-bar)">Someone is named</li>
+                <li class="ops-key" style="--key: var(--ops-viz-over)">No one is named</li>
+            </ul>
+        }
+    }
+</section>
+
+<partial name="~/Views/StaffOps/Programme/_ProgrammeHealth.cshtml" model="overview" />
+
+@if (hasDeliveryData)
+{
+    <section class="ops-panel" aria-label="Workstream breakdown">
+        <details>
+            <summary class="ops-panel__summary"><h2 class="ops-panel__heading">Workstream breakdown (@overview.WorkstreamStatuses.Count)</h2></summary>
+            <div class="ops-table-scroll">
+                <table class="ops-table">
+                    <caption class="ops-visually-hidden">Workstream status: totals, done, blocked, overdue, and percent complete</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Workstream</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Done</th>
+                            <th scope="col">Blocked</th>
+                            <th scope="col">Overdue</th>
+                            <th scope="col">% Complete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in overview.WorkstreamStatuses)
+                        {
+                            <tr>
+                                <td>
+                                    @row.WorkstreamName
+                                    <span class="ops-cell-context">@(showProgrammeColumn ? $"{row.ProgrammeName} › {row.ProjectName}" : row.ProjectName)</span>
+                                </td>
+                                <td>@row.TotalItems</td>
+                                <td>@row.DoneItems</td>
+                                <td>@row.BlockedItems</td>
+                                <td>@row.OverdueItems</td>
+                                <td class="is-nowrap">
+                                    <span class="ops-progress" aria-hidden="true"><span class="ops-progress__bar" style="width:@(Math.Clamp(row.PercentComplete, 0, 100))%"></span></span>
+                                    @(row.PercentComplete)%
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </details>
+    </section>
+}
+
+<section class="ops-panel" aria-labelledby="milestones-heading">
+    <div class="ops-panel__header">
+        <h2 class="ops-panel__heading" id="milestones-heading">Milestones</h2>
+        @if (overview.Milestones.Count > 0)
+        {
+            <span class="ops-panel__meta">@overview.Milestones.Count(m => m.DueDateUtc is not null) dated · @overdueMilestones.Count overdue</span>
+        }
+    </div>
+    @if (overview.Milestones.Count == 0)
+    {
+        <p class="ops-empty-state">No work items are flagged as milestones yet.</p>
+    }
+    else
+    {
+        <partial name="~/Views/StaffOps/Programme/_MilestoneTimeline.cshtml" model="@((overview.Milestones, overview.GeneratedAtUtc))" />
+        @if (overview.Milestones.Any(m => m.DueDateUtc is null))
+        {
+            <p class="ops-empty-state">@overview.Milestones.Count(m => m.DueDateUtc is null) milestone(s) have no due date, so they can't be placed on the timeline or show as late.</p>
+        }
+        <details class="ops-disclosure">
+            <summary>Milestones as a table</summary>
+            <div class="ops-table-scroll">
+                <table class="ops-table">
+                    <caption class="ops-visually-hidden">Milestone work items with due date and stage</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Milestone</th>
+                            <th scope="col">Workstream</th>
+                            <th scope="col">Due</th>
+                            <th scope="col">Stage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var milestone in overview.Milestones)
+                        {
+                            <tr class="@(milestone.IsOverdue ? "ops-table__row--overdue" : "")">
+                                <td>@milestone.Title</td>
+                                <td>@milestone.WorkstreamName</td>
+                                <td class="is-nowrap">@(milestone.DueDateUtc?.ToString("yyyy-MM-dd") ?? "—")@(milestone.IsOverdue ? " (overdue)" : milestone.IsPastDueWithUnreadableStatus ? " (past due, status unreadable)" : "")</td>
+                                <td>@milestone.StageLabel</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </details>
+    }
+</section>
+
+@if (showLoad)
+{
+<div class="ops-grid-2">
+    <section class="ops-panel" aria-labelledby="workload-heading">
+        <h2 class="ops-panel__heading" id="workload-heading">Outstanding workload</h2>
+        <p class="ops-empty-state">Open items per person and their estimates. Not a dated forecast.</p>
+        @if (overview.ResourceCapacity.Count == 0)
+        {
+            <p class="ops-empty-state">No open work items are assigned to active staff yet.</p>
+        }
+        else
+        {
+            <div class="ops-table-scroll">
+                <table class="ops-table">
+                    <caption class="ops-visually-hidden">Outstanding workload by staff member</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Staff</th>
+                            <th scope="col">Capacity (h/week)</th>
+                            <th scope="col">Open items</th>
+                            <th scope="col">Estimated hours</th>
+                            <th scope="col">No estimate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in overview.ResourceCapacity)
+                        {
+                            <tr>
+                                <td class="is-nowrap">@row.StaffFullName</td>
+                                <td>@row.CapacityHoursPerWeek.ToString("0.##")</td>
+                                <td>@row.AssignedOpenItems</td>
+                                <td>@row.EstimatedHoursOutstanding.ToString("0.##")</td>
+                                <td>@row.OpenItemsWithoutEstimate</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+
+    @* Bookings are a separate, scheduling-source concept; with none in the
+       window there is nothing to qualify, so the section stays out of the way. *@
+    @if (coverage.TotalInWindow > 0)
+    {
+        <section class="ops-panel" aria-labelledby="planned-heading">
+            <h2 class="ops-panel__heading" id="planned-heading">Planned allocation, next @ProgrammeOverviewQueryServiceWindowDays days</h2>
+            <p class="ops-empty-state">
+                Booked time from the scheduling source, @coverage.WindowStartUtc.ToString("yyyy-MM-dd") to
+                @coverage.WindowEndUtc.ToString("yyyy-MM-dd"). Planned time, not delivery progress. Booked hours are
+                as recorded; the weekly average counts only the part of each booking inside the window.
+            </p>
+            <p class="ops-empty-state">
+                Coverage: @coverage.TotalInWindow bookings in window, @coverage.WithoutResolvedStaff not matched to an
+                active staff profile, @coverage.WithoutHours without recorded hours, @coverage.Undated undated (excluded).
+            </p>
+            @if (overview.PlannedAllocations.Count == 0)
+            {
+                <p class="ops-empty-state">No bookings for active staff in this window — resolve unmatched people in the identity queue.</p>
+            }
+            else
+            {
+                <div class="ops-table-scroll">
+                    <table class="ops-table">
+                        <caption class="ops-visually-hidden">Planned allocation by staff member</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Staff</th>
+                                <th scope="col">Bookings</th>
+                                <th scope="col">Booked hours</th>
+                                <th scope="col">Per week vs contract</th>
+                                <th scope="col">No hours</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in overview.PlannedAllocations)
+                            {
+                                <tr class="@(row.IsBookedOverCapacity ? "ops-table__row--overdue" : "")">
+                                    <td class="is-nowrap">@row.StaffFullName</td>
+                                    <td>@row.AllocationCount</td>
+                                    <td>@(row.BookedHours?.ToString("0.##") ?? "no hours recorded")</td>
+                                    <td class="is-nowrap">@(row.BookedHoursPerWeek is { } perWeek ? $"{perWeek:0.#} of {row.CapacityHoursPerWeek:0.#}" : "—")</td>
+                                    <td>@row.AllocationsWithoutHours</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    }
+</div>
+}
+
+<section class="ops-panel" id="data-sources" aria-label="Data sources">
+    <details open="@(failedSources.Count > 0)">
+    <summary class="ops-panel__summary"><h2 class="ops-panel__heading">Data sources (@activeSources.Count)</h2><span class="ops-panel__meta">Whole organisation</span></summary>
+    @if (activeSources.Count == 0)
+    {
+        <p class="ops-empty-state">No source has completed a publication yet, so coverage is unknown.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Per-source publication state: status, last published, freshness, and last failure</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Source</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Last complete publication (UTC)</th>
+                        <th scope="col">Freshness</th>
+                        <th scope="col">Detail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var source in activeSources)
+                    {
+                        <tr class="@(source.LastRunFailed ? "ops-table__row--overdue" : "")">
+                            <th scope="row">@source.DisplayName</th>
+                            <td>@source.StatusLabel@(source.IsRunning && source.RunningStage is not null ? $" — {source.RunningStage}" : "")</td>
+                            <td class="is-nowrap">@(source.LastPublishedAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "—")</td>
+                            <td>@source.FreshnessLabel</td>
+                            <td class="ops-table__cell--wrap">
+                                @if (source.LastRunFailed)
+                                {
+                                    <span>Failed @(source.LastFailureAtUtc?.ToString("yyyy-MM-dd HH:mm")): @source.LastFailureError</span>
+                                    <span> @source.PartialDataNote</span>
+                                }
+                                else if (source.IsRunning)
+                                {
+                                    <span>@source.PartialDataNote</span>
+                                }
+                                else if (source.LastPublishedSummary is not null)
+                                {
+                                    @source.LastPublishedSummary
+                                }
+                                else
+                                {
+                                    <span>—</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (Model.UnresolvedIdentityCount == 0)
+        {
+            <p class="ops-empty-state">Everyone named in these sources is matched to a staff profile.</p>
+        }
+    }
+
+    @if (Model.CanSync)
+    {
+        <div class="ops-actions">
+            @foreach (var syncSource in refreshableSources)
+            {
+                <form asp-controller="StaffProgrammeOverview" asp-action="Sync" asp-route-source="@syncSource.Source" method="post">
+                    <button type="submit" class="ops-button">Refresh from @syncSource.DisplayName</button>
+                </form>
+            }
+            <a class="ops-button ops-button--secondary" asp-controller="StaffFileImport" asp-action="Index">Import a file</a>
+            <a class="ops-button ops-button--secondary" asp-controller="StaffSourceConnection" asp-action="Index">Manage connections</a>
+            @if (showRepositories)
+            {
+                <a class="ops-button ops-button--secondary" asp-controller="StaffCodeRepository" asp-action="Index">Link code repositories</a>
+            }
+        </div>
+        @if (firstSyncSources.Count > 0)
+        {
+            <details class="ops-disclosure">
+                <summary>Run a first sync from a newly connected tool</summary>
+                <p class="ops-empty-state">Only run one once its connection is set up under Manage connections; an unconnected tool reports an error and changes nothing.</p>
+                <div class="ops-actions">
+                    @foreach (var syncSource in firstSyncSources)
+                    {
+                        <form asp-controller="StaffProgrammeOverview" asp-action="Sync" asp-route-source="@syncSource.Source" method="post">
+                            <button type="submit" class="ops-button ops-button--secondary">Run @syncSource.DisplayName sync</button>
+                        </form>
+                    }
+                </div>
+            </details>
+        }
+    }
+    </details>
+</section>
+}
+
+@functions {
+    private static int ProgrammeOverviewQueryServiceWindowDays => ProgrammePulse.Services.ProgrammeOps.ProgrammeOverviewQueryService.PlannedWindowDays;
+}

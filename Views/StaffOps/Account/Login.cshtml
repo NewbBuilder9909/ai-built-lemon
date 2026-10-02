@@ -1,0 +1,50 @@
+@model string
+@inject Microsoft.Extensions.Options.IOptions<ProgrammePulse.Services.Commercial.CommercialOptions> Commercial
+@{
+    Layout = null;
+    var returnUrl = Model;
+}
+<!DOCTYPE html>
+<html lang="@ProgrammePulse.Services.Localization.CultureMarkup.Lang" dir="@ProgrammePulse.Services.Localization.CultureMarkup.Dir">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@Localizer["Log in"] — @ProductBrand.Value.Name</title>
+    <link rel="stylesheet" href="~/css/app.css" />
+    <script src="~/js/app.js" defer></script>
+</head>
+<body>
+    <main class="ops-main ops-auth">
+        <div class="ops-panel">
+            <h1 class="ops-panel__heading">@Localizer["Login.Heading", ProductBrand.Value.Name]</h1>
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <p class="ops-chip">@ViewData.ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage</p>
+            }
+            <form asp-controller="StaffAccount" asp-action="Login" method="post" class="ops-login-form">
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <div class="ops-filter-bar__field">
+                    <label for="email">@Localizer["Email"]</label>
+                    <input type="email" id="email" name="email" autocomplete="username" required />
+                </div>
+                <div class="ops-filter-bar__field">
+                    <label for="password">@Localizer["Password"]</label>
+                    <input type="password" id="password" name="password" autocomplete="current-password" required />
+                </div>
+                <button type="submit" class="ops-button">@Localizer["Log in"]</button>
+            </form>
+            <p><a asp-controller="StaffAccount" asp-action="Forgot">@Localizer["Login.Forgot"]</a></p>
+            @* Only advertise the trial when /purchase actually offers it; otherwise the one offer is the diagnostic. *@
+            @if (Commercial.Value.SelfServiceTrialEnabled)
+            {
+                <p class="ops-empty-state">@Localizer["Login.NewTo", ProductBrand.Value.Name] <a href="/purchase#start-trial">@Localizer["Start a trial"]</a></p>
+            }
+            else
+            {
+                <p class="ops-empty-state">@Localizer["Login.NewTo", ProductBrand.Value.Name] <a href="/purchase">@Localizer["Login.SeeOffer"]</a></p>
+            }
+        </div>
+        <div class="ops-login-lang"><partial name="~/Views/Shared/_LanguageSwitcher.cshtml" /></div>
+    </main>
+</body>
+</html>

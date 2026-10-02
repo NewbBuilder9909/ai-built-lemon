@@ -1,0 +1,35 @@
+@using ProgrammePulse.Controllers
+@using ProgrammePulse.Services.ProgrammeOps
+@model (EvidenceReadiness Readiness, string Here)
+@*
+    The verdict as a band, never a score: all three bands are shown, the
+    current one is marked, and each states the rule that puts a check in it,
+    so a reader can see why this one landed where it did. Shared by the
+    Evidence Check, a recorded review and the board pack (charts.css).
+*@
+@{
+    var bands = new[]
+    {
+        (Readiness: EvidenceReadiness.NotDecisionReady,
+         Rule: $"A source failed, or a high-severity gap covers {EvidenceCheckCalculator.MaterialShare:P0} or more of its data"),
+        (Readiness: EvidenceReadiness.UseWithCaveats,
+         Rule: $"Evidence gaps to state, or data more than {EvidenceCheckCalculator.StaleAfterDays} days old"),
+        (Readiness: EvidenceReadiness.DecisionReady,
+         Rule: "No evidence gaps, and the data is current")
+    };
+}
+<ol class="ops-band" aria-label="Readiness bands, least ready first">
+    @foreach (var band in bands)
+    {
+        var current = band.Readiness == Model.Readiness;
+        <li class="ops-band__segment ops-band__segment--@StaffEvidenceCheckController.BandModifier(band.Readiness)@(current ? " ops-band__segment--current" : "")"
+            aria-current="@(current ? "true" : null)">
+            @if (current)
+            {
+                <span class="ops-band__here">@Model.Here</span>
+            }
+            <span class="ops-band__name">@StaffEvidenceCheckController.Label(band.Readiness)</span>
+            <span class="ops-band__rule">@band.Rule</span>
+        </li>
+    }
+</ol>

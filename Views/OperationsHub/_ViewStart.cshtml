@@ -1,0 +1,8 @@
+@{
+    // Explicit path, not a bare name: layout resolution is driven by the requesting
+    // controller's own conventional search paths (e.g. /Views/ErpRecords/ for
+    // ErpRecordsController), not by the physical folder this view file lives in.
+    // A bare "_Layout" would fail to resolve for any controller other than
+    // OperationsHubController.
+    Layout = "~/Views/OperationsHub/_Layout.cshtml";
+}

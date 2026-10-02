@@ -1,0 +1,16 @@
+@using ProgrammePulse.Controllers
+@using ProgrammePulse.Services.ProgrammeOps
+@model (decimal Numerator, decimal Denominator, bool MarkMaterialShare)
+@*
+    The affected share of a finding's own total. Hidden from assistive
+    technology because the same figure is written beside it ("4 of 53
+    committed items"). A high-severity evidence gap carries the 10% line
+    that decides readiness, so a reader can see how close each one is.
+*@
+<span class="ops-share ops-finding__share" aria-hidden="true">
+    <span class="ops-share__fill" style="--share: @StaffEvidenceCheckController.SharePercent(Model.Numerator, Model.Denominator)"></span>
+    @if (Model.MarkMaterialShare)
+    {
+        <span class="ops-share__mark" style="--mark: @StaffEvidenceCheckController.SharePercent(EvidenceCheckCalculator.MaterialShare, 1m)"></span>
+    }
+</span>

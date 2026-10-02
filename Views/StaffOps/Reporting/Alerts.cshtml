@@ -1,0 +1,54 @@
+@using ProgrammePulse.Models.Programme
+@model ProgrammePulse.Services.Shared.ResultPage<Alert>
+
+@{ ViewData["ReportActions"] = true; }
+<partial name="~/Views/StaffOps/Reporting/_ReportingNav.cshtml" model="@("alerts")" />
+<p class="ops-page-lede">
+    Raised after every successful sync, or now with Refresh: a workstream with blocked work, someone whose capacity
+    is already used up or will be over the next two weeks, or someone well under 50% utilisation with hours free.
+    Alerts stay open until acknowledged.
+</p>
+<form asp-controller="StaffReportingAlerts" asp-action="RefreshAlerts" method="post">
+    <button type="submit" class="ops-button ops-button--secondary">@Localizer["Refresh alerts"]</button>
+</form>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@Localizer["Alerts"]</h2>
+    @if (Model.Items.Count == 0 && !Model.HasPrevious)
+    {
+        <p class="ops-empty-state">@Localizer["No open alerts."]</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">@Localizer["Open threshold alerts"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Localizer["Raised"]</th>
+                        <th scope="col">@Localizer["Type"]</th>
+                        <th scope="col">@Localizer["Message"]</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var alert in Model.Items)
+                    {
+                        <tr>
+                            <td>@alert.RaisedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@ProgrammePulse.Services.Shared.DisplayText.Words(alert.Type)</td>
+                            <td>@alert.Message</td>
+                            <td>
+                                <form asp-controller="StaffReportingAlerts" asp-action="AcknowledgeAlert" method="post">
+                                    <input type="hidden" name="alertKey" value="@alert.AlertKey" />
+                                    <button type="submit" class="ops-button">@Localizer["Acknowledge"]</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <partial name="~/Views/StaffOps/_Pager.cshtml" model="Model.Links" />
+    }
+</section>

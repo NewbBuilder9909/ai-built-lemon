@@ -1,0 +1,13 @@
+@model ProgrammePulse.Models.SkillsEvidence.EvidenceCoverageSummary
+<aside class="ops-banner ops-banner--info" aria-label="Evidence coverage">
+    @if (Model.IsUnverifiedReplay)
+    {
+        <p><strong>Unverified replay.</strong> A live source run has not yet established coverage.</p>
+    }
+    <p>These examples use selected repositories and approved account mappings. Missing examples or AI signals are unknown, not evidence of inactivity or unassisted work.</p>
+    <p>Source status: <strong>@Model.WorstStatus</strong>.
+        Observed from @(Model.ObservedFromUtc?.ToString("yyyy-MM-dd") ?? "unknown"),
+        complete through @(Model.CompleteThroughUtc?.ToString("yyyy-MM-dd") ?? "unknown") UTC.
+        Unmapped actors: @Model.UnmappedActors. Unattributed records: @Model.UnattributedEvidence.</p>
+    <p>A declared tool is not independently verified by accepting an example.</p>
+</aside>

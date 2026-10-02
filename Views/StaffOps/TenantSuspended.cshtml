@@ -1,0 +1,15 @@
+@{
+    var reason = ViewData["Reason"] as string;
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Access suspended</h2>
+    <p class="ops-banner ops-banner--error" role="alert">
+        @(string.IsNullOrWhiteSpace(reason) ? "This organisation's account is not currently active." : reason)
+    </p>
+    <p class="ops-empty-state">
+        Your sign-in is valid, but your organisation's account is not active on this
+        platform right now. Nothing has been deleted. Use the log out button above,
+        and contact your account manager to restore access.
+    </p>
+</section>

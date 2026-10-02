@@ -1,0 +1,52 @@
+@using ProgrammePulse.Services.ExecutiveReview
+@inject Microsoft.Extensions.Options.IOptions<ProgrammePulse.Services.Localization.LocalizationSettings> LocalizationOptions
+@{ var localization = LocalizationOptions.Value; }
+@model ProgrammePulse.Models.ExecutiveReview.MarketSettingsInput
+
+@if (ViewData["ErrorKey"] is string error)
+{
+    <p class="ops-empty-state" role="alert">@Localizer[error]</p>
+}
+<form asp-controller="StaffExecutiveReview" asp-action="SaveMarket" method="post" class="ops-filter-bar review-settings">
+    <input asp-for="ExpectedVersion" type="hidden" />
+    <div class="ops-filter-bar__field">
+        <label asp-for="MarketCode">@Localizer["Review.Market"]</label>
+        <select asp-for="MarketCode">
+            @foreach (var code in localization.SupportedMarkets) { <option value="@code">@ProgrammePulse.Services.Shared.DisplayText.Words(code)</option> }
+        </select>
+    </div>
+    <div class="ops-filter-bar__field">
+        <label asp-for="UiCulture">@Localizer["Review.Language"]</label>
+        <select asp-for="UiCulture">
+            @foreach (var code in localization.SupportedUiCultures) { <option value="@code">@System.Globalization.CultureInfo.GetCultureInfo(code).NativeName</option> }
+        </select>
+    </div>
+    <div class="ops-filter-bar__field">
+        <label asp-for="FormatCulture">@Localizer["Review.Format"]</label>
+        <select asp-for="FormatCulture">
+            @foreach (var code in localization.SupportedFormatCultures) { <option value="@code">@System.Globalization.CultureInfo.GetCultureInfo(code).NativeName</option> }
+        </select>
+    </div>
+    <div class="ops-filter-bar__field">
+        <label asp-for="ReportingCurrency">@Localizer["Review.ReportingCurrency"]</label>
+        <select asp-for="ReportingCurrency">
+            @foreach (var code in localization.SupportedCurrencies) { <option value="@code">@ProgrammePulse.Services.Shared.DisplayText.Words(code)</option> }
+        </select>
+    </div>
+    <div class="ops-filter-bar__field">
+        <label asp-for="TimeZoneId">@Localizer["Review.TimeZone"]</label>
+        <select asp-for="TimeZoneId">
+            @foreach (var code in localization.SupportedTimeZones) { <option value="@code">@ProgrammePulse.Services.Shared.DisplayText.Words(code)</option> }
+        </select>
+    </div>
+    <div class="ops-filter-bar__field">
+        <label asp-for="FiscalYearStartMonth">@Localizer["Review.FiscalStart"]</label>
+        <select asp-for="FiscalYearStartMonth">
+            @for (var month = 1; month <= 12; month++) { <option value="@month">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month)</option> }
+        </select>
+    </div>
+    <button type="submit" class="ops-button">@Localizer["Review.Save"]</button>
+    <a asp-action="Market" class="ops-button">@Localizer["Review.Reload"]</a>
+</form>
+<p>@Localizer["Review.SettingsVersion"]: @Model.ExpectedVersion</p>
+<a asp-action="Index">@Localizer["Review.Title"]</a>

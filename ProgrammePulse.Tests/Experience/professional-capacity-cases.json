@@ -1,0 +1,80 @@
+[
+  {
+    "name": "Healthy delivery team",
+    "contractualHours": 37.5,
+    "absenceHours": 0,
+    "plannedHours": 35,
+    "estimatedHours": 35,
+    "actualHours": 34,
+    "availableHours": 37.5,
+    "allocationHeadroomHours": 2.5,
+    "planAlignmentHours": 0,
+    "effortVarianceHours": -1,
+    "actualResidualHours": 3.5
+  },
+  {
+    "name": "Over-allocated developer",
+    "contractualHours": 37.5,
+    "absenceHours": 0,
+    "plannedHours": 50,
+    "estimatedHours": 50,
+    "actualHours": 0,
+    "availableHours": 37.5,
+    "allocationHeadroomHours": -12.5,
+    "planAlignmentHours": 0,
+    "effortVarianceHours": -50,
+    "actualResidualHours": 37.5
+  },
+  {
+    "name": "Leave creates a future capacity deficit",
+    "contractualHours": 37.5,
+    "absenceHours": 7.5,
+    "plannedHours": 35,
+    "estimatedHours": 35,
+    "actualHours": 0,
+    "availableHours": 30,
+    "allocationHeadroomHours": -5,
+    "planAlignmentHours": 0,
+    "effortVarianceHours": -35,
+    "actualResidualHours": 30
+  },
+  {
+    "name": "Resource plan and task plan mismatch",
+    "contractualHours": 200,
+    "absenceHours": 0,
+    "plannedHours": 200,
+    "estimatedHours": 90,
+    "actualHours": 0,
+    "availableHours": 200,
+    "allocationHeadroomHours": 0,
+    "planAlignmentHours": 110,
+    "effortVarianceHours": -90,
+    "actualResidualHours": 200
+  },
+  {
+    "name": "Actual effort overruns estimate",
+    "contractualHours": 150,
+    "absenceHours": 0,
+    "plannedHours": 100,
+    "estimatedHours": 100,
+    "actualHours": 140,
+    "availableHours": 150,
+    "allocationHeadroomHours": 50,
+    "planAlignmentHours": 0,
+    "effortVarianceHours": 40,
+    "actualResidualHours": 10
+  },
+  {
+    "name": "Missing estimate is unknown",
+    "contractualHours": 37.5,
+    "absenceHours": 0,
+    "plannedHours": 20,
+    "estimatedHours": null,
+    "actualHours": 0,
+    "availableHours": 37.5,
+    "allocationHeadroomHours": 17.5,
+    "planAlignmentHours": null,
+    "effortVarianceHours": null,
+    "actualResidualHours": 37.5
+  }
+]

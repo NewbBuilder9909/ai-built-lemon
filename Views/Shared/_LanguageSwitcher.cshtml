@@ -1,0 +1,45 @@
+@* Language switcher, built from Localization:UiCultures — adding a language to
+   configuration adds it here with no view change. Each language is shown in
+   its own name ("Cymraeg", "Français"), the convention that lets someone find
+   their language without reading the current one. A handful of languages
+   render as links; beyond that a select, which still works without JS. *@
+@inject Microsoft.Extensions.Options.IOptions<ProgrammePulse.Services.Localization.LocalizationSettings> LocalizationOptions
+@inject Microsoft.Extensions.Localization.IStringLocalizer<ProgrammePulse.Resources.SharedResource> SwitcherLocalizer
+@{
+    var offered = LocalizationOptions.Value.SupportedUiCultures.Select(System.Globalization.CultureInfo.GetCultureInfo).ToList();
+    var current = System.Globalization.CultureInfo.CurrentUICulture;
+    var formatCulture = System.Globalization.CultureInfo.CurrentCulture.Name;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+    string Label(System.Globalization.CultureInfo c) => ProgrammePulse.Services.Localization.CultureMarkup.NativeLabel(c, offered);
+    const int MaximumLinks = 3;
+}
+@if (offered.Count > 1)
+{
+    @if (offered.Count <= MaximumLinks)
+    {
+        <ul class="ops-nav__lang" aria-label="@SwitcherLocalizer["Language"]">
+            @foreach (var culture in offered)
+            {
+                var isCurrent = culture.Name == current.Name;
+                <li><a asp-controller="Language" asp-action="Set" asp-route-culture="@culture.Name" asp-route-formatCulture="@formatCulture" asp-route-returnUrl="@returnUrl"
+                       class="@(isCurrent ? "ops-nav__lang-link ops-nav__lang-link--active" : "ops-nav__lang-link")"
+                       hreflang="@culture.Name" lang="@culture.Name" aria-current="@(isCurrent ? "true" : null)">@Label(culture)</a></li>
+            }
+        </ul>
+    }
+    else
+    {
+        <form class="ops-nav__lang ops-nav__lang--select" method="get" asp-controller="Language" asp-action="Set">
+            <label class="ops-visually-hidden" for="ops-language">@SwitcherLocalizer["Language"]</label>
+            <select id="ops-language" name="culture" data-autosubmit>
+                @foreach (var culture in offered)
+                {
+                    <option value="@culture.Name" lang="@culture.Name" selected="@(culture.Name == current.Name ? "selected" : null)">@Label(culture)</option>
+                }
+            </select>
+            <input type="hidden" name="formatCulture" value="@formatCulture" />
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
+            <button type="submit" class="ops-nav__lang-link">@SwitcherLocalizer["Change"]</button>
+        </form>
+    }
+}

@@ -1,0 +1,33 @@
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # Umbraco.Cms and Umbraco.Cms.DevelopmentMode.Backoffice ship together
+      # and must stay on the same version; one PR per package would leave
+      # them mismatched.
+      umbraco:
+        patterns: ["Umbraco.*"]
+      azure:
+        patterns: ["Azure.*", "Microsoft.Azure.*"]
+      test-tooling:
+        patterns: ["xunit*", "Microsoft.NET.Test.Sdk", "coverlet.*", "Microsoft.AspNetCore.Mvc.Testing"]
+    ignore:
+      # A major Umbraco release is a planned upgrade (see .github/modernize/
+      # dotnet10-umbraco18-upgrade), not a weekly bump.
+      - dependency-name: "Umbraco.*"
+        update-types: ["version-update:semver-major"]
+      # Tracks the .NET runtime the site targets; its next major needs the
+      # next .NET, which global.json and the SDK decide.
+      - dependency-name: "Microsoft.AspNetCore.*"
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]

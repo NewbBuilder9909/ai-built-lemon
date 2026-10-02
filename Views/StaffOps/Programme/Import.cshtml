@@ -1,0 +1,212 @@
+@using ProgrammePulse.Models.ViewModels.ProgrammeOverview
+@using ProgrammePulse.Services.Integrations.FileImport
+@model FileImportViewModel
+
+<partial name="~/Views/StaffOps/Programme/_DataNav.cshtml" model="@("import")" />
+
+@if (!string.IsNullOrWhiteSpace(Model.Error))
+{
+    <p class="ops-banner ops-banner--error" role="alert">@Model.Error</p>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.CancelledNotice))
+{
+    <p class="ops-banner ops-banner--info" role="status">@Model.CancelledNotice</p>
+}
+
+@if (Model.LastResult is { AwaitingConfirmation: true, Plan: { } plan } pending)
+{
+    var noun = plan.Kind == DeliveryExportKind.WorkItems ? "Work items" : "Time entries";
+    <section class="ops-panel" aria-label="Confirm replacement">
+        <h2 class="ops-panel__heading">@noun: confirm the replacement</h2>
+        <p class="ops-banner ops-banner--warning" role="alert">@pending.Summary</p>
+        <p>
+            Each upload replaces everything imported before, so a row missing from this file is removed. If the export was
+            filtered or cut short, cancel and export the whole period instead.
+        </p>
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">@noun before and after this import</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Now</th>
+                        <th scope="col">After import</th>
+                        <th scope="col">New</th>
+                        <th scope="col">Updated</th>
+                        <th scope="col">Removed</th>
+                        @if (plan.HoursBefore is not null)
+                        {
+                            <th scope="col">Hours now</th>
+                            <th scope="col">Hours after</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@plan.RowsBefore.ToString("N0")</td>
+                        <td>@plan.RowsAfter.ToString("N0")</td>
+                        <td>@plan.Added.ToString("N0")</td>
+                        <td>@plan.Updated.ToString("N0")</td>
+                        <td><strong>@plan.Removed.ToString("N0")</strong></td>
+                        @if (plan.HoursBefore is { } before)
+                        {
+                            <td>@before.ToString("N1")</td>
+                            <td>@(plan.HoursAfter?.ToString("N1"))</td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        @if (plan.HoursUnlinkedByRemoval > 0)
+        {
+            <p>
+                <strong>@plan.HoursUnlinkedByRemoval.ToString("N1") hours</strong> of recorded time are logged against the work items being
+                removed. That time is kept but will no longer be linked to a work item.
+            </p>
+        }
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption>@(plan.RemovalsNotShown > 0 ? $"The first {plan.Removals.Count} of {plan.Removed:N0} rows to be removed" : "Rows to be removed")</caption>
+                <thead><tr><th scope="col">Id</th><th scope="col">@(plan.Kind == DeliveryExportKind.WorkItems ? "Title" : "Date and hours")</th></tr></thead>
+                <tbody>
+                    @foreach (var removal in plan.Removals)
+                    {
+                        <tr><td>@removal.Id</td><td>@removal.Description</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="ops-filter-bar">
+            <form method="post" action="/staffops/programme/import/confirm/@pending.StagingKey">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="ops-button ops-button--primary">Replace and remove @plan.Removed.ToString("N0")</button>
+            </form>
+            <form method="post" action="/staffops/programme/import/cancel/@pending.StagingKey">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="ops-button ops-button--secondary">Cancel, change nothing</button>
+            </form>
+        </div>
+        <p class="ops-empty-state">This preview can be confirmed for @DeliveryExportImportService.StagingLifetime.TotalMinutes.ToString("N0") minutes.</p>
+    </section>
+}
+else if (Model.LastResult is { } result)
+{
+    <section class="ops-panel" aria-label="Import result">
+        <h2 class="ops-panel__heading">@(Model.LastKind == DeliveryExportKind.WorkItems ? "Work items" : "Time entries"): @(result.Imported ? "imported" : "not imported")</h2>
+        <p class="ops-banner @(result.Imported ? "ops-banner--success" : "ops-banner--error")" role="@(result.Imported ? "status" : "alert")">@result.Summary</p>
+        @if (result.Imported)
+        {
+            <p><a class="ops-button ops-button--primary" href="/staffops/programme/evidence-check">Run the Evidence Check on this data</a></p>
+        }
+        @if (result.IgnoredColumns is { Count: > 0 } ignored)
+        {
+            <p class="ops-empty-state">Columns not recognised, so ignored: @string.Join(", ", ignored).</p>
+        }
+        @if (result.Errors.Count > 0)
+        {
+            <div class="ops-table-scroll">
+                <table class="ops-table">
+                    <caption class="ops-visually-hidden">Problems found in the uploaded file, by row and column</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Row</th>
+                            <th scope="col">Column</th>
+                            <th scope="col">Problem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var error in result.Errors)
+                        {
+                            <tr>
+                                <td>@error.Row</td>
+                                <td>@error.Column</td>
+                                <td>@error.Message</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Import delivery data from a file</h2>
+    <p class="ops-empty-state">
+        Upload CSV exports instead of connecting a live tool: work items first, then the time recorded against them.
+        Headers are matched ignoring case, spaces and punctuation, so most exports load unedited. Up to
+        @(ProgrammePulse.Controllers.StaffFileImportController.MaxUploadBytes / (1024 * 1024)) MB and
+        @DeliveryExportImportService.MaxDataRows.ToString("N0") rows per file.
+    </p>
+    <ul class="ops-checklist">
+        <li><strong>All or nothing.</strong> The whole file is checked first; if any row has a problem, nothing is written and every problem is listed.</li>
+        <li><strong>Each upload replaces the last.</strong> Upload the whole period every time: rows missing from the new file are removed, so corrections and deletions at source come through. Anything that would be removed is shown for you to confirm first, and the same file twice changes nothing.</li>
+        <li><strong>Nothing guessed.</strong> People who can't be matched go on the <a href="/staffops/programme/identities">identity queue</a>; statuses that can't be mapped stay <em>Unmapped</em>.</li>
+    </ul>
+</section>
+
+<div class="ops-grid-2">
+    @foreach (var (step, slug, heading, columns, note) in new[]
+    {
+        (1, "work-items", "Work items", Model.WorkItemColumns, "One row per task, with its status and due date."),
+        (2, "time-entries", "Time entries", Model.TimeEntryColumns, "Who recorded how many hours, against which task. Import work items first.")
+    })
+    {
+        <section class="ops-panel" aria-label="@heading import">
+            <div class="ops-panel__header">
+                <h2 class="ops-panel__heading"><span class="ops-step">@step</span> @heading</h2>
+                <a href="/staffops/programme/import/template/@slug">Download template</a>
+            </div>
+            <p class="ops-empty-state">@note</p>
+            <form method="post" action="/staffops/programme/import/@slug" enctype="multipart/form-data" class="ops-filter-bar">
+                @Html.AntiForgeryToken()
+                <div class="ops-filter-bar__field">
+                    <label for="file-@slug">@heading CSV</label>
+                    <input id="file-@slug" name="file" type="file" accept=".csv,text/csv" required />
+                </div>
+                <button type="submit" class="ops-button">Import @heading.ToLowerInvariant()</button>
+            </form>
+            <details class="ops-disclosure">
+                <summary>Column reference (@columns.Count columns, @columns.Count(c => c.Required) required)</summary>
+                <div class="ops-table-scroll">
+                    <table class="ops-table" data-collapse="off">
+                        <caption class="ops-visually-hidden">@heading columns: name, whether required, meaning and accepted header spellings</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Column</th>
+                                <th scope="col">Meaning</th>
+                                <th scope="col">Also accepted as</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var column in columns)
+                            {
+                                <tr>
+                                    <td>
+                                        @column.Name
+                                        <span class="ops-cell-context">@(column.Required ? "Required" : "Optional")</span>
+                                    </td>
+                                    <td>@column.Description</td>
+                                    <td>@string.Join(", ", column.Aliases)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+        </section>
+    }
+</div>
+
+<section class="ops-panel" aria-label="Sample data">
+    <h2 class="ops-panel__heading">Try it on sample data</h2>
+    <p class="ops-empty-state">
+        Exports from a fictional agency, with the ordinary mess real exports have: statuses nobody mapped, work with no
+        estimate or due date, time booked to nothing. Import them into a demonstration tenant to show the Evidence Check
+        before a prospect has shared any data of their own. Dates are set relative to today, so overdue work stays overdue.
+    </p>
+    <ul class="ops-link-row">
+        <li><a href="/staffops/programme/import/sample/work-items">Sample work items (CSV)</a></li>
+        <li><a href="/staffops/programme/import/sample/time-entries">Sample time entries (CSV)</a></li>
+    </ul>
+</section>

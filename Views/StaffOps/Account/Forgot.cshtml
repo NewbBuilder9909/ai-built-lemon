@@ -1,0 +1,21 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="@ProgrammePulse.Services.Localization.CultureMarkup.Lang" dir="@ProgrammePulse.Services.Localization.CultureMarkup.Dir">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@Localizer["Login.Forgot"] — @ProductBrand.Value.Name</title>
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+</head>
+<body>
+    <main class="ops-main ops-auth">
+        <div class="ops-panel">
+            <h1 class="ops-panel__heading">@Localizer["Login.Forgot"]</h1>
+            <p>Ask your organisation's administrator. They can send you a link to set a new password, and unlock your account if too many wrong passwords locked it.</p>
+            <p><a asp-controller="StaffAccount" asp-action="Login">Back to sign in</a></p>
+        </div>
+    </main>
+</body>
+</html>

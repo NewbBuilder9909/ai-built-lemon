@@ -1,0 +1,270 @@
+@inject ProgrammePulse.Services.BrandingOps.IBrandingThemeResolverService BrandingThemeResolverService
+@inject ProgrammePulse.Services.Tenancy.ITenantContext TenantContext
+@inject ProgrammePulse.Services.Tenancy.IFeatureGate FeatureGate
+@inject ProgrammePulse.Services.Tenancy.IModuleGate ModuleGate
+@inject ProgrammePulse.Services.Staff.IStaffAuthorizationService StaffAuthorization
+@inject Microsoft.Extensions.Options.IOptions<ProgrammePulse.Services.ExecutiveReview.ExecutiveReviewOptions> ExecutiveReviewOptions
+@inject ProgrammePulse.Services.Staff.ICurrentStaff CurrentStaff
+@using ProgrammePulse.Models.Tenancy
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    bool Is(params string[] controllerNames) =>
+        controllerNames.Any(c => string.Equals(currentController, c, StringComparison.OrdinalIgnoreCase));
+    bool IsAction(string controllerName, params string[] actionNames) =>
+        Is(controllerName) && actionNames.Any(a => string.Equals(currentAction, a, StringComparison.OrdinalIgnoreCase));
+    string Css(bool active) => active ? "ops-nav__link ops-nav__link--active" : "ops-nav__link";
+
+    // Every StaffOps page shares this layout, signed-in or not (e.g. the
+    // login page redirects through here too) — EnsureResolvedAsync leaves
+    // CurrentTenantId null for an anonymous/unresolved caller rather than
+    // throwing, and GetActiveThemeAsync falls back to the platform default
+    // theme for that case. See docs/tenancy.md.
+    await TenantContext.EnsureResolvedAsync();
+    var brandingTheme = await BrandingThemeResolverService.GetActiveThemeAsync(TenantContext.CurrentTenantId);
+    var htmlDataTheme = brandingTheme.DarkModeEnabled ? "dark" : "light";
+
+    // The core: five items, each gated on the same capability (and plan
+    // feature) its controller enforces, so nobody is shown a link that
+    // refuses them. The links only hide; the actions' own gates enforce.
+    var canReview = await StaffAuthorization.HasAsync(Capability.ViewDeliveryReporting)
+        && await FeatureGate.IsEnabledAsync(ProductFeature.ReportingHub);
+    var canViewPortfolio = await StaffAuthorization.HasAsync(Capability.ViewPortfolio);
+    var canIntegrate = await StaffAuthorization.HasAsync(Capability.ManageIntegrations);
+    var canMatch = await StaffAuthorization.HasAsync(Capability.ManageIdentityMappings);
+    var canCustomers = await StaffAuthorization.HasAsync(Capability.ManageCustomers);
+    var canManageStaff = await StaffAuthorization.HasAsync(Capability.ManageStaff);
+    var canManageModules = await StaffAuthorization.HasAsync(Capability.ManageModules);
+    var canManageBranding = await StaffAuthorization.HasAsync(Capability.ManageBranding)
+        && await FeatureGate.IsEnabledAsync(ProductFeature.Branding);
+    var isPlatformAdmin = await StaffAuthorization.HasAsync(Capability.ManagePlatform);
+
+    // Data and Settings open on the first page the member may use.
+    var dataController = canIntegrate ? "StaffFileImport" : canMatch ? "StaffIdentity" : canCustomers ? "StaffCustomers" : null;
+    var settingsController = canManageStaff ? "StaffAdmin" : canManageBranding ? "StaffBranding" : canManageModules ? "StaffModules" : null;
+
+    // Benched modules: shown only once an Admin has switched them on in
+    // Settings → Modules, and then only the links this member's role opens.
+    var on = await ModuleGate.GetSwitchedOnAsync();
+    var canReporting = on.Contains(ProductModules.Reporting) && canReview;
+    var canLoad = on.Contains(ProductModules.DeliveryLoad) && await StaffAuthorization.HasAsync(Capability.ViewTeamLoad);
+    var canCalibration = on.Contains(ProductModules.EstimateCalibration) && canReview
+        && await StaffAuthorization.HasAsync(Capability.ViewEstimateCalibration);
+    var canContracts = on.Contains(ProductModules.Contracts)
+        && await FeatureGate.IsEnabledAsync(ProductFeature.ContractOps)
+        && await StaffAuthorization.HasAsync(Capability.ViewCommercials);
+    var skillsOn = on.Contains(ProductModules.Skills);
+    var canSkillCoverage = skillsOn && await StaffAuthorization.HasAsync(Capability.ViewTeamSkillCoverage);
+    var canCoveragePlan = skillsOn && await StaffAuthorization.HasAsync(Capability.ViewStaffSkillEvidence);
+    var canOwnSkills = skillsOn && await StaffAuthorization.HasAsync(Capability.ViewOwnSkills);
+    var canEvidenceSources = skillsOn
+        && await FeatureGate.IsEnabledAsync(ProductFeature.GitHubEvidence)
+        && await StaffAuthorization.HasAsync(Capability.ManageIntegrations);
+    var canServiceHealth = on.Contains(ProductModules.ServiceHealth)
+        && await FeatureGate.IsEnabledAsync(ProductFeature.SupportEvidence)
+        && await StaffAuthorization.HasAsync(Capability.ViewServiceHealth);
+    var selfServiceOn = on.Contains(ProductModules.SelfService);
+    var canOwnWork = selfServiceOn && await StaffAuthorization.HasAsync(Capability.ViewOwnWork);
+    var canOwnProfile = selfServiceOn && await StaffAuthorization.HasAsync(Capability.ViewOwnProfile);
+    var canApproveLeave = selfServiceOn && await StaffAuthorization.HasAsync(Capability.ApproveLeave);
+    var executiveOn = on.Contains(ProductModules.ExecutiveReview) && ExecutiveReviewOptions.Value.Enabled;
+    var canExecutiveReview = executiveOn && canReview;
+    var canMarketSettings = executiveOn && canManageStaff;
+    var hasModules = canReporting || canLoad || canCalibration || canContracts || canSkillCoverage || canCoveragePlan
+        || canOwnSkills || canEvidenceSources || canServiceHealth || canOwnWork || canOwnProfile || canApproveLeave
+        || canExecutiveReview || canMarketSettings;
+    // The search page has its own form, so the top-bar box would only repeat it.
+    var canSearch = canViewPortfolio && !Is("StaffSearch");
+
+    // Who is signed in, at the foot of the rail. CurrentStaff is request-
+    // scoped and already resolved by the authorization checks above.
+    var signedIn = await CurrentStaff.GetProfileAsync();
+    var isSignedIn = signedIn is not null || await CurrentStaff.GetMemberIdAsync() is not null;
+    var brandInitial = string.IsNullOrWhiteSpace(brandingTheme.CompanyName) ? "?" : brandingTheme.CompanyName.Trim()[..1].ToUpperInvariant();
+}
+<!DOCTYPE html>
+<html lang="@ProgrammePulse.Services.Localization.CultureMarkup.Lang" dir="@ProgrammePulse.Services.Localization.CultureMarkup.Dir" data-theme="@htmlDataTheme">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] — @brandingTheme.CompanyName</title>
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/charts.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/executive-review.css" asp-append-version="true" />
+    @* Versioned by the published theme, so a publish is a new address and no
+       browser, proxy or back/forward cache can keep showing the old colours. *@
+    <link rel="stylesheet" href="~/staffops/branding/theme.css?v=@brandingTheme.Version" />
+    @* Opens the mobile nav and labels stacked table cells. Without it the
+       nav list is display:none below 700px and the toggle does nothing, so a
+       signed-in member on a phone had no navigation at all. *@
+    <script src="~/js/app.js" asp-append-version="true" defer></script>
+    @if (brandingTheme.FaviconUrl is not null)
+    {
+        <link rel="icon" href="@brandingTheme.FaviconUrl" />
+    }
+</head>
+<body data-flag-label="@Localizer["Flagged"]" data-scroll-label="@Localizer["Scrollable table"]"
+      data-show-all-label="@Localizer["Table.ShowAll"]" data-show-fewer-label="@Localizer["Table.ShowFewer"]" data-showing-label="@Localizer["Table.Showing"]">
+    <a class="ops-skip-link" href="#main-content">@Localizer["Skip to main content"]</a>
+    <div class="ops-shell">
+        <nav class="ops-nav" aria-label="Primary">
+            <div class="ops-nav__brand">
+                @if (brandingTheme.LogoUrl is not null)
+                {
+                    @* Decorative: the name is printed beside it. *@
+                    <img src="@brandingTheme.LogoUrl" alt="" />
+                }
+                else
+                {
+                    <span class="ops-nav__mark" aria-hidden="true">@brandInitial</span>
+                }
+                <span>@brandingTheme.CompanyName</span>
+            </div>
+            <button type="button" class="ops-nav__toggle" aria-controls="ops-nav-list" aria-expanded="false">
+                <span class="ops-visually-hidden">@Localizer["Toggle navigation"]</span>
+                <span aria-hidden="true">☰</span>
+            </button>
+            <ul class="ops-nav__list" id="ops-nav-list">
+                <li class="ops-nav__group">
+                    <ul>
+                        @if (canReview)
+                        {
+                            <li><a class="@Css(IsAction("StaffEvidenceCheck", "Index", "Record"))" asp-controller="StaffEvidenceCheck" asp-action="Index">@Localizer["Nav.Review"]</a></li>
+                            <li><a class="@Css(IsAction("StaffEvidenceCheck", "Reviews", "Review", "Decide", "Pack"))" asp-controller="StaffEvidenceCheck" asp-action="Reviews">@Localizer["Nav.History"]</a></li>
+                        }
+                        @if (canViewPortfolio)
+                        {
+                            <li><a class="@Css(Is("StaffProgrammeOverview"))" asp-controller="StaffProgrammeOverview" asp-action="Index">@Localizer["Nav.Programmes"]</a></li>
+                        }
+                        @if (dataController is not null)
+                        {
+                            <li><a class="@Css(Is("StaffFileImport", "StaffSourceConnection", "StaffOAuthConnection", "StaffIdentity", "StaffCustomers"))" asp-controller="@dataController" asp-action="Index">@Localizer["Nav.Data"]</a></li>
+                        }
+                        @if (settingsController is not null)
+                        {
+                            <li><a class="@Css(Is("StaffAdmin", "StaffBranding", "StaffModules"))" asp-controller="@settingsController" asp-action="Index">@Localizer["Nav.Settings"]</a></li>
+                        }
+                        @if (isPlatformAdmin)
+                        {
+                            <li><a class="@Css(Is("StaffTenantAdmin", "StaffTenantOnboarding"))" asp-controller="StaffTenantAdmin" asp-action="Index">@Localizer["Platform"]</a></li>
+                        }
+                    </ul>
+                </li>
+                @if (hasModules)
+                {
+                    <li class="ops-nav__group">
+                        <span class="ops-nav__group-label" id="ops-nav-modules">@Localizer["Nav.Modules"]</span>
+                        <ul aria-labelledby="ops-nav-modules">
+                            @if (canReporting)
+                            {
+                                <li><a class="@Css(Is("StaffReporting", "StaffRaid", "StaffGovernance", "StaffReportingAlerts", "StaffJiraTempo"))" asp-controller="StaffReporting" asp-action="Index">@Localizer["Reporting"]</a></li>
+                            }
+                            @if (canLoad)
+                            {
+                                <li><a class="@Css(Is("StaffDeliveryLoad"))" asp-controller="StaffDeliveryLoad" asp-action="Index">@Localizer["Delivery load"]</a></li>
+                            }
+                            @if (canCalibration)
+                            {
+                                <li><a class="@Css(Is("StaffEstimateCalibration"))" asp-controller="StaffEstimateCalibration" asp-action="Index">@Localizer["Estimate calibration"]</a></li>
+                            }
+                            @if (canContracts)
+                            {
+                                <li><a class="@Css(Is("StaffContract", "StaffContractAssurance", "StaffCodeRepository", "StaffSecurity"))" asp-controller="StaffContract" asp-action="Index">@Localizer["Contracts"]</a></li>
+                            }
+                            @if (canSkillCoverage)
+                            {
+                                <li><a class="@Css(IsAction("StaffSkills", "Coverage"))" asp-controller="StaffSkills" asp-action="Coverage">@Localizer["Skills Coverage"]</a></li>
+                            }
+                            @if (canCoveragePlan)
+                            {
+                                <li><a class="@Css(Is("StaffContinuity"))" asp-controller="StaffContinuity" asp-action="Index">@Localizer["Coverage Plan"]</a></li>
+                            }
+                            @if (canOwnSkills)
+                            {
+                                <li><a class="@Css(IsAction("StaffSkills", "Index"))" asp-controller="StaffSkills" asp-action="Index">@Localizer["My Skills"]</a></li>
+                            }
+                            @if (canEvidenceSources)
+                            {
+                                <li><a class="@Css(Is("StaffEvidenceConnection", "StaffAzureDevOpsEvidence", "StaffContributionExamples"))" asp-controller="StaffEvidenceConnection" asp-action="Index">@Localizer["Evidence Sources"]</a></li>
+                            }
+                            @if (canServiceHealth)
+                            {
+                                <li><a class="@Css(Is("StaffService"))" asp-controller="StaffService" asp-action="Index">@Localizer["Service Health"]</a></li>
+                            }
+                            @if (canOwnWork)
+                            {
+                                <li><a class="@Css(IsAction("StaffPortal", "MyWork"))" asp-controller="StaffPortal" asp-action="MyWork">@Localizer["My Work"]</a></li>
+                            }
+                            @if (canOwnProfile)
+                            {
+                                <li><a class="@Css(IsAction("StaffPortal", "Index"))" asp-controller="StaffPortal" asp-action="Index">@Localizer["My Profile"]</a></li>
+                            }
+                            @if (canApproveLeave)
+                            {
+                                <li><a class="@Css(Is("StaffApprovals"))" asp-controller="StaffApprovals" asp-action="Index">@Localizer["Approvals"]</a></li>
+                            }
+                            @if (canExecutiveReview)
+                            {
+                                <li><a class="@Css(Is("StaffExecutiveReview", "StaffExecutiveDecision"))" href="/staffops/executive">@Localizer["Review.Title"]</a></li>
+                            }
+                            @if (canMarketSettings)
+                            {
+                                <li><a class="ops-nav__link" href="/staffops/market">@Localizer["Review.MarketSettings"]</a></li>
+                            }
+                        </ul>
+                    </li>
+                }
+            </ul>
+            <div class="ops-nav__footer">
+                <div class="ops-nav__footer-row">
+                    @if (signedIn is not null)
+                    {
+                        <p class="ops-nav__user">
+                            <span class="ops-visually-hidden">@Localizer["Nav.SignedInAs"]</span>
+                            <span class="ops-nav__user-name">@signedIn.FullName</span>
+                            @if (!string.IsNullOrWhiteSpace(signedIn.JobTitle))
+                            {
+                                <span class="ops-nav__user-role">@signedIn.JobTitle</span>
+                            }
+                        </p>
+                    }
+                    @if (isSignedIn)
+                    {
+                        <form asp-controller="StaffAccount" asp-action="Logout" method="post">
+                            <button type="submit" class="ops-nav__logout">@Localizer["Log out"]</button>
+                        </form>
+                    }
+                </div>
+                <partial name="~/Views/Shared/_LanguageSwitcher.cshtml" />
+            </div>
+        </nav>
+        <div class="ops-content">
+            <header class="ops-topbar">
+                @* Print-only: who, what and when, so a printed or PDF report
+                   can't be separated from its provenance. *@
+                <div class="ops-print-header" aria-hidden="true">
+                    <strong>@brandingTheme.CompanyName</strong>
+                    <span>@Localizer["Report.GeneratedAt", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture)]</span>
+                    <span>@Localizer["Report.Source", $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}"]</span>
+                </div>
+                <h1 class="ops-topbar__title">@ViewData["Title"]</h1>
+                @if (canSearch)
+                {
+                    <form class="ops-search" role="search" method="get" asp-controller="StaffSearch" asp-action="Index">
+                        <label class="ops-visually-hidden" for="ops-search-q">@Localizer["Search.Label"]</label>
+                        <input id="ops-search-q" name="q" type="search" placeholder="@Localizer["Search.Placeholder"]" maxlength="100" autocomplete="off" />
+                        <button type="submit" class="ops-button ops-button--secondary">@Localizer["Search.Button"]</button>
+                    </form>
+                }
+                @if (ViewData["ReportActions"] is true)
+                {
+                    <partial name="~/Views/StaffOps/_ReportActions.cshtml" />
+                }
+            </header>
+            <main id="main-content" class="ops-main" tabindex="-1">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+</body>
+</html>

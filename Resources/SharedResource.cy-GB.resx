@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="Dashboard" xml:space="preserve"><value>Dangosfwrdd</value></data>
+  <data name="ERP Records" xml:space="preserve"><value>Cofnodion ERP</value></data>
+  <data name="Demonstration data" xml:space="preserve"><value>Data arddangos</value></data>
+  <data name="DemoBannerBody" xml:space="preserve"><value>mae pob cofnod ar y dudalen hon yn ffug, wedi'u cynhyrchu at ddibenion dysgu. Ni ddefnyddir unrhyw ddata cwsmer, ariannol, na data ERP go iawn.</value></data>
+  <data name="Status Summary" xml:space="preserve"><value>Crynodeb Statws</value></data>
+  <data name="Recent Activity" xml:space="preserve"><value>Gweithgaredd Diweddar</value></data>
+  <data name="Transformation Pipeline" xml:space="preserve"><value>Piblinell Trawsnewid</value></data>
+  <data name="No activity yet." xml:space="preserve"><value>Dim gweithgaredd eto.</value></data>
+
+  <data name="Total Records" xml:space="preserve"><value>Cyfanswm Cofnodion</value></data>
+  <data name="Successfully Transformed" xml:space="preserve"><value>Wedi'u Trawsnewid yn Llwyddiannus</value></data>
+  <data name="Requiring Attention" xml:space="preserve"><value>Angen Sylw</value></data>
+  <data name="Completion" xml:space="preserve"><value>Cwblhad</value></data>
+
+  <data name="New" xml:space="preserve"><value>Newydd</value></data>
+  <data name="In Progress" xml:space="preserve"><value>Ar y Gweill</value></data>
+  <data name="Complete" xml:space="preserve"><value>Cyflawn</value></data>
+  <data name="Exception" xml:space="preserve"><value>Eithriad</value></data>
+  <data name="Validating" xml:space="preserve"><value>Yn Dilysu</value></data>
+  <data name="Transformed" xml:space="preserve"><value>Wedi'i Drawsnewid</value></data>
+
+  <data name="ERP ID" xml:space="preserve"><value>Rhif ERP</value></data>
+  <data name="Customer / Account" xml:space="preserve"><value>Cwsmer / Cyfrif</value></data>
+  <data name="Work Type" xml:space="preserve"><value>Math o Waith</value></data>
+  <data name="Raw Status" xml:space="preserve"><value>Statws Crai</value></data>
+  <data name="Normalised Status" xml:space="preserve"><value>Statws Wedi'i Normaleiddio</value></data>
+  <data name="Amount" xml:space="preserve"><value>Swm</value></data>
+  <data name="Source-System Date" xml:space="preserve"><value>Dyddiad System Ffynhonnell</value></data>
+  <data name="Normalised UTC Date" xml:space="preserve"><value>Dyddiad UTC Wedi'i Normaleiddio</value></data>
+  <data name="Validation" xml:space="preserve"><value>Dilysiad</value></data>
+  <data name="Raw Status (source system)" xml:space="preserve"><value>Statws Crai (system ffynhonnell)</value></data>
+
+  <data name="Search" xml:space="preserve"><value>Chwilio</value></data>
+  <data name="Status" xml:space="preserve"><value>Statws</value></data>
+  <data name="Validation result" xml:space="preserve"><value>Canlyniad dilysu</value></data>
+  <data name="Apply" xml:space="preserve"><value>Cymhwyso</value></data>
+  <data name="All statuses" xml:space="preserve"><value>Pob statws</value></data>
+  <data name="All results" xml:space="preserve"><value>Pob canlyniad</value></data>
+  <data name="Valid" xml:space="preserve"><value>Dilys</value></data>
+  <data name="Warning" xml:space="preserve"><value>Rhybudd</value></data>
+  <data name="Error" xml:space="preserve"><value>Gwall</value></data>
+
+  <data name="No records match the current filters." xml:space="preserve"><value>Does dim cofnodion yn cyfateb i'r hidlwyr cyfredol.</value></data>
+  <data name="ShowingXOfY" xml:space="preserve"><value>Yn dangos {0} o {1} gofnod.</value></data>
+  <data name="Fictional ERP records with transformation and validation results" xml:space="preserve"><value>Cofnodion ERP ffug gyda chanlyniadau trawsnewid a dilysu</value></data>
+
+  <data name="BackToErpRecords" xml:space="preserve"><value>Yn ôl i Gofnodion ERP</value></data>
+  <data name="Pipeline:" xml:space="preserve"><value>Piblinell:</value></data>
+  <data name="Status:" xml:space="preserve"><value>Statws:</value></data>
+  <data name="Validation Result —" xml:space="preserve"><value>Canlyniad Dilysu —</value></data>
+  <data name="No validation messages for this record." xml:space="preserve"><value>Does dim negeseuon dilysu ar gyfer y cofnod hwn.</value></data>
+
+  <data name="RecordTitlePrefix" xml:space="preserve"><value>Cofnod</value></data>
+  <data name="Skip to main content" xml:space="preserve"><value>Neidio i'r prif gynnwys</value></data>
+  <data name="Toggle navigation" xml:space="preserve"><value>Toglo llywio</value></data>
+
+  <!-- Staff Ops layout chrome -->
+  <data name="My Profile" xml:space="preserve"><value>Fy Mhroffil</value></data>
+  <data name="My Work" xml:space="preserve"><value>Fy Ngwaith</value></data>
+  <data name="Programme Overview" xml:space="preserve"><value>Trosolwg Rhaglen</value></data>
+  <data name="Reporting" xml:space="preserve"><value>Adrodd</value></data>
+  <data name="Contracts" xml:space="preserve"><value>Contractau</value></data>
+  <data name="Approvals" xml:space="preserve"><value>Cymeradwyaethau</value></data>
+  <data name="Admin" xml:space="preserve"><value>Gweinyddu</value></data>
+  <data name="Branding" xml:space="preserve"><value>Brandio</value></data>
+  <data name="Log out" xml:space="preserve"><value>Allgofnodi</value></data>
+
+  <!-- Reporting Hub -->
+  <data name="Reporting Hub" xml:space="preserve"><value>Hyb Adrodd</value></data>
+  <data name="From" xml:space="preserve"><value>O</value></data>
+  <data name="To" xml:space="preserve"><value>I</value></data>
+  <data name="Update" xml:space="preserve"><value>Diweddaru</value></data>
+  <data name="Export CSV" xml:space="preserve"><value>Allforio CSV</value></data>
+  <data name="RAID register" xml:space="preserve"><value>Cofrestr RAID</value></data>
+  <data name="Governance" xml:space="preserve"><value>Llywodraethu</value></data>
+  <data name="Trend" xml:space="preserve"><value>Tueddiad</value></data>
+  <data name="View cost summary" xml:space="preserve"><value>Gweld crynodeb cost</value></data>
+  <data name="ScopedToTeam" xml:space="preserve"><value>Wedi'i gyfyngu i'r tîm: {0}</value></data>
+  <data name="NoTeamScope" xml:space="preserve"><value>Does dim tîm wedi'i neilltuo i chi, felly ni ddangosir capasiti cyfranwyr unigol. Gofynnwch i Weinyddwr osod eich tîm.</value></data>
+  <data name="Programme" xml:space="preserve"><value>Rhaglen</value></data>
+  <data name="Project" xml:space="preserve"><value>Prosiect</value></data>
+  <data name="Workstream" xml:space="preserve"><value>Llif gwaith</value></data>
+  <data name="AllProgrammes" xml:space="preserve"><value>(pob rhaglen)</value></data>
+  <data name="Customer" xml:space="preserve"><value>Cwsmer</value></data>
+  <data name="AllCustomers" xml:space="preserve"><value>(pob cwsmer)</value></data>
+  <data name="Effort Variance (Estimated vs Actual)" xml:space="preserve"><value>Amrywiad Ymdrech (Amcangyfrifedig vs Gwirioneddol)</value></data>
+  <data name="No workstreams with work items yet." xml:space="preserve"><value>Dim llifoedd gwaith gydag eitemau gwaith eto.</value></data>
+  <data name="Effort variance by workstream: estimated hours versus actual logged hours" xml:space="preserve"><value>Amrywiad ymdrech yn ôl llif gwaith: oriau amcangyfrifedig o gymharu ag oriau gwirioneddol wedi'u cofnodi</value></data>
+  <data name="Estimated (hrs)" xml:space="preserve"><value>Amcangyfrifedig (oriau)</value></data>
+  <data name="Actual (hrs)" xml:space="preserve"><value>Gwirioneddol (oriau)</value></data>
+  <data name="Variance (hrs)" xml:space="preserve"><value>Amrywiad (oriau)</value></data>
+  <data name="Baseline (hrs)" xml:space="preserve"><value>Llinell sylfaen (oriau)</value></data>
+  <data name="Baseline variance (hrs)" xml:space="preserve"><value>Amrywiad llinell sylfaen (oriau)</value></data>
+  <data name="Forecast at completion (hrs)" xml:space="preserve"><value>Rhagolwg wrth gwblhau (oriau)</value></data>
+  <data name="Forecast variance (hrs)" xml:space="preserve"><value>Amrywiad rhagolwg (oriau)</value></data>
+  <data name="Estimate coverage" xml:space="preserve"><value>Cwmpas amcangyfrifon</value></data>
+  <data name="without estimate" xml:space="preserve"><value>heb amcangyfrif</value></data>
+  <data name="Contributor Capacity &amp; Residual" xml:space="preserve"><value>Capasiti Cyfranwyr a Gweddill</value></data>
+  <data name="No active staff in scope for this period." xml:space="preserve"><value>Dim staff gweithredol o fewn cwmpas ar gyfer y cyfnod hwn.</value></data>
+  <data name="Contributor capacity and residual availability by staff member" xml:space="preserve"><value>Capasiti cyfranwyr ac argaeledd gweddilliol yn ôl aelod staff</value></data>
+  <data name="Staff" xml:space="preserve"><value>Staff</value></data>
+  <data name="Team" xml:space="preserve"><value>Tîm</value></data>
+  <data name="Leave (hrs)" xml:space="preserve"><value>Absenoldeb (oriau)</value></data>
+  <data name="Logged (hrs)" xml:space="preserve"><value>Wedi'u cofnodi (oriau)</value></data>
+  <data name="Residual (hrs)" xml:space="preserve"><value>Gweddill (oriau)</value></data>
+  <data name="Utilisation" xml:space="preserve"><value>Defnydd</value></data>
+  <data name="Billable Utilisation" xml:space="preserve"><value>Defnydd Biliadwy</value></data>
+  <data name="Team Capacity Summary" xml:space="preserve"><value>Crynodeb Capasiti Tîm</value></data>
+  <data name="Contributors" xml:space="preserve"><value>Cyfranwyr</value></data>
+  <data name="Capacity and residual availability, subtotalled by team" xml:space="preserve"><value>Capasiti ac argaeledd gweddilliol, is-gyfanswm yn ôl tîm</value></data>
+  <data name="Portfolio by Customer" xml:space="preserve"><value>Portffolio yn ôl Cwsmer</value></data>
+  <data name="No programmes yet — run a ClickUp sync to populate this page." xml:space="preserve"><value>Dim rhaglenni eto. Mewngludwch neu cysonwch ddata cyflawni i lenwi’r dudalen hon.</value></data>
+  <data name="Portfolio rollup by customer" xml:space="preserve"><value>Crynodeb portffolio yn ôl cwsmer</value></data>
+  <data name="Programmes" xml:space="preserve"><value>Rhaglenni</value></data>
+  <data name="Open Work Items" xml:space="preserve"><value>Eitemau Gwaith Agored</value></data>
+  <data name="Blocked" xml:space="preserve"><value>Wedi'i Rwystro</value></data>
+  <data name="Cost Summary" xml:space="preserve"><value>Crynodeb Cost</value></data>
+  <data name="PMO Governance" xml:space="preserve"><value>Llywodraethu PMO</value></data>
+
+  <!-- Cost Summary -->
+  <data name="Back to Reporting Hub" xml:space="preserve"><value>Yn ôl i'r Hyb Adrodd</value></data>
+  <data name="Contracts.Pages" xml:space="preserve"><value>Tudalennau contractau</value></data>
+  <data name="Contracts.Overview" xml:space="preserve"><value>Trosolwg portffolio</value></data>
+  <data name="Contracts.Assurance" xml:space="preserve"><value>Sicrwydd contractau</value></data>
+  <data name="Hours.Estimated" xml:space="preserve"><value>Amcangyfrif</value></data>
+  <data name="Hours.Coverage" xml:space="preserve"><value>Cwmpas amcangyfrif</value></data>
+  <data name="Hours.Actual" xml:space="preserve"><value>Gwirioneddol</value></data>
+  <data name="Hours.Variance" xml:space="preserve"><value>Amrywiant</value></data>
+  <data name="Hours.Baseline" xml:space="preserve"><value>Llinell sylfaen</value></data>
+  <data name="Hours.VsBaseline" xml:space="preserve"><value>Yn erbyn llinell sylfaen</value></data>
+  <data name="Hours.Forecast" xml:space="preserve"><value>Rhagolwg</value></data>
+  <data name="Hours.VsForecast" xml:space="preserve"><value>Yn erbyn rhagolwg</value></data>
+  <data name="Hours.AllInHours" xml:space="preserve"><value>Mae’r ffigurau mewn oriau. Rhagolwg ar gwblhau yw’r rhagolwg.</value></data>
+  <data name="Reporting.Overview" xml:space="preserve"><value>Trosolwg</value></data>
+  <data name="Reporting.Cost" xml:space="preserve"><value>Crynodeb costau</value></data>
+  <data name="Reporting.JiraTempo" xml:space="preserve"><value>Jira a Tempo</value></data>
+  <data name="Reporting.Pages" xml:space="preserve"><value>Tudalennau adrodd</value></data>
+  <data name="Reporting.Caveats" xml:space="preserve"><value>Cyn dibynnu ar y ffigurau hyn</value></data>
+  <data name="Reporting.Unlinked" xml:space="preserve"><value>Amser a gofnodwyd heb ei gysylltu: {0} cofnod, {1} awr</value></data>
+  <data name="Reporting.ManageCustomers" xml:space="preserve"><value>Rheoli cwsmeriaid</value></data>
+  <data name="Cost by Contributor" xml:space="preserve"><value>Cost yn ôl Cyfrannwr</value></data>
+  <data name="No priced time entries in this period." xml:space="preserve"><value>Dim cofnodion amser wedi'u prisio yn y cyfnod hwn.</value></data>
+  <data name="Cost by contributor, including billable hours and total cost" xml:space="preserve"><value>Cost yn ôl cyfrannwr, gan gynnwys oriau bilio a chyfanswm cost</value></data>
+  <data name="Billable (hrs)" xml:space="preserve"><value>Biliadwy (oriau)</value></data>
+  <data name="Total Cost" xml:space="preserve"><value>Cyfanswm Cost</value></data>
+  <data name="Currency" xml:space="preserve"><value>Arian cyfred</value></data>
+  <data name="Programme Budgets" xml:space="preserve"><value>Cyllidebau Rhaglen</value></data>
+  <data name="Budget" xml:space="preserve"><value>Cyllideb</value></data>
+  <data name="Cost to date" xml:space="preserve"><value>Cost hyd yma</value></data>
+  <data name="Burn %" xml:space="preserve"><value>% Gwariant</value></data>
+  <data name="Set budget" xml:space="preserve"><value>Gosod cyllideb</value></data>
+  <data name="Save" xml:space="preserve"><value>Cadw</value></data>
+  <data name="Programme budgets versus cost to date" xml:space="preserve"><value>Cyllidebau rhaglen o gymharu â chost hyd yma</value></data>
+
+  <!-- RAID register -->
+  <data name="Risks" xml:space="preserve"><value>Risgiau</value></data>
+  <data name="Issues" xml:space="preserve"><value>Materion</value></data>
+  <data name="Title" xml:space="preserve"><value>Teitl</value></data>
+  <data name="Severity" xml:space="preserve"><value>Difrifoldeb</value></data>
+  <data name="No risks logged yet." xml:space="preserve"><value>Dim risgiau wedi'u cofnodi eto.</value></data>
+  <data name="No issues logged yet." xml:space="preserve"><value>Dim materion wedi'u cofnodi eto.</value></data>
+  <data name="Logged risks with severity and status" xml:space="preserve"><value>Risgiau wedi'u cofnodi gyda difrifoldeb a statws</value></data>
+  <data name="Logged issues with severity and status" xml:space="preserve"><value>Materion wedi'u cofnodi gyda difrifoldeb a statws</value></data>
+
+  <!-- Governance -->
+  <data name="Change requests" xml:space="preserve"><value>Ceisiadau newid</value></data>
+  <data name="No change requests logged yet." xml:space="preserve"><value>Dim ceisiadau newid wedi'u cofnodi eto.</value></data>
+  <data name="Change requests with status and decision" xml:space="preserve"><value>Ceisiadau newid gyda statws a phenderfyniad</value></data>
+  <data name="Requested by" xml:space="preserve"><value>Gofynnwyd gan</value></data>
+  <data name="Decided by" xml:space="preserve"><value>Penderfynwyd gan</value></data>
+  <data name="Decide" xml:space="preserve"><value>Penderfynu</value></data>
+  <data name="Stakeholders (RACI)" xml:space="preserve"><value>Rhanddeiliaid (RACI)</value></data>
+  <data name="No stakeholders recorded yet." xml:space="preserve"><value>Dim rhanddeiliaid wedi'u cofnodi eto.</value></data>
+  <data name="Programme stakeholders with RACI role" xml:space="preserve"><value>Rhanddeiliaid rhaglen gyda rôl RACI</value></data>
+  <data name="Name" xml:space="preserve"><value>Enw</value></data>
+  <data name="Role" xml:space="preserve"><value>Rôl</value></data>
+  <data name="Remove" xml:space="preserve"><value>Dileu</value></data>
+  <data name="Dependencies" xml:space="preserve"><value>Dibyniaethau</value></data>
+  <data name="No dependencies recorded yet." xml:space="preserve"><value>Dim dibyniaethau wedi'u cofnodi eto.</value></data>
+  <data name="Work-item dependencies and whether they're still unresolved" xml:space="preserve"><value>Dibyniaethau eitemau gwaith a ph'un a ydynt yn dal heb eu datrys</value></data>
+  <data name="Work item" xml:space="preserve"><value>Eitem waith</value></data>
+  <data name="Stage" xml:space="preserve"><value>Cam</value></data>
+  <data name="Depends on" xml:space="preserve"><value>Yn dibynnu ar</value></data>
+  <data name="Depends-on stage" xml:space="preserve"><value>Cam yr eitem ddibynnol</value></data>
+  <data name="Unresolved" xml:space="preserve"><value>Heb ei ddatrys</value></data>
+  <data name="Clear" xml:space="preserve"><value>Clir</value></data>
+
+  <!-- Trend -->
+  <data name="Capture a snapshot" xml:space="preserve"><value>Cofnodi ciplun</value></data>
+  <data name="Capture snapshot" xml:space="preserve"><value>Cofnodi ciplun</value></data>
+  <data name="History" xml:space="preserve"><value>Hanes</value></data>
+  <data name="No snapshots captured yet." xml:space="preserve"><value>Dim cipluniau wedi'u cofnodi eto.</value></data>
+  <data name="Reporting snapshot history, oldest first" xml:space="preserve"><value>Hanes cipluniau adrodd, yr hynaf yn gyntaf</value></data>
+  <data name="Captured" xml:space="preserve"><value>Cofnodwyd</value></data>
+  <data name="Period" xml:space="preserve"><value>Cyfnod</value></data>
+  <data name="Open" xml:space="preserve"><value>Agored</value></data>
+  <data name="Avg. utilisation" xml:space="preserve"><value>Defnydd cyfartalog</value></data>
+
+  <!-- Alerts -->
+  <data name="Alerts" xml:space="preserve"><value>Rhybuddion</value></data>
+  <data name="No open alerts." xml:space="preserve"><value>Dim rhybuddion agored.</value></data>
+  <data name="Open threshold alerts" xml:space="preserve"><value>Rhybuddion trothwy agored</value></data>
+  <data name="Raised" xml:space="preserve"><value>Codwyd</value></data>
+  <data name="Type" xml:space="preserve"><value>Math</value></data>
+  <data name="Message" xml:space="preserve"><value>Neges</value></data>
+  <data name="Acknowledge" xml:space="preserve"><value>Cydnabod</value></data>
+  <data name="Refresh alerts" xml:space="preserve"><value>Adnewyddu rhybuddion</value></data>
+  <data name="Pagination" xml:space="preserve"><value>Tudaleniad</value></data>
+  <data name="Previous page" xml:space="preserve"><value>Tudalen flaenorol</value></data>
+  <data name="Next page" xml:space="preserve"><value>Tudalen nesaf</value></data>
+  <data name="Page {0}" xml:space="preserve"><value>Tudalen {0}</value></data>
+  <data name="Review.Title" xml:space="preserve"><value>Adolygiad gweithredol</value></data>
+  <data name="Review.Pack" xml:space="preserve"><value>Pecyn tystiolaeth weithredol</value></data>
+  <data name="Review.MarketSettings" xml:space="preserve"><value>Gosodiadau marchnad</value></data>
+  <data name="Review.Market" xml:space="preserve"><value>Marchnad</value></data>
+  <data name="Review.Language" xml:space="preserve"><value>Iaith ddiofyn</value></data>
+  <data name="Review.Format" xml:space="preserve"><value>Fformat dyddiadau a rhifau</value></data>
+  <data name="Review.ReportingCurrency" xml:space="preserve"><value>Dewis arian cyfred adrodd</value></data>
+  <data name="Review.TimeZone" xml:space="preserve"><value>Parth amser adrodd</value></data>
+  <data name="Review.FiscalStart" xml:space="preserve"><value>Dechrau'r flwyddyn ariannol</value></data>
+  <data name="Review.Save" xml:space="preserve"><value>Cadw gosodiadau</value></data>
+  <data name="Review.Reload" xml:space="preserve"><value>Ail-lwytho'r gosodiadau cyfredol</value></data>
+  <data name="Review.SettingsVersion" xml:space="preserve"><value>Fersiwn gosodiadau</value></data>
+  <data name="Review.Source" xml:space="preserve"><value>Ffynhonnell gyflawni</value></data>
+  <data name="Review.Capture" xml:space="preserve"><value>Cofnodi pecyn gweithredol</value></data>
+  <data name="Review.RecentPacks" xml:space="preserve"><value>Pecynnau diweddar (hyd at 50)</value></data>
+  <data name="Review.NoPacks" xml:space="preserve"><value>Dim pecynnau gweithredol wedi'u cofnodi.</value></data>
+  <data name="Review.CapturedUtc" xml:space="preserve"><value>Cofnodwyd (UTC)</value></data>
+  <data name="Review.Captured" xml:space="preserve"><value>Cofnodwyd</value></data>
+  <data name="Review.Overdue" xml:space="preserve"><value>Hwyr</value></data>
+  <data name="Review.OpenChange" xml:space="preserve"><value>Newid mewn eitemau agored</value></data>
+  <data name="Review.Unknown" xml:space="preserve"><value>Anhysbys</value></data>
+  <data name="Review.Publication" xml:space="preserve"><value>Cyhoeddiad y ffynhonnell</value></data>
+  <data name="Review.Account" xml:space="preserve"><value>Cyfrif cysylltiedig adeg cofnodi</value></data>
+  <data name="Review.FiscalYear" xml:space="preserve"><value>Blwyddyn ariannol</value></data>
+  <data name="Review.Total" xml:space="preserve"><value>Eitemau gwaith a welwyd</value></data>
+  <data name="Review.NoDueDate" xml:space="preserve"><value>Eitemau agored heb ddyddiad cau</value></data>
+  <data name="Review.Unmapped" xml:space="preserve"><value>Statysau heb eu mapio</value></data>
+  <data name="Review.Verification" xml:space="preserve"><value>Statws adolygu</value></data>
+  <data name="Review.NotReviewed" xml:space="preserve"><value>Ciplun a welwyd; heb adolygiad annibynnol</value></data>
+  <data name="Review.Download" xml:space="preserve"><value>Lawrlwytho tystiolaeth (JSON)</value></data>
+  <data name="Review.Evidence" xml:space="preserve"><value>Tystiolaeth a gofnodwyd</value></data>
+  <data name="Review.Record" xml:space="preserve"><value>Cofnod ffynhonnell</value></data>
+  <data name="Review.Stage" xml:space="preserve"><value>Cam</value></data>
+  <data name="Review.Due" xml:space="preserve"><value>Dyddiad cau</value></data>
+  <data name="Review.Updated" xml:space="preserve"><value>Diweddarwyd rhes y ffynhonnell</value></data>
+  <data name="Review.InvalidSettings" xml:space="preserve"><value>Dewiswch werth a gefnogir ar gyfer pob gosodiad.</value></data>
+  <data name="Review.AmbiguousBoundary" xml:space="preserve"><value>Mae amser lleol ffin yr adroddiad yn amwys neu ar goll.</value></data>
+  <data name="Review.Conflict" xml:space="preserve"><value>Newidiwyd gosodiadau mewn sesiwn arall. Ail-lwythwch y gosodiadau cyfredol cyn cadw.</value></data>
+  <data name="Review.InvalidFreshness" xml:space="preserve"><value>Mae terfyn oedran y cyhoeddiad yn annilys.</value></data>
+  <data name="Review.PublicationRequired" xml:space="preserve"><value>Mae cofnodi yn gofyn am gyhoeddiad llwyddiannus diweddar sydd wedi'i gwblhau. Ni ellir cofnodi cyhoeddiadau sy'n rhedeg, wedi methu, ar goll neu'n hen.</value></data>
+  <data name="Review.ProvenanceRequired" xml:space="preserve"><value>Mae tarddiad cyfrif neu gofnod y ffynhonnell ar goll.</value></data>
+  <data name="Review.NoEvidence" xml:space="preserve"><value>Ni chanfuwyd eitemau gwaith ar gyfer y ffynhonnell hon.</value></data>
+  <data name="Review.InvalidSource" xml:space="preserve"><value>Dewiswch ffynhonnell gyflawni a gefnogir.</value></data>
+  <data name="Review.Stage.Backlog" xml:space="preserve"><value>Ôl-groniad</value></data>
+  <data name="Review.Stage.Ready" xml:space="preserve"><value>Yn barod</value></data>
+  <data name="Review.Stage.InProgress" xml:space="preserve"><value>Ar waith</value></data>
+  <data name="Review.Stage.Blocked" xml:space="preserve"><value>Wedi'i rwystro</value></data>
+  <data name="Review.Stage.InReview" xml:space="preserve"><value>Yn cael ei adolygu</value></data>
+  <data name="Review.Stage.Done" xml:space="preserve"><value>Wedi'i gwblhau</value></data>
+  <data name="Review.Stage.Cancelled" xml:space="preserve"><value>Wedi'i ganslo</value></data>
+  <data name="Review.Stage.Unmapped" xml:space="preserve"><value>Heb ei fapio</value></data>
+  <data name="Decision.Queue" xml:space="preserve"><value>Penderfyniadau gweithredol</value></data>
+  <data name="Decision.Title" xml:space="preserve"><value>Teitl</value></data>
+  <data name="Decision.Materiality" xml:space="preserve"><value>Perthnasedd</value></data>
+  <data name="Decision.Options" xml:space="preserve"><value>Opsiynau</value></data>
+  <data name="Decision.Recommendation" xml:space="preserve"><value>Argymhelliad</value></data>
+  <data name="Decision.Owner" xml:space="preserve"><value>Perchennog y penderfyniad</value></data>
+  <data name="Decision.Due" xml:space="preserve"><value>Dyddiad y penderfyniad</value></data>
+  <data name="Decision.Evidence" xml:space="preserve"><value>Adolygiad tystiolaeth</value></data>
+  <data name="Decision.Status" xml:space="preserve"><value>Statws</value></data>
+  <data name="Decision.Version" xml:space="preserve"><value>Fersiwn</value></data>
+  <data name="Decision.ReviewNote" xml:space="preserve"><value>Nodyn adolygu</value></data>
+  <data name="Decision.Decision" xml:space="preserve"><value>Penderfyniad</value></data>
+  <data name="Decision.Rationale" xml:space="preserve"><value>Rhesymeg</value></data>
+  <data name="Decision.ActionOwner" xml:space="preserve"><value>Perchennog y cam gweithredu</value></data>
+  <data name="Decision.FollowUp" xml:space="preserve"><value>Dyddiad dilynol</value></data>
+  <data name="Decision.Outcome" xml:space="preserve"><value>Canlyniad</value></data>
+  <data name="Decision.Download" xml:space="preserve"><value>Lawrlwytho hanes y penderfyniad</value></data>
+  <data name="Decision.Reload" xml:space="preserve"><value>Ail-lwytho</value></data>
+  <data name="Decision.Edit" xml:space="preserve"><value>Diwygio'r penderfyniad</value></data>
+  <data name="Decision.New" xml:space="preserve"><value>Penderfyniad newydd</value></data>
+  <data name="Decision.Detail" xml:space="preserve"><value>Cofnod penderfyniad</value></data>
+  <data name="Decision.Update" xml:space="preserve"><value>Cofnodi diweddariad</value></data>
+  <data name="Decision.Action" xml:space="preserve"><value>Cam gweithredu</value></data>
+  <data name="Decision.Select" xml:space="preserve"><value>Dewis</value></data>
+  <data name="Decision.Note" xml:space="preserve"><value>Rheswm / nodyn adolygu</value></data>
+  <data name="Decision.Record" xml:space="preserve"><value>Cofnodi diweddariad</value></data>
+  <data name="Decision.History" xml:space="preserve"><value>Hanes</value></data>
+  <data name="Decision.Cancel" xml:space="preserve"><value>Canslo</value></data>
+  <data name="Decision.AllStatuses" xml:space="preserve"><value>Pob statws</value></data>
+  <data name="Decision.Filter" xml:space="preserve"><value>Hidlo</value></data>
+  <data name="Decision.QueueLimit" xml:space="preserve"><value>Penderfyniadau (hyd at 100, yn nhrefn dyddiad)</value></data>
+  <data name="Decision.None" xml:space="preserve"><value>Dim penderfyniadau.</value></data>
+  <data name="Decision.LoadPack" xml:space="preserve"><value>Llwytho pecyn tystiolaeth</value></data>
+  <data name="Decision.UnavailableOwner" xml:space="preserve"><value>Person nad yw ar gael</value></data>
+  <data name="Decision.InvalidTransition" xml:space="preserve"><value>Ni chaniateir y diweddariad hwn yng nghyflwr presennol y penderfyniad.</value></data>
+  <data name="Decision.InvalidFields" xml:space="preserve"><value>Cwblhewch y meysydd gofynnol a gwiriwch eu hyd a'u dyddiadau.</value></data>
+  <data name="Decision.InvalidEvidence" xml:space="preserve"><value>Nid yw'r cofnod a ddewiswyd yn perthyn i'r pecyn tystiolaeth hwn.</value></data>
+  <data name="Decision.StaleEvidence" xml:space="preserve"><value>Mae'r dystiolaeth hon y tu allan i'r cyfnod dilysrwydd. Mae angen tystiolaeth gyfredol cyn ei derbyn neu wneud penderfyniad.</value></data>
+  <data name="Decision.UnmappedEvidence" xml:space="preserve"><value>Nid yw statws y ffynhonnell wedi'i fapio. Datryswch y mapio a chofnodwch becyn newydd cyn derbyn y dystiolaeth hon.</value></data>
+  <data name="Decision.InvalidOwner" xml:space="preserve"><value>Dewiswch berchennog gweithredol o'r sefydliad hwn.</value></data>
+  <data name="Decision.Conflict" xml:space="preserve"><value>Mae'r penderfyniad hwn wedi newid. Ail-lwythwch y cofnod cyn cyflwyno diweddariad arall.</value></data>
+  <data name="Decision.Status.Draft" xml:space="preserve"><value>Drafft</value></data>
+  <data name="Decision.Status.Reviewed" xml:space="preserve"><value>Wedi'i adolygu</value></data>
+  <data name="Decision.Status.Decided" xml:space="preserve"><value>Wedi penderfynu</value></data>
+  <data name="Decision.Status.Closed" xml:space="preserve"><value>Wedi cau</value></data>
+  <data name="Decision.Status.Dismissed" xml:space="preserve"><value>Wedi'i ddiystyru</value></data>
+  <data name="Decision.Evidence.Unreviewed" xml:space="preserve"><value>Heb ei adolygu</value></data>
+  <data name="Decision.Evidence.Accepted" xml:space="preserve"><value>Wedi'i dderbyn</value></data>
+  <data name="Decision.Evidence.Disputed" xml:space="preserve"><value>Dan anghydfod</value></data>
+  <data name="Decision.Event.Created" xml:space="preserve"><value>Wedi'i greu</value></data>
+  <data name="Decision.Action.Revise" xml:space="preserve"><value>Diwygio</value></data>
+  <data name="Decision.Event.Revise" xml:space="preserve"><value>Diwygio</value></data>
+  <data name="Decision.Action.AcceptEvidence" xml:space="preserve"><value>Derbyn tystiolaeth</value></data>
+  <data name="Decision.Event.AcceptEvidence" xml:space="preserve"><value>Derbyn tystiolaeth</value></data>
+  <data name="Decision.Action.DisputeEvidence" xml:space="preserve"><value>Herio tystiolaeth</value></data>
+  <data name="Decision.Event.DisputeEvidence" xml:space="preserve"><value>Herio tystiolaeth</value></data>
+  <data name="Decision.Action.Decide" xml:space="preserve"><value>Cofnodi penderfyniad</value></data>
+  <data name="Decision.Event.Decide" xml:space="preserve"><value>Cofnodi penderfyniad</value></data>
+  <data name="Decision.Action.Close" xml:space="preserve"><value>Cofnodi canlyniad a chau</value></data>
+  <data name="Decision.Event.Close" xml:space="preserve"><value>Cofnodi canlyniad a chau</value></data>
+  <data name="Decision.Action.Dismiss" xml:space="preserve"><value>Diystyru</value></data>
+  <data name="Decision.Event.Dismiss" xml:space="preserve"><value>Diystyru</value></data>
+  <data name="Decision.Action.Reopen" xml:space="preserve"><value>Ailagor</value></data>
+  <data name="Decision.Event.Reopen" xml:space="preserve"><value>Ailagor</value></data>
+  <data name="Review.Data.Title" xml:space="preserve"><value>Rheolaethau data gweithredol</value></data>
+  <data name="Review.Data.Operation" xml:space="preserve"><value>Gweithred</value></data>
+  <data name="Review.Data.Target" xml:space="preserve"><value>Allwedd penderfyniad neu becyn</value></data>
+  <data name="Review.Data.Reason" xml:space="preserve"><value>Rheswm</value></data>
+  <data name="Review.Data.Select" xml:space="preserve"><value>Dewis</value></data>
+  <data name="Review.Data.Preview" xml:space="preserve"><value>Rhagolwg o'r cofnodion yr effeithir arnynt</value></data>
+  <data name="Review.Data.Versions" xml:space="preserve"><value>Fersiynau penderfyniadau</value></data>
+  <data name="Review.Data.Audit" xml:space="preserve"><value>Archwiliad cylch oes data</value></data>
+  <data name="Review.Data.Cutoff" xml:space="preserve"><value>Dyddiad terfyn cadw</value></data>
+  <data name="Review.Data.RetentionDays" xml:space="preserve"><value>Cyfnod cadw (diwrnodau)</value></data>
+  <data name="Review.Data.Disabled" xml:space="preserve"><value>Heb ei ffurfweddu</value></data>
+  <data name="Review.Data.Irreversible" xml:space="preserve"><value>Dileu'r cofnodion a gyfrifir uchod yn barhaol, gan gynnwys hanes penderfyniadau yr effeithir arnynt. Ni chaiff copïau a lawrlwythwyd na chopïau wrth gefn eu hadalw.</value></data>
+  <data name="Review.Data.Confirm" xml:space="preserve"><value>Rwy'n cymeradwyo dileu'r cofnodion hyn yn barhaol.</value></data>
+  <data name="Review.Data.Apply" xml:space="preserve"><value>Dileu'r cofnodion a gadarnhawyd</value></data>
+  <data name="Review.Data.Completed" xml:space="preserve"><value>Wedi cwblhau. Derbynneb:</value></data>
+  <data name="Review.Data.InvalidRequest" xml:space="preserve"><value>Dewiswch weithred ddilys a rheswm cyfatebol. Mae angen allwedd cofnod ar gyfer golygu penderfyniad neu dynnu pecyn yn ôl yn unig.</value></data>
+  <data name="Review.Data.RetentionDisabled" xml:space="preserve"><value>Nid oes cyfnod cadw wedi'i ffurfweddu.</value></data>
+  <data name="Review.Data.ConfirmationRequired" xml:space="preserve"><value>Rhagolygwch a chadarnhewch y cofnodion yr effeithir arnynt cyn eu dileu.</value></data>
+  <data name="Review.Data.Conflict" xml:space="preserve"><value>Mae cofnodion neu osodiadau cadw wedi newid. Ni ddilëwyd dim. Rhagolygwch y weithred eto.</value></data>
+  <data name="Review.Data.Operation.RedactDecision" xml:space="preserve"><value>Dileu cynnwys holl hanes y penderfyniad</value></data>
+  <data name="Review.Data.Operation.WithdrawPack" xml:space="preserve"><value>Tynnu pecyn a phenderfyniadau dibynnol yn ôl</value></data>
+  <data name="Review.Data.Operation.ApplyRetention" xml:space="preserve"><value>Gweithredu'r polisi cadw</value></data>
+  <data name="Review.Data.Operation.PurgeTenantData" xml:space="preserve"><value>Dileu holl ddata gweithredol y tenant hwn</value></data>
+  <data name="Review.Data.Operation.SubjectErasure" xml:space="preserve"><value>Dileu data'r unigolyn</value></data>
+  <data name="Review.Data.Reason.PersonalData" xml:space="preserve"><value>Dileu data personol</value></data>
+  <data name="Review.Data.Reason.IncorrectEvidence" xml:space="preserve"><value>Tystiolaeth anghywir neu anaddas</value></data>
+  <data name="Review.Data.Reason.RetentionPolicy" xml:space="preserve"><value>Polisi cadw</value></data>
+  <data name="Review.Data.Reason.TenantOffboarding" xml:space="preserve"><value>Terfynu tenantiaeth</value></data>
+  <data name="Delivery" xml:space="preserve"><value>Cyflawni</value></data>
+  <data name="Team and continuity" xml:space="preserve"><value>Tîm a pharhad</value></data>
+  <data name="Nav.Section.MyWork" xml:space="preserve"><value>Fy ngwaith</value></data>
+  <data name="Administration" xml:space="preserve"><value>Gweinyddu</value></data>
+  <data name="Delivery load" xml:space="preserve"><value>Llwyth cyflawni</value></data>
+  <data name="Estimate calibration" xml:space="preserve"><value>Graddnodi amcangyfrifon</value></data>
+  <data name="Skills Coverage" xml:space="preserve"><value>Cwmpas sgiliau</value></data>
+  <data name="Coverage Plan" xml:space="preserve"><value>Cynllun cwmpas</value></data>
+  <data name="Service Health" xml:space="preserve"><value>Iechyd gwasanaeth</value></data>
+  <data name="Evidence Sources" xml:space="preserve"><value>Ffynonellau tystiolaeth</value></data>
+  <data name="My Skills" xml:space="preserve"><value>Fy sgiliau</value></data>
+  <data name="Language" xml:space="preserve"><value>Iaith</value></data>
+  <data name="Change" xml:space="preserve"><value>Newid</value></data>
+  <data name="Log in" xml:space="preserve"><value>Mewngofnodi</value></data>
+  <data name="Login.Heading" xml:space="preserve"><value>Mewngofnodi i {0}</value></data>
+  <data name="Email" xml:space="preserve"><value>E-bost</value></data>
+  <data name="Password" xml:space="preserve"><value>Cyfrinair</value></data>
+  <data name="Login.NewTo" xml:space="preserve"><value>Yn newydd i {0}?</value></data>
+  <data name="Start a trial" xml:space="preserve"><value>Dechrau treial</value></data>
+  <data name="Login.SeeOffer" xml:space="preserve"><value>Gweld beth sydd yn y diagnostig</value></data>
+  <data name="AccessDenied.PageTitle" xml:space="preserve"><value>Dim mynediad i'r dudalen honno</value></data>
+  <data name="AccessDenied.Heading" xml:space="preserve"><value>Does gennych chi ddim mynediad i'r dudalen honno</value></data>
+  <data name="AccessDenied.Body" xml:space="preserve"><value>Nid yw eich rôl yn cynnwys y dudalen honno. Does dim byd o'i le ar eich cyfrif. Os oes ei hangen arnoch ar gyfer eich gwaith, gofynnwch i weinyddwr eich sefydliad newid eich rôl.</value></data>
+  <data name="Go to your home page" xml:space="preserve"><value>Ewch i'ch tudalen gartref</value></data>
+  <data name="Overdue" xml:space="preserve"><value>Yn hwyr</value></data>
+  <data name="Flagged" xml:space="preserve"><value>Wedi'i nodi</value></data>
+  <data name="Scrollable table" xml:space="preserve"><value>Tabl y gellir ei sgrolio</value></data>
+  <data name="Table.ShowAll" xml:space="preserve"><value>Dangos pob un o'r {0} rhes</value></data>
+  <data name="Table.ShowFewer" xml:space="preserve"><value>Dangos llai o resi</value></data>
+  <data name="Table.Showing" xml:space="preserve"><value>Yn dangos {0} o {1} rhes. Mae rhesi wedi'u nodi bob amser yn cael eu dangos.</value></data>
+  <data name="Nav.SignedInAs" xml:space="preserve"><value>Wedi mewngofnodi fel</value></data>
+  <data name="Print or save as PDF" xml:space="preserve"><value>Argraffu neu gadw fel PDF</value></data>
+  <data name="Copy link" xml:space="preserve"><value>Copïo'r ddolen</value></data>
+  <data name="Link copied" xml:space="preserve"><value>Dolen wedi'i chopïo</value></data>
+  <data name="Download CSV" xml:space="preserve"><value>Lawrlwytho CSV</value></data>
+  <data name="Share.Note" xml:space="preserve"><value>Mae angen i unrhyw un y byddwch yn anfon dolen ato fewngofnodi a chael caniatâd i weld yr adroddiad hwn.</value></data>
+  <data name="Share.CopyFailed" xml:space="preserve"><value>Methu copïo'n awtomatig. Copïwch y cyfeiriad o far cyfeiriad eich porwr yn lle hynny.</value></data>
+  <data name="Report.GeneratedAt" xml:space="preserve"><value>Crëwyd {0} UTC</value></data>
+  <data name="Report.Source" xml:space="preserve"><value>Ffynhonnell: {0}</value></data>
+  <!-- Evidence display (design and PMO data review, 30 Sep 2026) -->
+  <data name="Evidence Check" xml:space="preserve"><value>Gwiriad Tystiolaeth</value></data>
+  <data name="Overdue milestones" xml:space="preserve"><value>Cerrig milltir yn hwyr</value></data>
+  <data name="Kpi.OfWorkItems" xml:space="preserve"><value>o {0} eitem waith</value></data>
+  <data name="Kpi.OfOpenItems" xml:space="preserve"><value>o {0} eitem agored</value></data>
+  <data name="Kpi.OfOpenMilestones" xml:space="preserve"><value>o {0} carreg filltir agored</value></data>
+  <data name="Trend.Lede" xml:space="preserve"><value>Mae pob ciplun yn cofnodi'r portffolio fel yr oedd pan gafodd ei gofnodi. Cyfansymiau erioed yw'r oriau, a chaiff eitemau agored ac wedi'u rhwystro eu cyfrif ar adeg cofnodi; dim ond y defnydd sy'n cwmpasu'r cyfnod. Cofnodwch gyfnod o fewn wythnos i'w ddiwedd.</value></data>
+  <data name="Trend.Basis" xml:space="preserve"><value>Cyfansymiau erioed ar adeg cofnodi yw'r amcangyfrif, y gwirioneddol a'r amrywiad. Mae'r ffigurau agored ac wedi'u rhwystro fel yr oeddent ar adeg cofnodi. Defnydd y cyfnod yw'r defnydd.</value></data>
+  <data name="Trend.CapturedLate" xml:space="preserve"><value>Cofnodwyd {0} diwrnod ar ôl diwedd y cyfnod, felly mae'r ffigurau hyn o ddyddiad y cofnodi, nid o'r cyfnod.</value></data>
+  <data name="Trend.CaptureHint" xml:space="preserve"><value>Gellir cofnodi cyfnod o'r diwrnod y daw i ben hyd at {0} diwrnod wedyn.</value></data>
+  <data name="Nav.Audit" xml:space="preserve"><value>Trywydd archwilio</value></data>
+  <data name="Nav.Connections" xml:space="preserve"><value>Cysylltiadau</value></data>
+  <data name="Nav.Customers" xml:space="preserve"><value>Cwsmeriaid</value></data>
+  <data name="Nav.Data" xml:space="preserve"><value>Data</value></data>
+  <data name="Nav.History" xml:space="preserve"><value>Hanes</value></data>
+  <data name="Nav.Import" xml:space="preserve"><value>Mewnforio</value></data>
+  <data name="Nav.Modules" xml:space="preserve"><value>Modiwlau</value></data>
+  <data name="Nav.People" xml:space="preserve"><value>Pobl</value></data>
+  <data name="Nav.PeopleToMatch" xml:space="preserve"><value>Pobl i'w paru</value></data>
+  <data name="Nav.Programmes" xml:space="preserve"><value>Rhaglenni</value></data>
+  <data name="Nav.Review" xml:space="preserve"><value>Adolygu</value></data>
+  <data name="Nav.Settings" xml:space="preserve"><value>Gosodiadau</value></data>
+  <data name="Search.Button" xml:space="preserve"><value>Chwilio</value></data>
+  <data name="Search.Label" xml:space="preserve"><value>Chwilio rhaglenni, eitemau gwaith a phobl</value></data>
+  <data name="Search.Placeholder" xml:space="preserve"><value>Chwilio</value></data>
+  <data name="Login.Forgot" xml:space="preserve"><value>Wedi anghofio eich cyfrinair?</value></data>
+</root>

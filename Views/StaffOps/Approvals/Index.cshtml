@@ -1,0 +1,56 @@
+@model LeaveApprovalQueueViewModel
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Pending Leave Requests</h2>
+    @if (Model.PendingRequests.Count == 0)
+    {
+        <p class="ops-empty-state">No pending leave requests.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Pending leave requests awaiting approval or rejection</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Staff</th>
+                        <th scope="col">Dates</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Notes</th>
+                        <th scope="col">Decision</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.PendingRequests)
+                    {
+                        var days = Enumerable.Range(0, row.RequestedTo.DayNumber - row.RequestedFrom.DayNumber + 1)
+                            .Select(offset => row.RequestedFrom.AddDays(offset))
+                            .Count(day => day.DayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday));
+                        var dates = row.RequestedFrom == row.RequestedTo
+                            ? row.RequestedFrom.ToString("yyyy-MM-dd")
+                            : $"{row.RequestedFrom:yyyy-MM-dd} to {row.RequestedTo:yyyy-MM-dd}";
+                        <tr>
+                            <td>@row.StaffFullName</td>
+                            <td>
+                                @dates
+                                <span class="ops-cell-context">@days working @(days == 1 ? "day" : "days")</span>
+                            </td>
+                            <td>@ProgrammePulse.Services.Shared.DisplayText.Words(row.Type)</td>
+                            <td>@(string.IsNullOrWhiteSpace(row.Notes) ? "—" : row.Notes)</td>
+                            <td>
+                                <div class="ops-inline-form">
+                                    <form asp-controller="StaffApprovals" asp-action="Approve" asp-route-requestId="@row.RequestId" method="post">
+                                        <button type="submit" class="ops-button ops-button--primary ops-button--small" aria-label="Approve @row.StaffFullName's @row.Type.ToString().ToLowerInvariant(), @dates">Approve</button>
+                                    </form>
+                                    <form asp-controller="StaffApprovals" asp-action="Reject" asp-route-requestId="@row.RequestId" method="post">
+                                        <button type="submit" class="ops-button ops-button--secondary ops-button--small" aria-label="Reject @row.StaffFullName's @row.Type.ToString().ToLowerInvariant(), @dates">Reject</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

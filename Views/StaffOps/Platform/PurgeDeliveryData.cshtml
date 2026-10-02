@@ -1,0 +1,79 @@
+@using ProgrammePulse.Models.ViewModels.Tenancy
+@model PurgeDeliveryDataViewModel
+@{
+    var preview = Model.Preview;
+    var result = Model.Result;
+}
+
+<a class="ops-back-link" href="/staffops/platform/tenants">← Tenants</a>
+
+@if (result is { Purged: true })
+{
+    <section class="ops-panel" aria-label="Deletion record">
+        <h2 class="ops-panel__heading">Delivery data deleted</h2>
+        <p class="ops-banner ops-banner--success" role="status">
+            @result.TotalRows.ToString("N0") records were permanently deleted from @preview.Tenant.Name
+            (@preview.Tenant.ShortCode) at @result.PurgedAtUtc?.ToString("yyyy-MM-dd HH:mm") UTC.
+        </p>
+        <p class="ops-empty-state">
+            This page is the deletion record to send to the customer: print it or save it as a PDF. The same counts are
+            kept in the platform audit log. Staff profiles created to match the customer's people are not removed here;
+            erase each one through the GDPR erasure route.
+        </p>
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Records deleted, by table</caption>
+                <thead><tr><th scope="col">Table</th><th scope="col">Records deleted</th></tr></thead>
+                <tbody>
+                    @foreach (var row in result.Removed.Where(r => r.Rows > 0))
+                    {
+                        <tr><td>@row.Table</td><td>@row.Rows.ToString("N0")</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}
+else
+{
+    <section class="ops-panel" aria-label="What would be deleted">
+        <h2 class="ops-panel__heading">Delete delivery data for @preview.Tenant.Name</h2>
+        <p class="ops-empty-state">
+            Permanently deletes every imported work item and time entry, recorded review, identity match, raw copy, sync
+            record and delivery audit row for this tenant. It cannot be undone. The tenant itself, its staff profiles and
+            its platform audit history stay. Use this at the end of a diagnostic, on the date agreed with the customer.
+        </p>
+        @if (result is { Purged: false, Error: not null })
+        {
+            <p class="ops-banner ops-banner--error" role="alert">@result.Error</p>
+        }
+        @if (!preview.CanPurge)
+        {
+            <p class="ops-banner ops-banner--warning">@preview.RefusalReason</p>
+        }
+        <p><strong>@preview.TotalRows.ToString("N0") records</strong> would be deleted.</p>
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Records held for this tenant, by table</caption>
+                <thead><tr><th scope="col">Table</th><th scope="col">Records</th></tr></thead>
+                <tbody>
+                    @foreach (var row in preview.Counts.Where(r => r.Rows > 0))
+                    {
+                        <tr><td>@row.Table</td><td>@row.Rows.ToString("N0")</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (preview.CanPurge)
+        {
+            <form method="post" action="/staffops/platform/tenants/@preview.Tenant.TenantKey/purge" class="ops-filter-bar">
+                @Html.AntiForgeryToken()
+                <div class="ops-filter-bar__field">
+                    <label for="confirmShortCode">Type <strong>@preview.Tenant.ShortCode</strong> to confirm</label>
+                    <input id="confirmShortCode" name="confirmShortCode" type="text" required autocomplete="off" />
+                </div>
+                <button type="submit" class="ops-button">Permanently delete delivery data</button>
+            </form>
+        }
+    </section>
+}

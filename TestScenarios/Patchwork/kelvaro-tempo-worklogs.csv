@@ -1,0 +1,271 @@
+Worklog Id,Work Item Key,Work Item Summary,Logged Hours,Logged Seconds,Billable Hours,Billable Seconds,Work date,Full name,Account Key,Account Name,Work Description,Project Key,Project Name
+300013,KEL-3,Mobile beta,2,7200,2,7200,2026-08-10 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+300026,KEL-3,Mobile beta,2,7200,2,7200,2026-08-10 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+300039,KEL-13,Wallet: buy a single ticket,7.5,27000,7.5,27000,2026-08-10 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300052,KEL-23,Screen reader labels in the wallet,7.5,27000,7.5,27000,2026-08-10 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300065,KEL-30,Performance budget,7.5,27000,7.5,27000,2026-08-10 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300078,KEL-27,Regression suite: wallet,7.5,27000,7.5,27000,2026-08-10 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+300091,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-08-10 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+300104,KEL-1,Journey planner,2,7200,2,7200,2026-08-11 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+300117,KEL-3,Mobile beta,2,7200,2,7200,2026-08-11 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+300130,KEL-13,Wallet: buy a single ticket,7.5,27000,7.5,27000,2026-08-11 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300143,KEL-23,Screen reader labels in the wallet,7.5,27000,7.5,27000,2026-08-11 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300156,KEL-7,Offline journey cache,4,14400,4,14400,2026-08-11 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Offline cache spike,KEL,Ostrevane Passenger App
+300169,KEL-30,Performance budget,3.5,12600,3.5,12600,2026-08-11 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300182,KEL-27,Regression suite: wallet,7.5,27000,7.5,27000,2026-08-11 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+300195,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-08-11 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+300208,KEL-1,Journey planner,2,7200,2,7200,2026-08-12 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+300221,KEL-3,Mobile beta,2,7200,2,7200,2026-08-12 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+300234,KEL-13,Wallet: buy a single ticket,7.5,27000,7.5,27000,2026-08-12 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300247,KEL-12,Map tiles licence check,3.5,12600,3.5,12600,2026-08-12 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Licence review,KEL,Ostrevane Passenger App
+300260,KEL-23,Screen reader labels in the wallet,4,14400,4,14400,2026-08-12 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300273,KEL-30,Performance budget,7.5,27000,7.5,27000,2026-08-12 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300286,KEL-27,Regression suite: wallet,7.5,27000,7.5,27000,2026-08-12 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+300299,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-08-12 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+300312,KEL-1,Journey planner,2,7200,2,7200,2026-08-13 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+300325,KEL-3,Mobile beta,2,7200,2,7200,2026-08-13 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+300338,KEL-13,Wallet: buy a single ticket,7.5,27000,7.5,27000,2026-08-13 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300351,KEL-23,Screen reader labels in the wallet,7.5,27000,7.5,27000,2026-08-13 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300364,KEL-30,Performance budget,7.5,27000,7.5,27000,2026-08-13 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300377,KEL-27,Regression suite: wallet,7.5,27000,7.5,27000,2026-08-13 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+300390,KEL-1,Journey planner,2,7200,2,7200,2026-08-14 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+300403,KEL-3,Mobile beta,2,7200,2,7200,2026-08-14 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+300416,KEL-13,Wallet: buy a single ticket,7.5,27000,7.5,27000,2026-08-14 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300429,KEL-23,Screen reader labels in the wallet,7.5,27000,7.5,27000,2026-08-14 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300442,KEL-30,Performance budget,7.5,27000,7.5,27000,2026-08-14 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300455,KEL-27,Regression suite: wallet,7.5,27000,7.5,27000,2026-08-14 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+300468,KEL-3,Mobile beta,2,7200,2,7200,2026-08-17 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+300481,KEL-3,Mobile beta,2,7200,2,7200,2026-08-17 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+300494,KEL-13,Wallet: buy a single ticket,7.5,27000,7.5,27000,2026-08-17 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300507,KEL-23,Screen reader labels in the wallet,7.5,27000,7.5,27000,2026-08-17 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300520,KEL-30,Performance budget,7.5,27000,7.5,27000,2026-08-17 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300533,KEL-27,Regression suite: wallet,7.5,27000,7.5,27000,2026-08-17 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+300546,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-08-17 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+300559,KEL-1,Journey planner,2,7200,2,7200,2026-08-18 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+300572,KEL-3,Mobile beta,2,7200,2,7200,2026-08-18 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+300585,KEL-13,Wallet: buy a single ticket,7.5,27000,7.5,27000,2026-08-18 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300598,KEL-23,Screen reader labels in the wallet,7.5,27000,7.5,27000,2026-08-18 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300611,KEL-7,Offline journey cache,4,14400,4,14400,2026-08-18 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Offline cache spike,KEL,Ostrevane Passenger App
+300624,KEL-30,Performance budget,3.5,12600,3.5,12600,2026-08-18 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300637,KEL-27,Regression suite: wallet,7.5,27000,7.5,27000,2026-08-18 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+300650,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-08-18 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+300663,KEL-1,Journey planner,2,7200,2,7200,2026-08-19 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+300676,KEL-3,Mobile beta,2,7200,2,7200,2026-08-19 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+300689,KEL-13,Wallet: buy a single ticket,7.5,27000,7.5,27000,2026-08-19 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300702,KEL-12,Map tiles licence check,3.5,12600,3.5,12600,2026-08-19 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Licence review,KEL,Ostrevane Passenger App
+300715,KEL-23,Screen reader labels in the wallet,4,14400,4,14400,2026-08-19 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300728,KEL-30,Performance budget,7.5,27000,7.5,27000,2026-08-19 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300741,KEL-27,Regression suite: wallet,7.5,27000,7.5,27000,2026-08-19 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+300754,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-08-19 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+300767,KEL-1,Journey planner,2,7200,2,7200,2026-08-20 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+300780,KEL-3,Mobile beta,2,7200,2,7200,2026-08-20 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+300793,KEL-13,Wallet: buy a single ticket,7.5,27000,7.5,27000,2026-08-20 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300806,KEL-23,Screen reader labels in the wallet,7.5,27000,7.5,27000,2026-08-20 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300819,KEL-5,Journey search results list,7.5,27000,7.5,27000,2026-08-20 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300832,KEL-27,Regression suite: wallet,7.5,27000,7.5,27000,2026-08-20 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+300845,KEL-1,Journey planner,2,7200,2,7200,2026-08-21 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+300858,KEL-3,Mobile beta,2,7200,2,7200,2026-08-21 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+300871,KEL-13,Wallet: buy a single ticket,7.5,27000,7.5,27000,2026-08-21 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300884,KEL-23,Screen reader labels in the wallet,7.5,27000,7.5,27000,2026-08-21 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300897,KEL-5,Journey search results list,7.5,27000,7.5,27000,2026-08-21 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300910,KEL-27,Regression suite: wallet,7.5,27000,7.5,27000,2026-08-21 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+300923,KEL-3,Mobile beta,2,7200,2,7200,2026-08-24 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+300936,KEL-3,Mobile beta,2,7200,2,7200,2026-08-24 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+300949,KEL-16,Ticket QR code works offline,7.5,27000,7.5,27000,2026-08-24 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300962,KEL-23,Screen reader labels in the wallet,7.5,27000,7.5,27000,2026-08-24 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300975,KEL-5,Journey search results list,7.5,27000,7.5,27000,2026-08-24 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+300988,KEL-27,Regression suite: wallet,7.5,27000,7.5,27000,2026-08-24 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+301001,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-08-24 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+301014,KEL-1,Journey planner,2,7200,2,7200,2026-08-25 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+301027,KEL-3,Mobile beta,2,7200,2,7200,2026-08-25 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+301040,KEL-16,Ticket QR code works offline,7.5,27000,7.5,27000,2026-08-25 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301053,KEL-23,Screen reader labels in the wallet,7.5,27000,7.5,27000,2026-08-25 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301066,KEL-7,Offline journey cache,4,14400,4,14400,2026-08-25 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Offline cache spike,KEL,Ostrevane Passenger App
+301079,KEL-5,Journey search results list,3.5,12600,3.5,12600,2026-08-25 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301092,KEL-27,Regression suite: wallet,7.5,27000,7.5,27000,2026-08-25 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+301105,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-08-25 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+301118,KEL-1,Journey planner,2,7200,2,7200,2026-08-26 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+301131,KEL-3,Mobile beta,2,7200,2,7200,2026-08-26 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+301144,KEL-16,Ticket QR code works offline,7.5,27000,7.5,27000,2026-08-26 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301157,KEL-12,Map tiles licence check,3.5,12600,3.5,12600,2026-08-26 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Licence review,KEL,Ostrevane Passenger App
+301170,KEL-23,Screen reader labels in the wallet,4,14400,4,14400,2026-08-26 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301183,KEL-5,Journey search results list,7.5,27000,7.5,27000,2026-08-26 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301196,KEL-27,Regression suite: wallet,7.5,27000,7.5,27000,2026-08-26 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+301209,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-08-26 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+301222,KEL-1,Journey planner,2,7200,2,7200,2026-08-27 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+301235,KEL-3,Mobile beta,2,7200,2,7200,2026-08-27 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+301248,KEL-16,Ticket QR code works offline,7.5,27000,7.5,27000,2026-08-27 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301261,KEL-14,Wallet: season ticket renewal,7.5,27000,7.5,27000,2026-08-27 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301274,KEL-5,Journey search results list,7.5,27000,7.5,27000,2026-08-27 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301287,KEL-22,Beta test plan,7.5,27000,7.5,27000,2026-08-27 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+301300,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-08-27 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+301313,KEL-1,Journey planner,2,7200,2,7200,2026-08-28 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+301326,KEL-3,Mobile beta,2,7200,2,7200,2026-08-28 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+301339,KEL-16,Ticket QR code works offline,7.5,27000,7.5,27000,2026-08-28 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301352,KEL-14,Wallet: season ticket renewal,7.5,27000,7.5,27000,2026-08-28 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301365,KEL-5,Journey search results list,7.5,27000,7.5,27000,2026-08-28 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301378,KEL-22,Beta test plan,7.5,27000,7.5,27000,2026-08-28 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+301391,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-08-28 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+301404,KEL-3,Mobile beta,2,7200,2,7200,2026-08-31 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+301417,KEL-3,Mobile beta,2,7200,2,7200,2026-08-31 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+301430,KEL-16,Ticket QR code works offline,7.5,27000,7.5,27000,2026-08-31 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301443,KEL-14,Wallet: season ticket renewal,7.5,27000,7.5,27000,2026-08-31 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301456,KEL-5,Journey search results list,7.5,27000,7.5,27000,2026-08-31 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301469,KEL-22,Beta test plan,7.5,27000,7.5,27000,2026-08-31 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+301482,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-08-31 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+301495,KEL-1,Journey planner,2,7200,2,7200,2026-09-01 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+301508,KEL-3,Mobile beta,2,7200,2,7200,2026-09-01 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+301521,KEL-16,Ticket QR code works offline,7.5,27000,7.5,27000,2026-09-01 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301534,KEL-14,Wallet: season ticket renewal,7.5,27000,7.5,27000,2026-09-01 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301547,KEL-6,Saved journeys,7.5,27000,7.5,27000,2026-09-01 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301560,KEL-22,Beta test plan,7.5,27000,7.5,27000,2026-09-01 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+301573,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-01 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+301586,KEL-1,Journey planner,2,7200,2,7200,2026-09-02 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+301599,KEL-3,Mobile beta,2,7200,2,7200,2026-09-02 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+301612,KEL-16,Ticket QR code works offline,7.5,27000,7.5,27000,2026-09-02 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301625,KEL-14,Wallet: season ticket renewal,7.5,27000,7.5,27000,2026-09-02 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301638,KEL-6,Saved journeys,7.5,27000,7.5,27000,2026-09-02 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301651,KEL-22,Beta test plan,7.5,27000,7.5,27000,2026-09-02 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+301664,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-02 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+301677,KEL-1,Journey planner,2,7200,2,7200,2026-09-03 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+301690,KEL-3,Mobile beta,2,7200,2,7200,2026-09-03 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+301703,KEL-16,Ticket QR code works offline,7.5,27000,7.5,27000,2026-09-03 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301716,KEL-14,Wallet: season ticket renewal,7.5,27000,7.5,27000,2026-09-03 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301729,KEL-6,Saved journeys,7.5,27000,7.5,27000,2026-09-03 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301742,KEL-22,Beta test plan,7.5,27000,7.5,27000,2026-09-03 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+301755,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-03 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+301768,KEL-1,Journey planner,2,7200,2,7200,2026-09-04 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+301781,KEL-3,Mobile beta,2,7200,2,7200,2026-09-04 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+301794,KEL-16,Ticket QR code works offline,7.5,27000,7.5,27000,2026-09-04 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301807,KEL-14,Wallet: season ticket renewal,7.5,27000,7.5,27000,2026-09-04 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301820,KEL-6,Saved journeys,7.5,27000,7.5,27000,2026-09-04 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301833,KEL-22,Beta test plan,7.5,27000,7.5,27000,2026-09-04 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+301846,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-04 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+301859,KEL-3,Mobile beta,2,7200,2,7200,2026-09-07 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+301872,KEL-3,Mobile beta,2,7200,2,7200,2026-09-07 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+301885,KEL-10,Step-free route option,7.5,27000,7.5,27000,2026-09-07 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301898,KEL-14,Wallet: season ticket renewal,7.5,27000,7.5,27000,2026-09-07 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301911,KEL-6,Saved journeys,7.5,27000,7.5,27000,2026-09-07 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301924,KEL-22,Beta test plan,7.5,27000,7.5,27000,2026-09-07 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+301937,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-07 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+301950,KEL-1,Journey planner,2,7200,2,7200,2026-09-08 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+301963,KEL-3,Mobile beta,2,7200,2,7200,2026-09-08 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+301976,KEL-10,Step-free route option,7.5,27000,7.5,27000,2026-09-08 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+301989,KEL-14,Wallet: season ticket renewal,7.5,27000,7.5,27000,2026-09-08 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302002,KEL-6,Saved journeys,7.5,27000,7.5,27000,2026-09-08 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302015,KEL-22,Beta test plan,7.5,27000,7.5,27000,2026-09-08 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+302028,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-08 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+302041,KEL-1,Journey planner,2,7200,2,7200,2026-09-09 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+302054,KEL-3,Mobile beta,2,7200,2,7200,2026-09-09 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+302067,KEL-10,Step-free route option,7.5,27000,7.5,27000,2026-09-09 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302080,KEL-14,Wallet: season ticket renewal,7.5,27000,7.5,27000,2026-09-09 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302093,KEL-6,Saved journeys,7.5,27000,7.5,27000,2026-09-09 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302106,KEL-22,Beta test plan,7.5,27000,7.5,27000,2026-09-09 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+302119,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-09 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+302132,KEL-1,Journey planner,2,7200,2,7200,2026-09-10 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+302145,KEL-3,Mobile beta,2,7200,2,7200,2026-09-10 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+302158,KEL-10,Step-free route option,7.5,27000,7.5,27000,2026-09-10 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302171,KEL-14,Wallet: season ticket renewal,7.5,27000,7.5,27000,2026-09-10 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302184,KEL-6,Saved journeys,7.5,27000,7.5,27000,2026-09-10 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302197,KEL-22,Beta test plan,7.5,27000,7.5,27000,2026-09-10 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+302210,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-10 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+302223,KEL-1,Journey planner,2,7200,2,7200,2026-09-11 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+302236,KEL-3,Mobile beta,2,7200,2,7200,2026-09-11 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+302249,KEL-10,Step-free route option,7.5,27000,7.5,27000,2026-09-11 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302262,KEL-14,Wallet: season ticket renewal,7.5,27000,7.5,27000,2026-09-11 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302275,KEL-20,Beta feedback form,7.5,27000,7.5,27000,2026-09-11 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302288,KEL-22,Beta test plan,7.5,27000,7.5,27000,2026-09-11 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+302301,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-11 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+302314,KEL-3,Mobile beta,2,7200,2,7200,2026-09-14 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+302327,KEL-3,Mobile beta,2,7200,2,7200,2026-09-14 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+302340,KEL-10,Step-free route option,7.5,27000,7.5,27000,2026-09-14 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302353,KEL-14,Wallet: season ticket renewal,7.5,27000,7.5,27000,2026-09-14 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302366,KEL-20,Beta feedback form,7.5,27000,7.5,27000,2026-09-14 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302379,KEL-22,Beta test plan,7.5,27000,7.5,27000,2026-09-14 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+302392,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-14 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+302405,KEL-1,Journey planner,2,7200,2,7200,2026-09-15 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+302418,KEL-3,Mobile beta,2,7200,2,7200,2026-09-15 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+302431,KEL-10,Step-free route option,7.5,27000,7.5,27000,2026-09-15 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302444,KEL-8,Live departure board,7.5,27000,7.5,27000,2026-09-15 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302457,KEL-20,Beta feedback form,7.5,27000,7.5,27000,2026-09-15 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302470,KEL-11,Journey planner API error states,7.5,27000,7.5,27000,2026-09-15 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+302483,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-15 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+302496,KEL-1,Journey planner,2,7200,2,7200,2026-09-16 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+302509,KEL-3,Mobile beta,2,7200,2,7200,2026-09-16 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+302522,KEL-10,Step-free route option,7.5,27000,7.5,27000,2026-09-16 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302535,KEL-8,Live departure board,7.5,27000,7.5,27000,2026-09-16 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302548,KEL-20,Beta feedback form,7.5,27000,7.5,27000,2026-09-16 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302561,KEL-11,Journey planner API error states,7.5,27000,7.5,27000,2026-09-16 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+302574,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-16 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+302587,KEL-1,Journey planner,2,7200,2,7200,2026-09-17 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+302600,KEL-3,Mobile beta,2,7200,2,7200,2026-09-17 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+302613,KEL-10,Step-free route option,7.5,27000,7.5,27000,2026-09-17 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302626,KEL-8,Live departure board,7.5,27000,7.5,27000,2026-09-17 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302639,KEL-20,Beta feedback form,7.5,27000,7.5,27000,2026-09-17 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302652,KEL-11,Journey planner API error states,7.5,27000,7.5,27000,2026-09-17 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+302665,KEL-1,Journey planner,2,7200,2,7200,2026-09-18 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+302678,KEL-3,Mobile beta,2,7200,2,7200,2026-09-18 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+302691,KEL-10,Step-free route option,7.5,27000,7.5,27000,2026-09-18 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302704,KEL-8,Live departure board,7.5,27000,7.5,27000,2026-09-18 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302717,KEL-20,Beta feedback form,7.5,27000,7.5,27000,2026-09-18 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302730,KEL-11,Journey planner API error states,7.5,27000,7.5,27000,2026-09-18 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+302743,KEL-3,Mobile beta,2,7200,2,7200,2026-09-21 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+302756,KEL-3,Mobile beta,2,7200,2,7200,2026-09-21 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+302769,KEL-24,Dynamic type support,7.5,27000,7.5,27000,2026-09-21 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302782,KEL-8,Live departure board,7.5,27000,7.5,27000,2026-09-21 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302795,KEL-20,Beta feedback form,7.5,27000,7.5,27000,2026-09-21 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302808,KEL-11,Journey planner API error states,7.5,27000,7.5,27000,2026-09-21 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+302821,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-21 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+302834,KEL-1,Journey planner,2,7200,2,7200,2026-09-22 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+302847,KEL-3,Mobile beta,2,7200,2,7200,2026-09-22 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+302860,KEL-24,Dynamic type support,7.5,27000,7.5,27000,2026-09-22 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302873,KEL-8,Live departure board,7.5,27000,7.5,27000,2026-09-22 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302886,KEL-20,Beta feedback form,7.5,27000,7.5,27000,2026-09-22 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302899,KEL-11,Journey planner API error states,7.5,27000,7.5,27000,2026-09-22 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+302912,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-22 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+302925,KEL-1,Journey planner,2,7200,2,7200,2026-09-23 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+302938,KEL-3,Mobile beta,2,7200,2,7200,2026-09-23 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+302951,KEL-24,Dynamic type support,7.5,27000,7.5,27000,2026-09-23 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302964,KEL-8,Live departure board,7.5,27000,7.5,27000,2026-09-23 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302977,KEL-25,Colour contrast fixes,7.5,27000,7.5,27000,2026-09-23 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+302990,KEL-11,Journey planner API error states,7.5,27000,7.5,27000,2026-09-23 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+303003,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-23 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+303016,KEL-1,Journey planner,2,7200,2,7200,2026-09-24 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+303029,KEL-3,Mobile beta,2,7200,2,7200,2026-09-24 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+303042,KEL-24,Dynamic type support,7.5,27000,7.5,27000,2026-09-24 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303055,KEL-8,Live departure board,7.5,27000,7.5,27000,2026-09-24 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303068,KEL-25,Colour contrast fixes,7.5,27000,7.5,27000,2026-09-24 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303081,KEL-11,Journey planner API error states,7.5,27000,7.5,27000,2026-09-24 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+303094,KEL-1,Journey planner,2,7200,2,7200,2026-09-25 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+303107,KEL-3,Mobile beta,2,7200,2,7200,2026-09-25 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+303120,KEL-24,Dynamic type support,7.5,27000,7.5,27000,2026-09-25 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303133,KEL-8,Live departure board,7.5,27000,7.5,27000,2026-09-25 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303146,KEL-25,Colour contrast fixes,7.5,27000,7.5,27000,2026-09-25 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303159,KEL-11,Journey planner API error states,7.5,27000,7.5,27000,2026-09-25 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+303172,KEL-3,Mobile beta,2,7200,2,7200,2026-09-28 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+303185,KEL-3,Mobile beta,2,7200,2,7200,2026-09-28 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+303198,KEL-24,Dynamic type support,7.5,27000,7.5,27000,2026-09-28 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303211,KEL-8,Live departure board,7.5,27000,7.5,27000,2026-09-28 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303224,KEL-25,Colour contrast fixes,7.5,27000,7.5,27000,2026-09-28 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303237,KEL-11,Journey planner API error states,7.5,27000,7.5,27000,2026-09-28 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+303250,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-28 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+303263,KEL-1,Journey planner,2,7200,2,7200,2026-09-29 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+303276,KEL-3,Mobile beta,2,7200,2,7200,2026-09-29 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+303289,KEL-24,Dynamic type support,7.5,27000,7.5,27000,2026-09-29 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303302,KEL-8,Live departure board,7.5,27000,7.5,27000,2026-09-29 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303315,KEL-25,Colour contrast fixes,7.5,27000,7.5,27000,2026-09-29 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303328,KEL-11,Journey planner API error states,7.5,27000,7.5,27000,2026-09-29 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+303341,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-29 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+303354,KEL-1,Journey planner,2,7200,2,7200,2026-09-30 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+303367,KEL-3,Mobile beta,2,7200,2,7200,2026-09-30 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+303380,KEL-24,Dynamic type support,7.5,27000,7.5,27000,2026-09-30 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303393,KEL-8,Live departure board,7.5,27000,7.5,27000,2026-09-30 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303406,KEL-25,Colour contrast fixes,7.5,27000,7.5,27000,2026-09-30 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303419,KEL-11,Journey planner API error states,7.5,27000,7.5,27000,2026-09-30 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App
+303432,KEL-18,Beta build pipeline (TestFlight and Play internal track),7.5,27000,7.5,27000,2026-09-30 09:00,Rafe Lindqvist,OST-TM,Ostrevane time and materials,Beta pipeline,KEL,Ostrevane Passenger App
+303445,KEL-1,Journey planner,2,7200,2,7200,2026-10-01 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Planning and stand-ups,KEL,Ostrevane Passenger App
+303458,KEL-3,Mobile beta,2,7200,2,7200,2026-10-01 09:00,Priya Raman,OST-TM,Ostrevane time and materials,Beta coordination with Ostrevane,KEL,Ostrevane Passenger App
+303471,KEL-24,Dynamic type support,7.5,27000,7.5,27000,2026-10-01 09:00,Owen Hartley,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303484,KEL-8,Live departure board,7.5,27000,7.5,27000,2026-10-01 09:00,Leila Haddad,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303497,KEL-25,Colour contrast fixes,7.5,27000,7.5,27000,2026-10-01 09:00,Mateus Costa,OST-TM,Ostrevane time and materials,Development,KEL,Ostrevane Passenger App
+303510,KEL-11,Journey planner API error states,7.5,27000,7.5,27000,2026-10-01 09:00,Grace Nwosu,OST-TM,Ostrevane time and materials,Testing,KEL,Ostrevane Passenger App

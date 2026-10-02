@@ -1,0 +1,141 @@
+@using ProgrammePulse.Models.ContractOps
+@using ProgrammePulse.Models.ViewModels.ContractOps
+@model InvoiceDocumentPageViewModel
+@{
+    Layout = null;
+    var invoice = Model.Invoice;
+    var contract = Model.Contract;
+    var customerName = Model.CustomerName;
+    var lines = Model.Lines;
+}
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(invoice.HasNumber ? $"Invoice {invoice.InvoiceNumber}" : "Draft invoice")</title>
+    <style>
+        body { font-family: -apple-system, "Segoe UI", sans-serif; color: #171b1e; max-width: 760px; margin: 2.5rem auto; padding: 0 1.5rem; }
+        h1 { font-size: 1.5rem; margin-bottom: .25rem; }
+        .invoice-meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin: 1.5rem 0; padding-bottom: 1rem; border-bottom: 2px solid #171b1e; }
+        .invoice-meta dl { margin: 0; }
+        .invoice-meta dt { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: #666; }
+        .invoice-meta dd { margin: 0 0 .5rem; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+        th, td { text-align: left; padding: .6rem .5rem; border-bottom: 1px solid #ddd; }
+        td { overflow-wrap: anywhere; }
+        @@media (max-width: 480px) { body { margin: 1.25rem auto; padding: 0 1rem; } th, td { padding: .5rem .3rem; } }
+        th { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: #666; }
+        td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+        tfoot td { font-weight: 700; border-top: 2px solid #171b1e; border-bottom: none; }
+        .status { display: inline-block; padding: .2rem .6rem; border-radius: 999px; font-size: .8rem; font-weight: 600; background: #e4efed; }
+        .print-only-hide { margin-top: 2rem; }
+        @@media print { .print-only-hide { display: none; } }
+        .draft-banner { font-weight: 700; color: #8a1c1c; border: 2px dashed #8a1c1c; padding: .5rem .75rem; }
+        .review-note { background: #fff4d6; border-left: 4px solid #b57a00; padding: .75rem 1rem; margin: 1rem 0; }
+        .invoice-action { margin-top: .75rem; }
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+    </style>
+</head>
+<body>
+    @if (invoice.HasNumber)
+    {
+        <h1>Invoice @invoice.InvoiceNumber</h1>
+    }
+    else
+    {
+        <h1>Draft invoice</h1>
+        <p class="draft-banner" role="status">DRAFT — not issued. It has no invoice number and must not be sent.</p>
+    }
+    <span class="status">@invoice.Status</span>
+
+    <div class="invoice-meta">
+        <dl>
+            <dt>Bill to</dt>
+            <dd>@customerName</dd>
+            <dt>Contract reference</dt>
+            <dd>@(contract?.Reference)</dd>
+        </dl>
+        <dl>
+            <dt>Invoice date</dt>
+            <dd>@(invoice.IssuedAtUtc?.ToString("yyyy-MM-dd") ?? "Not issued")</dd>
+            <dt>Period covered</dt>
+            <dd>@invoice.PeriodStart.ToString("yyyy-MM-dd") to @invoice.PeriodEnd.ToString("yyyy-MM-dd")</dd>
+        </dl>
+    </div>
+
+    <table>
+        <caption class="sr-only">Invoice line items</caption>
+        <thead>
+            <tr>
+                <th scope="col">Description</th>
+                <th scope="col" class="num">Quantity</th>
+                <th scope="col" class="num">Rate</th>
+                <th scope="col" class="num">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var line in lines)
+            {
+                <tr>
+                    <td>@line.Description</td>
+                    <td class="num">@(line.Quantity?.ToString("0.##") ?? "—")</td>
+                    <td class="num">@(line.UnitRate?.ToString("N2") ?? "—")</td>
+                    <td class="num">@line.LineTotal.ToString("N2")</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3">Subtotal</td>
+                <td class="num">@invoice.Subtotal.ToString("N2") @invoice.Currency</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="print-only-hide">
+        <button type="button" onclick="window.print()">Print / Save as PDF</button>
+        <a asp-controller="StaffContract" asp-action="Detail" asp-route-contractKey="@invoice.ContractKey">Back to contract</a>
+
+        @if (invoice.Status == InvoiceStatus.Draft)
+        {
+            <h2>Review before issuing</h2>
+            <p>
+                Check the lines against the period's timesheets. Issuing gives this invoice its number and today's date, and it
+                can't be undone. Discarding keeps the draft on record without a number.
+            </p>
+            @if (invoice.NeedsReviewHours > 0m)
+            {
+                <div class="review-note" role="note">
+                    <strong>@invoice.NeedsReviewHours.ToString("0.##") hours need review.</strong>
+                    Their source gave no billability, so they are <em>not</em> on this invoice. If some are billable, discard this
+                    draft, confirm billability at the source, and generate again.
+                </div>
+            }
+            <form asp-controller="StaffContract" asp-action="UpdateInvoiceStatus" asp-route-contractKey="@invoice.ContractKey" asp-route-invoiceKey="@invoice.InvoiceKey" method="post">
+                <input type="hidden" name="status" value="@InvoiceStatus.Issued" />
+                @if (invoice.NeedsReviewHours > 0m)
+                {
+                    <p>
+                        <input type="checkbox" id="confirm-review" name="needsReviewHoursConfirmed" value="true" required />
+                        <label for="confirm-review">I've reviewed the @invoice.NeedsReviewHours.ToString("0.##") unconfirmed hours; they are correctly left off this invoice.</label>
+                    </p>
+                }
+                <button type="submit">Issue invoice</button>
+            </form>
+            <form asp-controller="StaffContract" asp-action="UpdateInvoiceStatus" asp-route-contractKey="@invoice.ContractKey" asp-route-invoiceKey="@invoice.InvoiceKey" method="post" class="invoice-action">
+                <input type="hidden" name="status" value="@InvoiceStatus.Discarded" />
+                <button type="submit">Discard draft</button>
+            </form>
+        }
+
+        @if (invoice.Status == InvoiceStatus.Issued)
+        {
+            <form asp-controller="StaffContract" asp-action="UpdateInvoiceStatus" asp-route-contractKey="@invoice.ContractKey" asp-route-invoiceKey="@invoice.InvoiceKey" method="post" class="invoice-action">
+                <input type="hidden" name="status" value="Paid" />
+                <button type="submit">Mark as paid</button>
+            </form>
+        }
+    </div>
+</body>
+</html>

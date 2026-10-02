@@ -1,0 +1,138 @@
+@using ProgrammePulse.Models.ViewModels.ProgrammeOverview
+@model IdentityQueueViewModel
+
+<partial name="~/Views/StaffOps/Programme/_DataNav.cshtml" model="@("identities")" />
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <p class="ops-banner ops-banner--success" role="status" aria-live="polite">@Model.Message</p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Unmatched people</h2>
+    <p class="ops-empty-state">
+        People a sync or import saw but could not match to a staff profile. Until they are linked, their
+        assigned work, recorded time and bookings are missing from every capacity and workload figure.
+        A matching email is only a <em>suggestion</em>: anyone who can edit a person's email in the source
+        tool could otherwise put their work under a colleague's name, so check the source email against the
+        suggested person before you approve. Approving or linking creates an explicit identity link that the
+        next sync or import uses. A row marked <em>ambiguous</em> matched more than one profile: nothing was
+        guessed, and your link is the decision.
+    </p>
+    @if (Model.Unresolved.Count == 0 && !Model.UnresolvedPages.HasPrevious)
+    {
+        <p class="ops-empty-state">Nothing queued — no unmatched or ambiguous people from the syncs so far.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Unmatched people from source tools, with how often they were seen and a link action</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Person</th>
+                        <th scope="col">Source</th>
+                        <th scope="col">Seen</th>
+                        <th scope="col">Suggested match</th>
+                        <th scope="col">Link to staff</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.Unresolved)
+                    {
+                        <tr>
+                            <td>
+                                @(row.DisplayName ?? "—")
+                                <span class="ops-cell-context ops-break">@(row.Email ?? "no email recorded")</span>
+                            </td>
+                            <td>
+                                @row.ExternalSource
+                                @if (row.ExternalUserId is not null)
+                                {
+                                    <span class="ops-cell-context">User id @row.ExternalUserId</span>
+                                }
+                            </td>
+                            <td>
+                                @row.Context
+                                <span class="ops-cell-context">@row.OccurrenceCount @(row.OccurrenceCount == 1 ? "time" : "times"), last @row.LastSeenUtc.ToString("yyyy-MM-dd HH:mm") UTC</span>
+                            </td>
+                            <td>
+                                @if (row.SuggestedStaffKey is not null)
+                                {
+                                    <form asp-controller="StaffIdentity" asp-action="Approve" method="post" class="ops-inline-form">
+                                        <input type="hidden" name="unresolvedIdentityKey" value="@row.UnresolvedIdentityKey" />
+                                        <span>@row.SuggestedStaffName <span class="ops-visually-hidden">(same email)</span></span>
+                                        <button type="submit" class="ops-button ops-button--primary ops-button--small" aria-label="Approve @row.SuggestedStaffName for @(row.DisplayName ?? row.Email)">Approve</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span>—</span>
+                                }
+                            </td>
+                            <td>
+                                <form asp-controller="StaffIdentity" asp-action="Link" method="post" class="ops-inline-form">
+                                    <input type="hidden" name="unresolvedIdentityKey" value="@row.UnresolvedIdentityKey" />
+                                    <label for="staff-@row.UnresolvedIdentityKey" class="ops-visually-hidden">Staff member for @(row.DisplayName ?? row.Email ?? "this person")</label>
+                                    <select id="staff-@row.UnresolvedIdentityKey" name="staffKey" required>
+                                        <option value="">Choose staff…</option>
+                                        @foreach (var option in Model.StaffOptions)
+                                        {
+                                            <option value="@option.StaffKey">@option.FullName (@option.Email)</option>
+                                        }
+                                    </select>
+                                    <button type="submit" class="ops-button ops-button--primary ops-button--small">Link</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <partial name="~/Views/StaffOps/_Pager.cshtml" model="Model.UnresolvedPages" />
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Approved identity links</h2>
+    @if (Model.Links.Count == 0)
+    {
+        <p class="ops-empty-state">No approved links yet. Nobody from the source tools is counted against a staff member until a link is approved above.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Approved identity links between source tool users and staff</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Source</th>
+                        <th scope="col">Source user id</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Staff</th>
+                        <th scope="col">Created (UTC)</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var link in Model.Links)
+                    {
+                        <tr>
+                            <td>@link.ExternalSource</td>
+                            <td>@(link.ExternalUserId ?? "—")</td>
+                            <td>@(link.Email ?? "—")</td>
+                            <td>@link.StaffFullName</td>
+                            <td>@link.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>
+                                <form asp-controller="StaffIdentity" asp-action="Unlink" method="post">
+                                    <input type="hidden" name="linkKey" value="@link.LinkKey" />
+                                    <button type="submit" class="ops-button">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

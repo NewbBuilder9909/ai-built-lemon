@@ -1,0 +1,36 @@
+@model (System.Collections.Generic.IReadOnlyList<string> RecoveryCodes, string ContinueUrl)
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Save your recovery codes — @ProductBrand.Value.Name</title>
+    <link rel="stylesheet" href="~/css/app.css" />
+</head>
+<body>
+    <main class="ops-main ops-auth ops-auth--wide">
+        <div class="ops-panel">
+            <h1 class="ops-panel__heading">Save your recovery codes</h1>
+            <p>
+                Each code below can be used <strong>once</strong> to sign in if you ever lose access to your
+                authenticator app. Save them somewhere safe (a password manager, not your inbox) — this is the
+                only time they'll be shown.
+            </p>
+
+            <ul class="ops-recovery-codes">
+                @foreach (var code in Model.RecoveryCodes)
+                {
+                    <li>@code</li>
+                }
+            </ul>
+
+            <p>If a code is ever used, or if you ever regenerate them from your account, the old ones stop working.</p>
+
+            <a class="ops-button" href="@Model.ContinueUrl">I've saved these — continue</a>
+        </div>
+    </main>
+</body>
+</html>

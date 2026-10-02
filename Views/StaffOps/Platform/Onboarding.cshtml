@@ -1,0 +1,68 @@
+@model ProgrammePulse.Models.ViewModels.Tenancy.TenantOnboardingViewModel
+
+<a class="ops-back-link" asp-controller="StaffTenantAdmin" asp-action="Index">← Tenants</a>
+
+@if (TempData["OnboardingMessage"] is string message)
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@Model.Tenant.Name</h2>
+    <p>Plan: @Model.Tenant.Plan · Status: @Model.Tenant.Status · Active staff: @Model.ActiveStaffCount</p>
+    <p>Trial ends (UTC): @(Model.Tenant.TrialEndsAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "No end date")</p>
+    @if (!Model.AccessAllowed)
+    {
+        <p class="ops-banner ops-banner--info" role="alert">@Model.AccessReason Resolve account access in the tenant console before provisioning.</p>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">1. Agree the first useful outcome</h2>
+    <p>Confirm the customer sponsor, administrator, intended use case, agreed plan, target date and one measurable acceptance criterion in the implementation record. Agree which data is needed before connecting any source.</p>
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">2. Provision the customer administrator</h2>
+    <p>Create a new login attached directly to this organisation. Existing identities are never reassigned. Active staff count does not prove administrator access or successful sign-in.</p>
+    @if (Model.AccessAllowed)
+    {
+        <p id="handover-hint" class="ops-empty-state">Use the agreed secure handover channel. No invitation email is sent. Confirm sign-in and MFA enrollment with the customer.</p>
+        <form asp-controller="StaffTenantOnboarding" asp-action="ProvisionAdministrator" asp-route-tenantKey="@Model.Tenant.TenantKey" method="post" class="ops-filter-bar" aria-describedby="handover-hint">
+            <div class="ops-filter-bar__field"><label for="FullName">Administrator name</label><input id="FullName" name="FullName" maxlength="200" required /></div>
+            <div class="ops-filter-bar__field"><label for="Email">Administrator email</label><input id="Email" name="Email" type="email" maxlength="254" autocomplete="off" required /></div>
+            <div class="ops-filter-bar__field"><label for="Password">Initial password</label><input id="Password" name="Password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required /></div>
+            <button class="ops-button" type="submit">Create tenant administrator</button>
+        </form>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">3. Configure and validate with the customer</h2>
+    <p>The customer administrator signs into their own account to add staff, connect the agreed source at <code>/staffops/programme/connections</code>, run a sync, link code repositories to projects at <code>/staffops/programme/repositories</code>, and review unmatched people at <code>/staffops/programme/identities</code>. These paths use the signed-in user's organisation; this page does not switch your tenant.</p>
+    @if (Model.Sources.Count == 0)
+    {
+        <p class="ops-empty-state">No source is entitled or connected for this organisation yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption>Observed source publications for this organisation; only agreed sources are required</caption>
+                <thead><tr><th scope="col">Source</th><th scope="col">State</th><th scope="col">Last complete publication (UTC)</th><th scope="col">Data caveat</th></tr></thead>
+                <tbody>
+                @foreach (var source in Model.Sources)
+                {
+                    <tr><td>@source.DisplayName</td><td>@source.StatusLabel</td><td>@(source.LastPublishedAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "None")</td><td>@(source.CurrentDataMayBePartial ? source.PartialDataNote : "Check source totals, identity mapping and freshness with the customer.")</td></tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">4. Accept and hand over</h2>
+    <p>Reconcile a sample against the source, demonstrate the agreed outcome, record customer acceptance and outstanding exceptions, and confirm a support owner and review date. A successful sync is technical evidence, not customer acceptance or launch approval.</p>
+    <p>Processing approvals for engineering evidence remain mandatory in the evidence module. Record implementation decisions and acceptance in your controlled customer record; this page does not store those attestations.</p>
+</section>

@@ -1,0 +1,108 @@
+{
+    "version": "2.0.0",
+    // Every task here is "type": "process" invoking the dotnet CLI directly.
+    // None of them route through C# Dev Kit, so build/test/run keep working
+    // when the Dev Kit project-system server is down. See
+    // docs/dev-environment.md for the recovery runbook.
+    "tasks": [
+        {
+            "label": "build",
+            "type": "process",
+            "command": "dotnet",
+            "args": ["build", "${workspaceFolder}/ProgrammePulse.csproj"],
+            "problemMatcher": "$msCompile",
+            "group": { "kind": "build", "isDefault": true }
+        },
+        {
+            // The whole solution (web + tests), which is what CI builds.
+            "label": "build solution",
+            "type": "process",
+            "command": "dotnet",
+            "args": ["build", "${workspaceFolder}/ProgrammePulse.slnx"],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "restore",
+            "type": "process",
+            "command": "dotnet",
+            "args": ["restore", "${workspaceFolder}/ProgrammePulse.slnx"],
+            "problemMatcher": []
+        },
+        {
+            "label": "watch",
+            "type": "process",
+            "command": "dotnet",
+            "args": ["watch", "run", "--project", "${workspaceFolder}/ProgrammePulse.csproj"],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "test",
+            "type": "process",
+            "command": "dotnet",
+            "args": ["test", "${workspaceFolder}/ProgrammePulse.Tests/ProgrammePulse.Tests.csproj"],
+            "problemMatcher": "$msCompile",
+            "group": { "kind": "test", "isDefault": true }
+        },
+        {
+            "label": "unit tests",
+            "type": "process",
+            "command": "dotnet",
+            "args": ["test", "${workspaceFolder}/ProgrammePulse.Tests/ProgrammePulse.Tests.csproj", "--filter", "FullyQualifiedName!~Integration&FullyQualifiedName!~Personas"],
+            "problemMatcher": "$msCompile",
+            "group": "test"
+        },
+        {
+            "label": "integration and render tests",
+            "type": "process",
+            "command": "dotnet",
+            "args": ["test", "${workspaceFolder}/ProgrammePulse.Tests/ProgrammePulse.Tests.csproj", "--filter", "FullyQualifiedName~Integration|FullyQualifiedName~Personas"],
+            "problemMatcher": "$msCompile",
+            "group": "test"
+        },
+        {
+            // Type-checks the .cshtml files, which "build" does not — see
+            // docs/dev-environment.md. Run this after changing any view.
+            "label": "check views",
+            "type": "process",
+            "command": "pwsh",
+            "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/check-views.ps1"],
+            "windows": {
+                "command": "powershell",
+                "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/check-views.ps1"]
+            },
+            "problemMatcher": "$msCompile",
+            "presentation": { "reveal": "always", "panel": "dedicated" }
+        },
+        {
+            // Environment health check: SDK selection, stray project copies,
+            // orphaned processes, restore + build. Run this first whenever the
+            // IDE starts behaving strangely, before touching any settings.
+            "label": "dev doctor",
+            "type": "process",
+            "command": "pwsh",
+            "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/dev-doctor.ps1"],
+            "windows": {
+                "command": "powershell",
+                "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/dev-doctor.ps1"]
+            },
+            "problemMatcher": [],
+            "presentation": { "reveal": "always", "panel": "dedicated" }
+        },
+        {
+            // Kills orphaned hosts and clears this project's build output, then
+            // restores. Use when a previous debug session left the site holding
+            // a port or a file lock. Deliberately does NOT touch the worktrees
+            // under .claude/ or the evidence under artifacts/.
+            "label": "reset build output",
+            "type": "process",
+            "command": "pwsh",
+            "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/dev-doctor.ps1", "-Reset"],
+            "windows": {
+                "command": "powershell",
+                "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/dev-doctor.ps1", "-Reset"]
+            },
+            "problemMatcher": [],
+            "presentation": { "reveal": "always", "panel": "dedicated" }
+        }
+    ]
+}

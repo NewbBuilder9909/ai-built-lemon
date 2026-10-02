@@ -1,0 +1,19 @@
+@model PipelinePanelViewModel
+
+<section class="ops-panel" aria-labelledby="pipeline-heading">
+    <h2 id="pipeline-heading" class="ops-panel__heading">@Localizer["Transformation Pipeline"]</h2>
+    <ol class="ops-pipeline">
+        @foreach (var stage in Model.Stages)
+        {
+            <li class="ops-pipeline__stage">
+                <div class="ops-pipeline__bar-track">
+                    <div class="ops-pipeline__bar @stage.CssClass" style="width: @(stage.PercentOfTotal)%"></div>
+                </div>
+                <div class="ops-pipeline__meta">
+                    <span class="ops-chip @stage.CssClass">@Localizer[stage.Label]</span>
+                    <span class="ops-pipeline__count">@stage.Count (@(stage.PercentOfTotal)%)</span>
+                </div>
+            </li>
+        }
+    </ol>
+</section>

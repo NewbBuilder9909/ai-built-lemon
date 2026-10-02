@@ -1,0 +1,164 @@
+@using ProgrammePulse.Models.ServiceOps
+@using ProgrammePulse.Models.ViewModels.ProgrammeOverview
+@using ProgrammePulse.Models.ViewModels.ServiceOps
+@model DesksPageViewModel
+
+@{
+    var message = ViewData["Message"] as string;
+    var connections = Model.Connections;
+    var coverage = Model.Coverage;
+    var runStates = Model.RunStates ?? [];
+}
+
+<p class="ops-empty-state">
+    Admin-only. Read-only support desk connections. Only case <em>metadata</em> is imported —
+    identifiers, timestamps, status, priority, approved component tags and a link back to the case.
+    Never the ticket body, attachments, or any customer contact detail.
+    <a asp-controller="StaffService" asp-action="Index">Service health</a>
+    <a asp-controller="StaffService" asp-action="Agents">Unidentified agents</a>
+</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+@if (runStates.Count > 0)
+{
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Sync status</h2>
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Latest desk sync status by source</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Source</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Last complete run</th>
+                        <th scope="col">Detail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var state in runStates)
+                {
+                    <tr class="@(state.CurrentDataMayBePartial ? "ops-table__row--overdue" : "")">
+                        <td>@state.DisplayName</td>
+                        <td>@state.StatusLabel</td>
+                        <td>@(state.LastPublishedAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "never")</td>
+                        <td>
+                            @if (state.IsRunning)
+                            {
+                                <text>@state.RunningStage (started @state.RunningSinceUtc?.ToString("HH:mm") UTC)</text>
+                            }
+                            else if (state.LastRunFailed)
+                            {
+                                <text>@state.PartialDataNote</text>
+                            }
+                            else
+                            {
+                                <text>@state.FreshnessLabel</text>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Connected desks</h2>
+    @if (connections.Count == 0)
+    {
+        <p class="ops-empty-state">No support desk is connected.</p>
+    }
+    else
+    {
+        @foreach (var connection in connections)
+        {
+            var streams = coverage.Where(c => c.ConnectionKey == connection.ConnectionKey).ToList();
+            <article class="ops-panel">
+                <h3>@connection.DisplayName (@connection.Provider)</h3>
+                <p>
+                    Status: <strong>@ProgrammePulse.Services.Shared.DisplayText.Words(connection.Status)</strong>.
+                    Credential: @(connection.ProtectedCredentialJson is null ? "none stored" : "stored, encrypted").
+                    @if (connection.Status == DeskConnectionStatus.AccessLost)
+                    {
+                        <strong> The API key no longer reads this desk. Reconnect it.</strong>
+                    }
+                </p>
+
+                @if (streams.Count > 0)
+                {
+                    <div class="ops-table-scroll">
+                        <table class="ops-table">
+                            <caption class="ops-visually-hidden">Sync coverage per stream for @connection.DisplayName</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Stream</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Observed from</th>
+                                    <th scope="col">Complete through</th>
+                                    <th scope="col">Detail</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var stream in streams)
+                            {
+                                <tr class="@(stream.IsTrustworthy ? "" : "ops-table__row--overdue")">
+                                    <td>@stream.Stream</td>
+                                    <td>@ProgrammePulse.Services.Shared.DisplayText.Words(stream.Status)</td>
+                                    <td>@(stream.ObservedFromUtc?.ToString("yyyy-MM-dd") ?? "—")</td>
+                                    <td>@(stream.CompleteThroughUtc?.ToString("yyyy-MM-dd") ?? "not claimed")</td>
+                                    <td>@(stream.StatusDetail ?? "—")</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+                <form asp-controller="StaffService" asp-action="SetComponents" asp-route-connectionKey="@connection.ConnectionKey" method="post" class="ops-form">
+                    <label>
+                        Approved components (comma separated) — a case tagged with anything else is counted
+                        but shown as unmapped rather than assigned to a product nobody chose
+                        <input type="text" name="approvedComponents" maxlength="4000" value="@string.Join(", ", connection.ApprovedComponents)" />
+                    </label>
+                    <button type="submit" class="ops-button">Save components</button>
+                </form>
+
+                <form asp-controller="StaffService" asp-action="Sync" asp-route-connectionKey="@connection.ConnectionKey" method="post">
+                    <button type="submit" class="ops-button">Run read-only sync</button>
+                </form>
+                <form asp-controller="StaffService" asp-action="Disconnect" asp-route-connectionKey="@connection.ConnectionKey" method="post">
+                    <button type="submit" class="ops-button">Disconnect</button>
+                </form>
+            </article>
+        }
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Connect Freshdesk</h2>
+    <p class="ops-empty-state">
+        Use an API key belonging to an agent with read access to tickets, and no more. The key is
+        verified against your desk before it is stored, encrypted at rest, and never falls back to a
+        shared deployment credential — if it stops working, syncs stop rather than borrowing another.
+    </p>
+    <form asp-controller="StaffService" asp-action="ConnectFreshdesk" method="post" class="ops-form">
+        <label>
+            Freshdesk account
+            <input type="text" name="account" maxlength="128" placeholder="acme or acme.freshdesk.com" required />
+        </label>
+        <label>
+            API key
+            <input type="password" name="apiToken" maxlength="256" required autocomplete="off" />
+        </label>
+        <label>
+            Approved components (comma separated, optional to begin with)
+            <input type="text" name="approvedComponents" maxlength="4000" />
+        </label>
+        <button type="submit" class="ops-button">Connect</button>
+    </form>
+</section>

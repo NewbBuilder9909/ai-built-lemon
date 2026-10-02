@@ -1,0 +1,32 @@
+@using Microsoft.AspNetCore.WebUtilities
+@model ProgrammePulse.Services.Shared.PageLinks
+@*
+    Previous/next links for a paged list. Keeps every other query-string
+    value (filters, periods) and replaces only "page". There is no page
+    count on purpose: the lists fetch one row past the page instead of
+    counting the whole table.
+*@
+@{
+    string PageUrl(int page)
+    {
+        var query = QueryHelpers.ParseQuery(Context.Request.QueryString.Value)
+            .Where(pair => !string.Equals(pair.Key, "page", StringComparison.OrdinalIgnoreCase))
+            .ToDictionary(pair => pair.Key, pair => (string?)pair.Value.ToString());
+        query["page"] = page.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        return QueryHelpers.AddQueryString(Context.Request.PathBase + Context.Request.Path, query);
+    }
+}
+@if (Model.IsNeeded)
+{
+    <nav class="ops-pager" aria-label="@Localizer["Pagination"]">
+        @if (Model.HasPrevious)
+        {
+            <a class="ops-button" rel="prev" href="@PageUrl(Model.Number - 1)">@Localizer["Previous page"]</a>
+        }
+        <span>@string.Format(Localizer["Page {0}"].Value, Model.Number)</span>
+        @if (Model.HasNext)
+        {
+            <a class="ops-button" rel="next" href="@PageUrl(Model.Number + 1)">@Localizer["Next page"]</a>
+        }
+    </nav>
+}

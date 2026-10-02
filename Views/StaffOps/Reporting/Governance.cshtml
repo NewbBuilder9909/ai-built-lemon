@@ -1,0 +1,234 @@
+@using ProgrammePulse.Models.Programme
+@using ProgrammePulse.Models.ViewModels.Reporting
+@model GovernanceViewModel
+@{
+    var message = ViewData["Message"] as string;
+}
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--error" role="alert">@message</p>
+}
+
+@{ ViewData["ReportActions"] = true; }
+<partial name="~/Views/StaffOps/Reporting/_ReportingNav.cshtml" model="@("governance")" />
+<partial name="~/Views/StaffOps/Programme/_PortfolioScope.cshtml" model="Model.Scope" />
+<p class="ops-page-lede">Change requests, the stakeholder register (RACI) and work-item dependencies. Baselines are locked from the effort-variance table on the reporting overview.</p>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@Localizer["Change requests"]</h2>
+
+    @if (Model.ProjectOptions.Count == 0)
+    {
+        <p class="ops-empty-state">No projects yet. Import or sync delivery data before raising a change request.</p>
+    }
+    else
+    {
+        <form asp-controller="StaffGovernance" asp-action="CreateChangeRequest" method="post" class="ops-filter-bar">
+            <input type="hidden" name="programmeFilter" value="@Model.Scope.ProgrammeKey" />
+            <input type="hidden" name="customerFilter" value="@Model.Scope.CustomerKey" />
+            <div class="ops-filter-bar__field">
+                <label for="change-project">Project</label>
+                <select id="change-project" name="projectKey">
+                    @foreach (var project in Model.ProjectOptions)
+                    {
+                        <option value="@project.ProjectKey">@project.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="change-title">Title</label>
+                <input type="text" id="change-title" name="title" maxlength="256" required />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="change-description">Description</label>
+                <input type="text" id="change-description" name="description" maxlength="1024" />
+            </div>
+            <button type="submit" class="ops-button">Raise change request</button>
+        </form>
+    }
+
+    @if (Model.ChangeRequests.Count == 0)
+    {
+        <p class="ops-empty-state">@Localizer["No change requests logged yet."]</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">@Localizer["Change requests with status and decision"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Localizer["Project"]</th>
+                        <th scope="col">@Localizer["Title"]</th>
+                        <th scope="col">@Localizer["Requested by"]</th>
+                        <th scope="col">@Localizer["Status"]</th>
+                        <th scope="col">@Localizer["Decided by"]</th>
+                        <th scope="col">@Localizer["Decide"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var change in Model.ChangeRequests)
+                    {
+                        <tr>
+                            <td>@change.ProjectName</td>
+                            <td>
+                                @change.Title
+                                @if (!string.IsNullOrWhiteSpace(change.Description))
+                                {
+                                    <br /><span class="ops-empty-state">@change.Description</span>
+                                }
+                            </td>
+                            <td>@(change.RequestedByName ?? "—")</td>
+                            <td>@ProgrammePulse.Services.Shared.DisplayText.Words(change.Status)</td>
+                            <td>@(change.DecidedByName ?? "—")</td>
+                            <td>
+                                <form asp-controller="StaffGovernance" asp-action="DecideChangeRequest" method="post" class="ops-inline-form">
+                                    <input type="hidden" name="programmeFilter" value="@Model.Scope.ProgrammeKey" />
+                                    <input type="hidden" name="customerFilter" value="@Model.Scope.CustomerKey" />
+                                    <input type="hidden" name="changeRequestKey" value="@change.ChangeRequestKey" />
+                                    <select name="status" aria-label="Decide status for @change.Title">
+                                        @foreach (ChangeRequestStatus status in Enum.GetValues<ChangeRequestStatus>())
+                                        {
+                                            <option value="@status" selected="@(status == change.Status ? "selected" : null)">@ProgrammePulse.Services.Shared.DisplayText.Words(status)</option>
+                                        }
+                                    </select>
+                                    <button type="submit" class="ops-button">@Localizer["Save"]</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@Localizer["Stakeholders (RACI)"]</h2>
+
+    @if (Model.ProgrammeOptions.Count == 0)
+    {
+        <p class="ops-empty-state">No programmes yet. Import or sync delivery data before adding a stakeholder.</p>
+    }
+    else
+    {
+        <form asp-controller="StaffGovernance" asp-action="AddStakeholder" method="post" class="ops-filter-bar">
+            <input type="hidden" name="programmeFilter" value="@Model.Scope.ProgrammeKey" />
+            <input type="hidden" name="customerFilter" value="@Model.Scope.CustomerKey" />
+            <div class="ops-filter-bar__field">
+                <label for="stakeholder-programme">Programme</label>
+                <select id="stakeholder-programme" name="programmeKey">
+                    @foreach (var programme in Model.ProgrammeOptions)
+                    {
+                        <option value="@programme.ProgrammeKey">@programme.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="stakeholder-staff">Staff member</label>
+                <select id="stakeholder-staff" name="staffKey">
+                    <option value="">Someone outside the organisation</option>
+                    @foreach (var person in Model.StaffOptions ?? [])
+                    {
+                        <option value="@person.StaffKey">@person.FullName</option>
+                    }
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="stakeholder-name">Or their name, if external</label>
+                <input type="text" id="stakeholder-name" name="externalName" maxlength="256" />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="stakeholder-role">Role</label>
+                <select id="stakeholder-role" name="role">
+                    @foreach (StakeholderRole role in Enum.GetValues<StakeholderRole>())
+                    {
+                        <option value="@role">@ProgrammePulse.Services.Shared.DisplayText.Words(role)</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="ops-button">Add stakeholder</button>
+        </form>
+    }
+
+    @if (Model.Stakeholders.Count == 0)
+    {
+        <p class="ops-empty-state">@Localizer["No stakeholders recorded yet."]</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">@Localizer["Programme stakeholders with RACI role"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Localizer["Programme"]</th>
+                        <th scope="col">@Localizer["Name"]</th>
+                        <th scope="col">@Localizer["Role"]</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var stakeholder in Model.Stakeholders)
+                    {
+                        <tr>
+                            <td>@stakeholder.ProgrammeName</td>
+                            <td>@stakeholder.DisplayName</td>
+                            <td>@ProgrammePulse.Services.Shared.DisplayText.Words(stakeholder.Role)</td>
+                            <td>
+                                <form asp-controller="StaffGovernance" asp-action="RemoveStakeholder" method="post">
+                                    <input type="hidden" name="programmeFilter" value="@Model.Scope.ProgrammeKey" />
+                                    <input type="hidden" name="customerFilter" value="@Model.Scope.CustomerKey" />
+                                    <input type="hidden" name="programmeStakeholderKey" value="@stakeholder.ProgrammeStakeholderKey" />
+                                    <button type="submit" class="ops-button" aria-label="Remove @stakeholder.DisplayName">@Localizer["Remove"]</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@Localizer["Dependencies"]</h2>
+    <p class="ops-empty-state">A read-only view of work-item dependencies captured from ClickUp — not a Gantt chart, just what's blocking what. "Unresolved" rows are still actively blocking something today.</p>
+
+    @if (Model.Dependencies.Count == 0)
+    {
+        <p class="ops-empty-state">@Localizer["No dependencies recorded yet."]</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">@Localizer["Work-item dependencies and whether they're still unresolved"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Localizer["Workstream"]</th>
+                        <th scope="col">@Localizer["Work item"]</th>
+                        <th scope="col">@Localizer["Stage"]</th>
+                        <th scope="col">@Localizer["Depends on"]</th>
+                        <th scope="col">@Localizer["Depends-on stage"]</th>
+                        <th scope="col">@Localizer["Status"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var dependency in Model.Dependencies)
+                    {
+                        <tr class="@(dependency.IsUnresolved ? "ops-table__row--overdue" : "")">
+                            <td>@dependency.WorkstreamName</td>
+                            <td>@dependency.WorkItemTitle</td>
+                            <td>@dependency.WorkItemStage</td>
+                            <td>@dependency.DependsOnWorkItemTitle</td>
+                            <td>@dependency.DependsOnWorkItemStage</td>
+                            <td>@(dependency.IsUnresolved ? Localizer["Unresolved"] : Localizer["Clear"])</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

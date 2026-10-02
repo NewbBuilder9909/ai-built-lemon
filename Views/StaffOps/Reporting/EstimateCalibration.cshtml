@@ -1,0 +1,91 @@
+@model ProgrammePulse.Services.ProgrammeOps.EstimateCalibrationReport
+@{ ViewData["ReportActions"] = true; }
+@{
+    var isAdmin = Model.IncludesPeople;
+}
+
+<section class="ops-panel">
+    <h1 class="ops-panel__heading">Estimate calibration</h1>
+    <p>Original effort estimates stay unchanged. Reviewed, completed work informs an advisory planning range. These figures are effort hours, not elapsed calendar days or an automatically levelled schedule.</p>
+    <p><strong>@Model.SampleCount</strong> reviewed comparable samples; <strong>@Model.PendingReviewCount</strong> completed items awaiting review; <strong>@Model.ExcludedCount</strong> excluded.</p>
+    @if (Model.PortfolioMedianRatio is decimal median)
+    {
+        <p>Observed portfolio actual / estimate: median <strong>@median.ToString("0.##")×</strong>; 80th percentile <strong>@Model.PortfolioP80Ratio?.ToString("0.##")×</strong>. Use this range to stress-test planned effort alongside resource calendars, priorities and dependencies.</p>
+    }
+    else
+    {
+        <p>Planning range unavailable until at least 10 comparable completed items have been reviewed.</p>
+    }
+    <p>Only Admins can inspect individual histories. Board access shows tenant totals only. Neither view ranks employee performance.</p>
+</section>
+
+@if (isAdmin)
+{
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Capture an original estimate</h2>
+        <p>Capture before work starts. Select the person who made the estimate; the assignee may be someone else.</p>
+        <form asp-controller="StaffEstimateCalibration" asp-action="Capture" method="post">
+            <label for="workItemKey">Ready or backlog work item</label>
+            <select id="workItemKey" name="workItemKey" required>
+                @foreach (var item in Model.CaptureOptions)
+                {
+                    <option value="@item.WorkItemKey">@item.Title (@item.EstimatedHours.ToString("0.##") hours)</option>
+                }
+            </select>
+            <label for="estimatorStaffKey">Estimator</label>
+            <select id="estimatorStaffKey" name="estimatorStaffKey" required>
+                @foreach (var person in Model.EstimatorOptions)
+                {
+                    <option value="@person.StaffKey">@person.Name</option>
+                }
+            </select>
+            <button class="ops-button" type="submit">Freeze estimate</button>
+        </form>
+    </section>
+
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Estimator history</h2>
+        <p>Observed medians are descriptive. Advisory factors require at least 5 personal and 10 portfolio samples, then blend personal history with the portfolio median.</p>
+        <div class="ops-table-scroll"><table class="ops-table">
+            <thead><tr><th scope="col">Estimator</th><th scope="col">Comparable items</th><th scope="col">Observed median</th><th scope="col">Advisory factor</th></tr></thead>
+            <tbody>
+            @foreach (var row in Model.Estimators)
+            {
+                <tr><th scope="row">@row.Name</th><td>@row.SampleCount</td><td>@row.ObservedMedianRatio.ToString("0.##")×</td><td>@(row.AdvisoryPlanningFactor?.ToString("0.##") ?? "insufficient history")</td></tr>
+            }
+            </tbody>
+        </table></div>
+    </section>
+
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Review completed estimates</h2>
+        <p>Approve only if scope and time records make the original estimate comparable. Exclusions require a reason and cannot be silently added to calibration.</p>
+        <div class="ops-table-scroll"><table class="ops-table">
+            <thead><tr><th scope="col">Work item</th><th scope="col">Estimator</th><th scope="col">Original effort</th><th scope="col">Review</th></tr></thead>
+            <tbody>
+            @foreach (var row in Model.Baselines)
+            {
+                <tr>
+                    <th scope="row">@row.WorkItemTitle</th><td>@row.EstimatorName</td><td>@row.OriginalEffortHours.ToString("0.##") h</td>
+                    <td>
+                    @if (row.ReviewedAtUtc is not null)
+                    {
+                        <span>@(row.IsComparable ? "Comparable" : "Excluded") @row.ReviewNote</span>
+                    }
+                    else if (row.IsDone)
+                    {
+                        <form asp-controller="StaffEstimateCalibration" asp-action="Review" method="post">
+                            <input type="hidden" name="estimateBaselineKey" value="@row.Key" />
+                            <label><input type="checkbox" name="isComparable" value="true" /> Comparable scope and complete time</label>
+                            <label>Reason if excluded <input type="text" name="note" maxlength="512" /></label>
+                            <button class="ops-button" type="submit">Review</button>
+                        </form>
+                    }
+                    else { <span>Waiting for completion</span> }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table></div>
+    </section>
+}

@@ -1,0 +1,347 @@
+@using ProgrammePulse.Models.ContractOps
+@using ProgrammePulse.Models.ViewModels.ContractOps
+@model ContractDetailPageViewModel
+
+@{
+    var position = Model.Position;
+    var contract = Model.Contract;
+    var documents = Model.Documents;
+    var invoices = Model.Invoices;
+    var message = ViewData["Message"] as string;
+}
+
+<a class="ops-back-link" asp-controller="StaffContract" asp-action="Index">← Contracts</a>
+@if (Model.Contract is not null)
+{
+    <a class="ops-button" asp-controller="StaffContractAssurance" asp-action="Obligations" asp-route-contractKey="@Model.Contract.ContractKey">Obligations and assurance</a>
+}
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+@if (contract is not null)
+{
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Terms</h2>
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Contract commercial terms</caption>
+                <tbody>
+                    <tr><th scope="row">Customer</th><td>@position.CustomerName</td></tr>
+                    <tr><th scope="row">Model</th><td>@ProgrammePulse.Services.Shared.DisplayText.Words(position.CommercialModel)</td></tr>
+                    <tr><th scope="row">Term</th><td>@contract.StartDate.ToString("yyyy-MM-dd") to @contract.EndDate.ToString("yyyy-MM-dd")</td></tr>
+                    <tr><th scope="row">Currency</th><td>@contract.Currency</td></tr>
+                    @if (contract.AnnualValue is not null)
+                    {
+                        <tr><th scope="row">Annual value</th><td>@contract.AnnualValue.Value.ToString("N0") @contract.Currency</td></tr>
+                    }
+                    @if (contract.TotalContractValue is not null)
+                    {
+                        <tr><th scope="row">Total contract value</th><td>@contract.TotalContractValue.Value.ToString("N0") @contract.Currency</td></tr>
+                    }
+                    @if (contract.BillRate is not null)
+                    {
+                        <tr><th scope="row">Bill rate</th><td>@contract.BillRate.Value.ToString("N2") @contract.Currency /hr</td></tr>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(contract.Notes))
+                    {
+                        <tr><th scope="row">Notes</th><td>@contract.Notes</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <form asp-controller="StaffContract" asp-action="UpdateStatus" asp-route-contractKey="@position.ContractKey" method="post" class="ops-filter-bar">
+            <div class="ops-filter-bar__field">
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    @foreach (ContractStatus status in Enum.GetValues<ContractStatus>())
+                    {
+                        <option value="@status" selected="@(status == position.Status ? "selected" : null)">@ProgrammePulse.Services.Shared.DisplayText.Words(status)</option>
+                    }
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="notes">Notes</label>
+                <input type="text" id="notes" name="notes" maxlength="2000" value="@contract.Notes" />
+            </div>
+            <button type="submit" class="ops-button">Save</button>
+        </form>
+        <p class="ops-empty-state">Commercial terms (value, dates, model) are set once at creation — a real term change is recorded as an Amendment document below, not a data edit, so the burn-down stays historically honest.</p>
+    </section>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Commercial Position</h2>
+    <div class="ops-table-scroll">
+        <table class="ops-table">
+            <caption class="ops-visually-hidden">Overall contract ceiling, cost to date, and margin</caption>
+            <thead>
+                <tr>
+                    <th scope="col">Ceiling</th>
+                    <th scope="col">Value to date <small>(not recognised revenue)</small></th>
+                    <th scope="col">Cost to date</th>
+                    <th scope="col">Margin <small>(@MarginBasisText.ShortLabel(position.MarginBasis))</small></th>
+                    <th scope="col">Margin %</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@(position.ContractCeiling?.ToString("N0") ?? "—") @position.Currency</td>
+                    <td>@(position.RevenueUnset ? "not set" : position.CumulativeRevenue?.ToString("N0") + " " + position.Currency)</td>
+                    <td>@position.CumulativeCost.ToString("N0") @position.Currency</td>
+                    <td>@(position.Margin?.ToString("N0") ?? "—")</td>
+                    <td>@(position.MarginPercent is not null ? position.MarginPercent + "%" : "—")</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p class="ops-empty-state"><strong>Margin basis:</strong> @MarginBasisText.Describe(position.MarginBasis)</p>
+
+    @if (position.Attribution.Contested)
+    {
+        <p class="ops-banner ops-banner--warning" role="status">
+            <strong>Margin not established — cost attribution is contested.</strong>
+            This customer also holds @string.Join(", ", position.Attribution.OverlappingContractReferences), whose term overlaps this one.
+            Cost is selected by customer and date, not allocated to a contract, so the same logged hours are counted against both.
+            @position.Attribution.SharedCost.ToString("N0") @position.Currency of the cost above falls inside an overlapping term.
+            Split the terms or record an explicit allocation before treating any margin here as this contract's own profit.
+        </p>
+    }
+    @if (position.UndatedHours > 0)
+    {
+        <p class="ops-banner ops-banner--info" role="status">@position.UndatedHours.ToString("0.##") logged hours for this customer carry no work date or start time, so they can't be placed in any contract term. They are excluded from the cost above rather than counted against every contract.</p>
+    }
+    @if (position.RevenueUnset)
+    {
+        <p class="ops-banner ops-banner--info" role="status">No bill rate is set on this Time &amp; Materials contract — cost is tracked, but revenue and margin can't be computed until one is.</p>
+    }
+    @if (position.UnpricedHours > 0)
+    {
+        <p class="ops-banner ops-banner--info" role="status">@position.UnpricedHours.ToString("0.##") logged hours couldn't be costed (no matching staff, timestamp, or effective rate) and are excluded above.</p>
+    }
+    @if (position.MismatchedCurrencyHours > 0)
+    {
+        <p class="ops-banner ops-banner--info" role="status">@position.MismatchedCurrencyHours.ToString("0.##") logged hours were costed in a currency other than @position.Currency and are excluded above rather than summed across currencies.</p>
+    }
+
+    @if (position.YearlyBreakdown.Count > 0)
+    {
+        <h3>Year by Year</h3>
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Contract value versus cost incurred, by contract year</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Year</th>
+                        <th scope="col">Period</th>
+                        <th scope="col">Value</th>
+                        <th scope="col">Cost</th>
+                        @if (!position.Attribution.Contested)
+                        {
+                            <th scope="col">Margin</th>
+                        }
+                        <th scope="col">Cumulative value</th>
+                        <th scope="col">Cumulative cost</th>
+                        @if (!position.Attribution.Contested)
+                        {
+                            <th scope="col">Cumulative margin</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var year in position.YearlyBreakdown)
+                    {
+                        @* No loss highlight while attribution is contested — the margin driving it isn't established. *@
+                        <tr class="@(!position.Attribution.Contested && year.Margin < 0 ? "ops-table__row--overdue" : "")">
+                            <td>@year.YearNumber</td>
+                            <td>@year.PeriodStart.ToString("yyyy-MM-dd") to @year.PeriodEnd.ToString("yyyy-MM-dd")</td>
+                            <td>@year.Value.ToString("N0")</td>
+                            <td>@year.Cost.ToString("N0")</td>
+                            @if (!position.Attribution.Contested)
+                            {
+                                <td>@year.Margin.ToString("N0")</td>
+                            }
+                            <td>@year.CumulativeValue.ToString("N0")</td>
+                            <td>@year.CumulativeCost.ToString("N0")</td>
+                            @if (!position.Attribution.Contested)
+                            {
+                                <td>@year.CumulativeMargin.ToString("N0")</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Non-labour costs</h2>
+    <p class="ops-empty-state">Expenses, POs, and vendor invoices against this contract — folded into the cost figures above once they land in @position.Currency.</p>
+
+    <form asp-controller="StaffContract" asp-action="AddNonLabourCost" asp-route-contractKey="@position.ContractKey" method="post" class="ops-filter-bar">
+        <div class="ops-filter-bar__field">
+            <label for="cost-description">Description</label>
+            <input type="text" id="cost-description" name="description" maxlength="256" required />
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="cost-amount">Amount</label>
+            <input type="number" id="cost-amount" name="amount" step="0.01" min="0" required />
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="cost-currency">Currency</label>
+            <input type="text" id="cost-currency" name="currency" maxlength="8" value="@position.Currency" required />
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="cost-incurred">Incurred on</label>
+            <input type="date" id="cost-incurred" name="incurredOn" required />
+        </div>
+        <button type="submit" class="ops-button">Add cost</button>
+    </form>
+
+    @if (position.NonLabourCosts.Count == 0)
+    {
+        <p class="ops-empty-state">No non-labour costs recorded yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Non-labour costs against this contract</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Description</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Currency</th>
+                        <th scope="col">Incurred on</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cost in position.NonLabourCosts)
+                    {
+                        <tr>
+                            <td>@cost.Description</td>
+                            <td>@cost.Amount.ToString("N2")</td>
+                            <td>@cost.Currency</td>
+                            <td>@cost.IncurredOn.ToString("yyyy-MM-dd")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (position.MismatchedCurrencyNonLabourCost > 0)
+        {
+            <p class="ops-banner ops-banner--info" role="status">@position.MismatchedCurrencyNonLabourCost.ToString("N2") in non-labour costs were recorded in a currency other than @position.Currency and are excluded from the totals above.</p>
+        }
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Invoices</h2>
+    <p class="ops-empty-state">Generates a <strong>draft</strong> invoice from billable Time &amp; Materials hours and non-labour costs in the chosen period, dated by each entry's work date. Review the draft, then issue it: only an issued invoice gets a number. Hours with no confirmed billability are listed on the draft, never billed. A fixed price or ongoing contract can still invoice non-labour costs.</p>
+
+    <form asp-controller="StaffContract" asp-action="GenerateInvoice" asp-route-contractKey="@position.ContractKey" method="post" class="ops-filter-bar">
+        <div class="ops-filter-bar__field">
+            <label for="invoice-from">Period from</label>
+            <input type="date" id="invoice-from" name="periodStart" required />
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="invoice-to">Period to</label>
+            <input type="date" id="invoice-to" name="periodEnd" required />
+        </div>
+        <button type="submit" class="ops-button">Generate draft invoice</button>
+    </form>
+
+    @if (invoices.Count == 0)
+    {
+        <p class="ops-empty-state">No invoices yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Generated invoices for this contract</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Number</th>
+                        <th scope="col">Period</th>
+                        <th scope="col">Subtotal</th>
+                        <th scope="col">Status</th>
+                        <th scope="col"><span class="ops-visually-hidden">Open</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var invoice in invoices)
+                    {
+                        <tr>
+                            <td>@(invoice.HasNumber ? invoice.InvoiceNumber : "—")</td>
+                            <td>@invoice.PeriodStart.ToString("yyyy-MM-dd") to @invoice.PeriodEnd.ToString("yyyy-MM-dd")</td>
+                            <td>@invoice.Subtotal.ToString("N2") @invoice.Currency</td>
+                            <td>@invoice.Status@(invoice.Status == ProgrammePulse.Models.ContractOps.InvoiceStatus.Draft && invoice.NeedsReviewHours > 0m ? $" ({invoice.NeedsReviewHours:0.##} hours need review)" : "")</td>
+                            <td><a class="ops-button" asp-controller="StaffContract" asp-action="InvoiceDocument" asp-route-contractKey="@position.ContractKey" asp-route-invoiceKey="@invoice.InvoiceKey">View</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Documents</h2>
+
+    <form asp-controller="StaffContract" asp-action="UploadDocument" asp-route-contractKey="@position.ContractKey" method="post" enctype="multipart/form-data" class="ops-filter-bar">
+        <div class="ops-filter-bar__field">
+            <label for="documentType">Type</label>
+            <select id="documentType" name="documentType">
+                @foreach (ContractDocumentType type in Enum.GetValues<ContractDocumentType>())
+                {
+                    <option value="@type">@ProgrammePulse.Services.Shared.DisplayText.Words(type)</option>
+                }
+            </select>
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="file">File (PDF, Word, Excel)</label>
+            <input type="file" id="file" name="file" accept=".pdf,.docx,.xlsx,.doc,.xls" required />
+        </div>
+        <button type="submit" class="ops-button">Upload</button>
+    </form>
+
+    @if (documents.Count == 0)
+    {
+        <p class="ops-empty-state">No documents uploaded yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Uploaded contract documents</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Type</th>
+                        <th scope="col">File</th>
+                        <th scope="col">Size</th>
+                        <th scope="col">Uploaded</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var doc in documents)
+                    {
+                        <tr>
+                            <td>@doc.DocumentType</td>
+                            <td>@doc.FileName</td>
+                            <td>@((doc.SizeBytes / 1024.0).ToString("N1")) KB</td>
+                            <td>@doc.UploadedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td><a class="ops-button" asp-controller="StaffContract" asp-action="DownloadDocument" asp-route-contractKey="@position.ContractKey" asp-route-documentKey="@doc.ContractDocumentKey">Download</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

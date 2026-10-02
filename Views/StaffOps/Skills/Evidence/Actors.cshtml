@@ -1,0 +1,116 @@
+@using ProgrammePulse.Models.SkillsEvidence
+@using ProgrammePulse.Models.Staff
+@using ProgrammePulse.Models.ViewModels.SkillsEvidence
+@model EvidenceActorsPageViewModel
+
+@{
+    var message = ViewData["Message"] as string;
+    var unmapped = Model.Unmapped;
+    var roster = Model.Roster;
+    var connections = Model.Connections;
+    var connectionNames = connections.ToDictionary(c => c.ConnectionKey, c => c.DisplayName);
+}
+
+<p class="ops-empty-state">
+    Admin-only. External accounts seen in evidence that nobody has identified yet. Until an account
+    is approved here, its work reaches nobody's record — which is why this queue exists rather than
+    the system guessing.
+    <a asp-controller="StaffEvidenceConnection" asp-action="Index">Back to sources</a>
+</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Why this is a manual step</h2>
+    <p class="ops-empty-state">
+        Approving a mapping attributes somebody's work to a named colleague on a page a manager may
+        read. A matching email address is a good hint and a poor decision — shared addresses, former
+        colleagues and personal accounts all break it. So an email match is shown below as a
+        <em>suggestion</em>, and stays a suggestion until a person approves it.
+    </p>
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Unidentified accounts (@Model.UnidentifiedPeople)</h2>
+    @if (unmapped.Count == 0 && !Model.UnmappedPages.HasPrevious)
+    {
+        <p class="ops-empty-state">Nothing is waiting to be identified.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">External accounts awaiting identification, with occurrence counts and suggestions</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Account</th>
+                        <th scope="col">Source</th>
+                        <th scope="col">Seen</th>
+                        <th scope="col">Last seen</th>
+                        <th scope="col">Why unmapped</th>
+                        <th scope="col">Approve as</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var actor in unmapped)
+                {
+                    <tr>
+                        <td>
+                            <strong>@(actor.ExternalLogin ?? actor.DisplayName ?? actor.ExternalActorId)</strong>
+                            @if (actor.Email is not null)
+                            {
+                                <br /><small>@actor.Email</small>
+                            }
+                        </td>
+                        <td>@connectionNames.GetValueOrDefault(actor.ConnectionKey, actor.Provider)</td>
+                        <td>@actor.OccurrenceCount</td>
+                        <td>@actor.LastSeenUtc.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            @switch (actor.Reason)
+                            {
+                                case UnmappedActorReason.Bot:
+                                    <text>Bot or service account — excluded from attribution</text>
+                                    break;
+                                case UnmappedActorReason.Ambiguous:
+                                    <text>More than one colleague matched; nothing was assumed</text>
+                                    break;
+                                case UnmappedActorReason.EmailSuggestion:
+                                    <text>An email matches — <em>suggestion only</em></text>
+                                    break;
+                                default:
+                                    <text>No candidate found</text>
+                                    break;
+                            }
+                        </td>
+                        <td>
+                            @if (actor.IsBot)
+                            {
+                                <text>—</text>
+                            }
+                            else
+                            {
+                                <form asp-controller="StaffEvidenceConnection" asp-action="ApproveActor" asp-route-unmappedActorKey="@actor.UnmappedActorKey" method="post">
+                                    <select name="staffKey" required>
+                                        <option value="">Choose a colleague…</option>
+                                        @foreach (var staff in roster)
+                                        {
+                                            <option value="@staff.StaffKey" selected="@(actor.SuggestedStaffKey == staff.StaffKey)">
+                                                @staff.FullName@(actor.SuggestedStaffKey == staff.StaffKey ? " (suggested)" : "")
+                                            </option>
+                                        }
+                                    </select>
+                                    <button type="submit" class="ops-button">Approve</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        <partial name="~/Views/StaffOps/_Pager.cshtml" model="Model.UnmappedPages" />
+    }
+</section>

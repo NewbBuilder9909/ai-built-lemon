@@ -1,0 +1,172 @@
+@using ProgrammePulse.Models.ViewModels.ProgrammeOverview
+@model CodeRepositoriesViewModel
+
+<a class="ops-back-link" asp-controller="StaffProgrammeOverview" asp-action="Index">← Programme Overview</a>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@Model.Message</p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Why repositories are linked by hand</h2>
+    <p class="ops-empty-state">
+        A link says a repository's code serves a project, and through it that project's programme, customer
+        and contracts. Estimated effort and contractual security requirements will both follow these links,
+        so a wrong one would put work and obligations on the wrong customer. That is why links are declared
+        here, never guessed from names. A shared library can be linked to several projects; it then carries
+        every one of their customers' requirements. Ending a link keeps it on record in the audit trail.
+    </p>
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Repositories no project claims (@Model.Unclaimed.Count)</h2>
+    @if (!Model.EvidenceSourcesAvailable)
+    {
+        <p class="ops-empty-state">
+            Repository evidence is not enabled on this plan, so there is no list of known repositories to check.
+            You can still link repositories by hand below.
+        </p>
+    }
+    else if (Model.Unclaimed.Count == 0)
+    {
+        <p class="ops-empty-state">Every repository the evidence sources read is linked to at least one project.</p>
+    }
+    else
+    {
+        <p class="ops-empty-state">
+            The evidence sources read these repositories, but no project claims them, so their work counts
+            towards no customer yet.
+        </p>
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Repositories read by evidence sources with no project link</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Repository</th>
+                        <th scope="col">Link to project</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var repository in Model.Unclaimed)
+                    {
+                        var id = $"unclaimed-{repository.Provider}-{repository.SourceAccountId}-{repository.RepositoryKey}".Replace('/', '-').Replace(' ', '-');
+                        <tr>
+                            <td>@repository.DisplayName</td>
+                            <td>
+                                <form asp-controller="StaffCodeRepository" asp-action="Link" method="post" class="ops-filter-bar">
+                                    <input type="hidden" name="provider" value="@repository.Provider" />
+                                    <input type="hidden" name="sourceAccountId" value="@repository.SourceAccountId" />
+                                    <input type="hidden" name="repositoryKey" value="@repository.RepositoryKey" />
+                                    <label for="@id" class="ops-visually-hidden">Project for @repository.DisplayName</label>
+                                    <select id="@id" name="projectKey" required>
+                                        <option value="">Choose a project…</option>
+                                        @foreach (var project in Model.Projects)
+                                        {
+                                            <option value="@project.ProjectKey">@project.Label</option>
+                                        }
+                                    </select>
+                                    <button type="submit" class="ops-button">Link</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Link a repository</h2>
+    @if (Model.Projects.Count == 0)
+    {
+        <p class="ops-empty-state">There are no projects yet. Projects arrive with the first programme sync.</p>
+    }
+    else
+    {
+        <p id="repositoryKey-hint" class="ops-empty-state">
+            GitHub: the owner, then owner/name. Azure DevOps: the organisation, then project/repository.
+        </p>
+        <form asp-controller="StaffCodeRepository" asp-action="Link" method="post" class="ops-filter-bar">
+            <div class="ops-filter-bar__field">
+                <label for="provider">Provider</label>
+                <select id="provider" name="provider" required>
+                    <option value="GitHub">GitHub</option>
+                    <option value="AzureDevOps">Azure DevOps</option>
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="sourceAccountId">Account or organisation</label>
+                <input id="sourceAccountId" name="sourceAccountId" required maxlength="100" autocomplete="off" />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="repositoryKey">Repository</label>
+                <input id="repositoryKey" name="repositoryKey" required maxlength="201" autocomplete="off"
+                       aria-describedby="repositoryKey-hint" />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="projectKey">Project</label>
+                <select id="projectKey" name="projectKey" required>
+                    <option value="">Choose a project…</option>
+                    @foreach (var project in Model.Projects)
+                    {
+                        <option value="@project.ProjectKey">@project.Label</option>
+                    }
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="note">Note (optional)</label>
+                <input id="note" name="note" maxlength="512" />
+            </div>
+            <button type="submit" class="ops-button">Link repository</button>
+        </form>
+    }
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Linked repositories</h2>
+    @if (Model.Links.Count == 0 && !Model.LinkPages.HasPrevious)
+    {
+        <p class="ops-empty-state">No repository is linked to a project yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Repositories and the projects they serve</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Repository</th>
+                        <th scope="col">Project</th>
+                        <th scope="col">Programme</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Note</th>
+                        <th scope="col">Linked (UTC)</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.Links)
+                    {
+                        <tr>
+                            <td>@row.Repository.DisplayName</td>
+                            <td>@row.ProjectName</td>
+                            <td>@row.ProgrammeName</td>
+                            <td>@(row.CustomerName ?? "(no customer)")</td>
+                            <td>@row.Note</td>
+                            <td>@row.LinkedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>
+                                <form asp-controller="StaffCodeRepository" asp-action="Unlink" method="post">
+                                    <input type="hidden" name="linkKey" value="@row.LinkKey" />
+                                    <button type="submit" class="ops-button">End link</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <partial name="~/Views/StaffOps/_Pager.cshtml" model="Model.LinkPages" />
+    }
+</section>

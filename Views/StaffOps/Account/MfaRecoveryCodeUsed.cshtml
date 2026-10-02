@@ -1,0 +1,34 @@
+@model (int RemainingCodes, string ContinueUrl)
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Signed in with a recovery code — @ProductBrand.Value.Name</title>
+    <link rel="stylesheet" href="~/css/app.css" />
+</head>
+<body>
+    <main class="ops-main ops-auth ops-auth--wide">
+        <div class="ops-panel">
+            <h1 class="ops-panel__heading">Signed in with a recovery code</h1>
+
+            @if (Model.RemainingCodes > 0)
+            {
+                <p>You have <strong>@Model.RemainingCodes</strong> recovery code@(Model.RemainingCodes == 1 ? "" : "s") left. Consider setting up your authenticator app again on this device soon.</p>
+            }
+            else
+            {
+                <p class="ops-chip" role="alert">
+                    That was your <strong>last</strong> recovery code. If you lose access to your authenticator app
+                    again, you'll need another Admin to reset your MFA enrollment from the Staff Administration area.
+                </p>
+            }
+
+            <a class="ops-button" href="@Model.ContinueUrl">Continue</a>
+        </div>
+    </main>
+</body>
+</html>

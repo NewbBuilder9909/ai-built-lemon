@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ProgrammePulse.Tests/ProgrammePulse.Tests.csproj" />
+  <Project Path="ProgrammePulse.csproj" />
+</Solution>

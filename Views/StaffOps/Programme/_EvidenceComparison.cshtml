@@ -1,0 +1,106 @@
+@using ProgrammePulse.Controllers
+@using ProgrammePulse.Services.ProgrammeOps
+@model EvidenceReviewComparison
+@{
+    var names = ViewData["StaffNames"] as IReadOnlyDictionary<Guid, string> ?? new Dictionary<Guid, string>();
+    string Figure(decimal? numerator, decimal? denominator) =>
+        numerator is null ? "—" : $"{numerator.Value:0.##} of {denominator!.Value:0.##}";
+
+    // One scale for every row, so a long bar means more records, not a
+    // bigger finding drawn on its own axis. Cleared records sit left of
+    // zero, those still present and new ones to its right.
+    var moved = Model.Findings.Where(f => f.Records is not null).Select(f => f.Records!).ToList();
+    var left = moved.Count == 0 ? 0 : moved.Max(m => m.Cleared);
+    var right = moved.Count == 0 ? 0 : moved.Max(m => m.StillPresent + m.Appeared);
+    var span = Math.Max(1, left + right);
+    string At(int records) => StaffEvidenceCheckController.SharePercent(records, span);
+}
+<div class="ops-table-scroll">
+    <table class="ops-table">
+        <caption class="ops-visually-hidden">Each finding against the previous recorded review, with the decision that review took</caption>
+        <thead>
+            <tr>
+                <th scope="col">Finding</th>
+                <th scope="col">Type</th>
+                <th scope="col">Movement</th>
+                <th scope="col">Before</th>
+                <th scope="col">Now</th>
+                <th scope="col">Records</th>
+                <th scope="col">Decision last time</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model.Findings)
+            {
+                var before = row.PreviousDecision;
+                <tr class="@(row.ResolvedButStillPresent || row.PastTargetDate ? "ops-table__row--overdue" : "")">
+                    <td>@row.Title</td>
+                    <td>@StaffEvidenceCheckController.CategoryLabel(row.Category)</td>
+                    <td><span class="ops-chip">@EvidenceReviewCalculator.Label(row.Trend)</span></td>
+                    <td>@Figure(row.PreviousNumerator, row.PreviousDenominator) @row.Unit</td>
+                    <td>@Figure(row.CurrentNumerator, row.CurrentDenominator) @(row.CurrentNumerator is null ? "" : row.Unit)</td>
+                    <td>
+                        @if (row.Records is { } records)
+                        {
+                            @* The words beside it carry the same numbers, so the bar is hidden from screen readers. *@
+                            <span class="ops-movement" aria-hidden="true" style="--zero: @At(left)">
+                                @if (records.Cleared > 0)
+                                {
+                                    <span class="ops-movement__segment ops-movement__segment--cleared" style="--from: @At(left - records.Cleared); --size: @At(records.Cleared)"></span>
+                                }
+                                @if (records.StillPresent > 0)
+                                {
+                                    <span class="ops-movement__segment ops-movement__segment--still" style="--from: @At(left); --size: @At(records.StillPresent)"></span>
+                                }
+                                @if (records.Appeared > 0)
+                                {
+                                    <span class="ops-movement__segment ops-movement__segment--new" style="--from: @At(left + records.StillPresent); --size: @At(records.Appeared)"></span>
+                                }
+                                <span class="ops-movement__zero"></span>
+                            </span>
+                        }
+                        @EvidenceReviewCalculator.Label(row.Records)
+                    </td>
+                    <td>
+                        @if (before is null || before.DecidedAtUtc is null)
+                        {
+                            <span>No decision recorded.</span>
+                        }
+                        else
+                        {
+                            <span>@EvidenceReviewCalculator.Label(before.Disposition)</span>
+                            @if (before.OwnerStaffKey is { } owner)
+                            {
+                                <span>, owner @(names.GetValueOrDefault(owner, "(former staff member)"))</span>
+                            }
+                            @if (before.TargetDate is { } target)
+                            {
+                                <span>, target @target.ToString("yyyy-MM-dd")</span>
+                            }
+                            @if (row.ResolvedButStillPresent)
+                            {
+                                <strong> Marked resolved, but still found.</strong>
+                            }
+                            else if (row.PastTargetDate)
+                            {
+                                <strong> Target date passed, still found.</strong>
+                            }
+                            else if (row.DecisionNotCarried)
+                            {
+                                <span> Every record it covered has cleared; the records found now need their own decision.</span>
+                            }
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+@if (moved.Count > 0)
+{
+    <ul class="ops-legend" aria-hidden="true">
+        <li class="ops-key" style="--key: var(--ops-viz-under)">Records cleared</li>
+        <li class="ops-key" style="--key: var(--ops-viz-still)">Still present</li>
+        <li class="ops-key" style="--key: var(--ops-viz-over)">New</li>
+    </ul>
+}

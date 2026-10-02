@@ -1,0 +1,105 @@
+@using ProgrammePulse.Controllers
+@model ProgrammePulse.Models.ViewModels.ProgrammeOverview.ProgrammeOverviewViewModel
+@*
+    One row per programme: the page's only programme table (it replaced a
+    second summary table that repeated the same counts). The reasons behind
+    each review signal fold away, so the table fits its card and the signal
+    reads first. No money, inferred benefit or synthetic RAG.
+*@
+@inject ProgrammePulse.Services.Tenancy.IModuleGate ModuleGate
+@{
+    // Risks, issues and change requests are kept in the Reporting hub module;
+    // with it benched there is nowhere to record them, so the columns would only ever read 0.
+    var raidOn = await ModuleGate.IsOnAsync(ProgrammePulse.Models.Tenancy.ProductModules.Reporting);
+    string SignalChip(string signal) => signal switch
+    {
+        "Review required" => "chip-status--exception",
+        "Evidence incomplete" => "chip-validation--warning",
+        _ => "chip-validation--ok"
+    };
+}
+<section class="ops-panel" aria-labelledby="programmes-heading">
+    <div class="ops-panel__header">
+        <h2 class="ops-panel__heading" id="programmes-heading">Programmes</h2>
+        <span class="ops-panel__meta">As at @Model.GeneratedAtUtc.ToString("yyyy-MM-dd HH:mm") UTC</span>
+    </div>
+    @if (Model.ProgrammeHealth.Count == 0)
+    {
+        <p class="ops-empty-state">No programmes in this scope.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table" data-collapse="off">
+                <caption class="ops-visually-hidden">Programmes: review signal, work done, blocked and overdue items, risks and issues, changes awaiting decision, next milestone and the reasons behind the signal</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Programme</th>
+                        <th scope="col">Review signal</th>
+                        <th scope="col">Workflow done</th>
+                        <th scope="col">Blocked</th>
+                        <th scope="col">Overdue</th>
+                        @if (raidOn)
+                        {
+                            <th scope="col">Risks / issues</th>
+                            <th scope="col">Changes awaiting decision</th>
+                        }
+                        <th scope="col">Next milestone</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.ProgrammeHealth)
+                    {
+                        var reasons = row.ReviewReasons.Split("; ", StringSplitOptions.RemoveEmptyEntries);
+                        <tr>
+                            <th scope="row">
+                                <a asp-controller="StaffProgrammeOverview" asp-action="Index" asp-route-programmeKey="@row.ProgrammeKey" asp-route-customerKey="@Model.Scope.CustomerKey">@row.ProgrammeName</a>
+                                <span class="ops-cell-context">@row.CustomerName · Accountable: @row.AccountableOwners</span>
+                            </th>
+                            <td>
+                                <span class="ops-chip @SignalChip(row.ReviewSignal)">@row.ReviewSignal</span>
+                                <details class="ops-disclosure ops-reasons">
+                                    <summary>@reasons.Length @(reasons.Length == 1 ? "reason" : "reasons")</summary>
+                                    <ul>
+                                        @foreach (var reason in reasons)
+                                        {
+                                            <li>@reason</li>
+                                        }
+                                    </ul>
+                                </details>
+                            </td>
+                            <td>
+                                <span class="ops-share ops-share--thin" aria-hidden="true"><span class="ops-share__fill" style="--share: @StaffEvidenceCheckController.SharePercent(row.DoneItems, row.TotalItems)"></span></span>
+                                @row.DoneItems of @row.TotalItems
+                                @if (row.CancelledItems > 0)
+                                {
+                                    <span class="ops-cell-context">@row.CancelledItems cancelled, included in the total</span>
+                                }
+                            </td>
+                            <td class="num">@row.BlockedItems</td>
+                            <td class="num">@row.OverdueItems</td>
+                            @if (raidOn)
+                            {
+                                <td>
+                                    <a asp-controller="StaffRaid" asp-action="Raid" asp-route-programmeKey="@row.ProgrammeKey" asp-route-customerKey="@Model.Scope.CustomerKey">@row.OpenRisks / @row.OpenIssues</a>
+                                    @if (row.HighRisks > 0)
+                                    {
+                                        <span class="ops-cell-context">@row.HighRisks high or critical</span>
+                                    }
+                                </td>
+                                <td class="num"><a asp-controller="StaffGovernance" asp-action="Governance" asp-route-programmeKey="@row.ProgrammeKey" asp-route-customerKey="@Model.Scope.CustomerKey">@row.ProposedChanges</a></td>
+                            }
+                            <td>
+                                @(row.NextMilestone ?? "No dated milestone outstanding")
+                                @if (row.NextMilestoneDueUtc is { } due)
+                                {
+                                    <span class="ops-cell-context">@due.ToString("yyyy-MM-dd")</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

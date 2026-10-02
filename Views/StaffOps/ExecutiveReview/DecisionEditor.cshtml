@@ -1,0 +1,50 @@
+@model ProgrammePulse.Models.ExecutiveReview.DecisionEditor
+<a asp-action="Index">@Localizer["Decision.Queue"]</a>
+@if (Model.ErrorKey is string error)
+{ <p role="alert">@Localizer[error]</p> }
+<form method="get" asp-action="@(Model.DecisionKey is null ? "New" : "Edit")" asp-route-decisionKey="@Model.DecisionKey" class="ops-filter-bar review-settings">
+    <div class="ops-filter-bar__field">
+        <label for="packKey">@Localizer["Review.Pack"]</label>
+        <select name="packKey" id="packKey">
+            @foreach (var pack in Model.AvailablePacks)
+            { <option value="@pack.PackKey" selected="@(pack.PackKey == Model.Pack.PackKey)">@pack.Source - @pack.CapturedAtUtc.ToString("yyyy-MM-dd HH:mm:ss") UTC - @pack.PackKey.ToString("N")[..8]</option> }
+        </select>
+    </div>
+    <button type="submit" class="ops-button">@Localizer["Decision.LoadPack"]</button>
+</form>
+<form asp-action="@(Model.DecisionKey is null ? "Create" : "Revise")" asp-route-decisionKey="@Model.DecisionKey" method="post" class="review-decision-form">
+    <input asp-for="Input.PackKey" type="hidden" />
+    @if (Model.DecisionKey is not null)
+    { <input type="hidden" name="expectedVersion" value="@Model.ExpectedVersion" /> }
+    <div>
+        <label asp-for="Input.WorkItemKey">@Localizer["Review.Record"] (@Model.Pack.Source)</label>
+        <select asp-for="Input.WorkItemKey" required>
+            <option value="">@Localizer["Decision.Select"]</option>
+            @foreach (var item in Model.Pack.Items)
+            { <option value="@item.WorkItemKey">@item.ExternalId - @Localizer[$"Review.Stage.{item.Stage}"]</option> }
+        </select>
+    </div>
+    <div><label asp-for="Input.Title">@Localizer["Decision.Title"]</label><input asp-for="Input.Title" maxlength="200" required /></div>
+    <div><label asp-for="Input.Materiality">@Localizer["Decision.Materiality"]</label><textarea asp-for="Input.Materiality" maxlength="2000" rows="3" required></textarea></div>
+    <div><label asp-for="Input.Options">@Localizer["Decision.Options"]</label><textarea asp-for="Input.Options" maxlength="4000" rows="4" required></textarea></div>
+    <div><label asp-for="Input.Recommendation">@Localizer["Decision.Recommendation"]</label><textarea asp-for="Input.Recommendation" maxlength="2000" rows="3" required></textarea></div>
+    <div>
+        <label asp-for="Input.OwnerStaffKey">@Localizer["Decision.Owner"]</label>
+        <select asp-for="Input.OwnerStaffKey" required>
+            <option value="">@Localizer["Decision.Select"]</option>
+            @foreach (var person in Model.People) { <option value="@person.StaffKey">@person.Name</option> }
+        </select>
+    </div>
+    <div><label asp-for="Input.DueOn">@Localizer["Decision.Due"]</label><input asp-for="Input.DueOn" type="date" required /></div>
+    @if (Model.DecisionKey is not null)
+    {
+        <div><label for="note">@Localizer["Decision.Note"]</label><textarea id="note" name="note" maxlength="2000" required rows="3">@(Context.Request.HasFormContentType ? Context.Request.Form["note"].ToString() : "")</textarea></div>
+    }
+    <div class="review-actions">
+        <button class="ops-button" type="submit">@Localizer["Review.Save"]</button>
+        @if (Model.DecisionKey is Guid key)
+        { <a asp-action="Detail" asp-route-decisionKey="@key">@Localizer["Decision.Cancel"]</a> }
+        else
+        { <a asp-controller="StaffExecutiveReview" asp-action="Pack" asp-route-packKey="@Model.Pack.PackKey">@Localizer["Decision.Cancel"]</a> }
+    </div>
+</form>

@@ -1,0 +1,47 @@
+@model PasswordResetFormViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="@ProgrammePulse.Services.Localization.CultureMarkup.Lang" dir="@ProgrammePulse.Services.Localization.CultureMarkup.Dir">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Set a new password — @ProductBrand.Value.Name</title>
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+</head>
+<body>
+    <main class="ops-main ops-auth">
+        <div class="ops-panel">
+            <h1 class="ops-panel__heading">Set a new password</h1>
+            @if (Model.Done)
+            {
+                <p class="ops-banner ops-banner--success" role="status">Your password has been changed.</p>
+                <p><a class="ops-button" asp-controller="StaffAccount" asp-action="Login">Sign in</a></p>
+            }
+            else
+            {
+                @foreach (var error in Model.Errors)
+                {
+                    <p class="ops-banner ops-banner--error" role="alert">@error</p>
+                }
+                <form asp-controller="StaffAccount" asp-action="Reset" method="post" class="ops-login-form">
+                    <input type="hidden" name="m" value="@Model.MemberId" />
+                    <input type="hidden" name="t" value="@Model.Token" />
+                    <div class="ops-filter-bar__field">
+                        <label for="password">New password</label>
+                        <input type="password" id="password" name="password" autocomplete="new-password" required />
+                    </div>
+                    <div class="ops-filter-bar__field">
+                        <label for="confirm">Type it again</label>
+                        <input type="password" id="confirm" name="confirm" autocomplete="new-password" required />
+                    </div>
+                    <button type="submit" class="ops-button">Save password</button>
+                </form>
+                <p class="ops-empty-state">Reset links work once. If this one has expired, ask your administrator for a new one.</p>
+            }
+        </div>
+    </main>
+</body>
+</html>

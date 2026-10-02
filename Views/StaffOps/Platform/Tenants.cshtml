@@ -1,0 +1,176 @@
+@using ProgrammePulse.Models.Tenancy
+@using ProgrammePulse.Models.ViewModels.Tenancy
+@model TenantAdminViewModel
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@Model.Message</p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Platform support signals</h2>
+    <div class="ops-kpi-row">
+        @foreach (var source in Model.Support.Sources)
+        {
+            <div class="ops-kpi-card">
+                <div class="ops-kpi-card__label">@source.DisplayName — @source.StatusLabel</div>
+                <div class="ops-kpi-card__value">@(source.LastPublishedAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "never")</div>
+                <div class="ops-kpi-card__sublabel">
+                    @if (source.IsRunning)
+                    {
+                        <span>Running since @(source.RunningSinceUtc?.ToString("HH:mm")) — @source.RunningStage</span>
+                    }
+                    else if (source.LastRunFailed)
+                    {
+                        <span>Last run failed @(source.LastFailureAtUtc?.ToString("yyyy-MM-dd HH:mm")): @source.LastFailureError @source.PartialDataNote</span>
+                    }
+                    else
+                    {
+                        <span>Published @source.FreshnessLabel@(source.LastPublishedSummary is null ? "" : $" — {source.LastPublishedSummary}")</span>
+                    }
+                </div>
+            </div>
+        }
+        <div class="ops-kpi-card">
+            <div class="ops-kpi-card__label">Staff with no valid tenant</div>
+            <div class="ops-kpi-card__value">@Model.Support.StaffWithoutTenantCount</div>
+            <div class="ops-kpi-card__sublabel">These members can't reach tenant-scoped pages</div>
+        </div>
+    </div>
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Tenants</h2>
+    <div class="ops-table-scroll">
+        <table class="ops-table">
+            <caption class="ops-visually-hidden">Tenants with status, plan, modules and current commercial totals</caption>
+            <thead>
+                <tr>
+                    <th scope="col">Organisation</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Plan</th>
+                    <th scope="col">Commercials</th>
+                    <th scope="col">Features</th>
+                    <th scope="col">Created (UTC)</th>
+                    <th scope="col">Manage</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model.Tenants)
+                {
+                    <tr>
+                        <th scope="row">
+                            <a asp-controller="StaffTenantOnboarding" asp-action="Index" asp-route-tenantKey="@row.TenantKey">@row.Name</a> @(row.IsCallersOwnTenant ? "(you)" : "")
+                            <span class="ops-cell-context">@row.ShortCode</span>
+                        </th>
+                        <td>
+                            @row.Status
+                            @if (row.Status == TenantStatus.Trial && row.TrialEndsAtUtc is not null)
+                            {
+                                <br /><small>ends @row.TrialEndsAtUtc.Value.ToString("yyyy-MM-dd")</small>
+                            }
+                            @if (row.Status is TenantStatus.Suspended or TenantStatus.Archived)
+                            {
+                                <br /><a href="/staffops/platform/tenants/@row.TenantKey/purge">Delete delivery data</a>
+                            }
+                        </td>
+                        <td>@row.Plan<br /><small>@row.ActiveStaffCount / @row.TotalStaffCount staff</small></td>
+                        <td><strong>£@row.MonthlyPrice.ToString("0")/mo</strong><br /><small>£@row.SetupFee.ToString("0") setup</small></td>
+                        <td>
+                            <small>@string.Join(", ", row.Features)</small>
+                            @if (row.SelectedModules.Count > 0)
+                            {
+                                <br /><small>Add-ons: @string.Join(", ", row.SelectedModules)</small>
+                            }
+                        </td>
+                        <td>@row.CreatedAtUtc.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            <details class="ops-disclosure ops-manage">
+                                <summary>Manage<span class="ops-visually-hidden"> @row.Name</span></summary>
+                            <form asp-controller="StaffTenantAdmin" asp-action="SetStatus" asp-route-tenantKey="@row.TenantKey" method="post" class="ops-manage-form">
+                                <div class="ops-filter-bar__field">
+                                    <label for="status-@row.TenantKey">Status<span class="ops-visually-hidden"> for @row.Name</span></label>
+                                    <select id="status-@row.TenantKey" name="status">
+                                        @foreach (var status in Model.Statuses)
+                                        {
+                                            <option value="@status" selected="@(status == row.Status)">@ProgrammePulse.Services.Shared.DisplayText.Words(status)</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="ops-filter-bar__field">
+                                    <label for="trial-@row.TenantKey">Trial days<span class="ops-visually-hidden"> for @row.Name</span></label>
+                                    <input id="trial-@row.TenantKey" type="number" name="trialDays" min="1" max="365" />
+                                </div>
+                                <button type="submit" class="ops-button ops-button--small">Update</button>
+                            </form>
+                            <form asp-controller="StaffTenantAdmin" asp-action="SetPlan" asp-route-tenantKey="@row.TenantKey" method="post" class="ops-manage-form">
+                                <div class="ops-filter-bar__field">
+                                    <label for="plan-@row.TenantKey">Plan<span class="ops-visually-hidden"> for @row.Name</span></label>
+                                    <select id="plan-@row.TenantKey" name="plan">
+                                        @foreach (var plan in Model.Plans)
+                                        {
+                                            <option value="@plan" selected="@(plan == row.Plan)">@ProgrammePulse.Services.Shared.DisplayText.Words(plan)</option>
+                                        }
+                                    </select>
+                                </div>
+                                <button type="submit" class="ops-button ops-button--small">Update</button>
+                            </form>
+                            <form asp-controller="StaffTenantAdmin" asp-action="SetModules" asp-route-tenantKey="@row.TenantKey" method="post">
+                                @Html.AntiForgeryToken()
+                                <fieldset class="ops-manage-form__modules">
+                                    <legend class="ops-visually-hidden">Add-ons for @row.Name</legend>
+                                    @foreach (var module in Model.SellableModules)
+                                    {
+                                        <label><input type="checkbox" name="selectedModules" value="@module.FeatureKey" checked="@row.SelectedModules.Contains(module.FeatureKey)" /> @module.DisplayName <small>(+£@module.MonthlyPrice.ToString("0")/mo)</small></label>
+                                    }
+                                </fieldset>
+                                <button type="submit" class="ops-button ops-button--small">Save add-ons</button>
+                            </form>
+                            </details>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Create tenant</h2>
+    <p class="ops-empty-state">
+        Creates the organisation record. Open its name above to provision a customer
+        administrator and follow the onboarding steps. Public self-service trials at /purchase
+        are off unless <code>Commercial:SelfServiceTrialEnabled</code> is set.
+    </p>
+    <form asp-controller="StaffTenantAdmin" asp-action="Create" method="post" class="ops-filter-bar">
+        <div class="ops-filter-bar__field">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" maxlength="200" required />
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="shortCode">Short code</label>
+            <input type="text" id="shortCode" name="shortCode" maxlength="32" pattern="[a-z0-9-]{2,32}" required />
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="plan">Plan</label>
+            <select id="plan" name="plan" required>
+                @foreach (var plan in Model.Plans)
+                {
+                    <option value="@plan">@ProgrammePulse.Services.Shared.DisplayText.Words(plan)</option>
+                }
+            </select>
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="status">Starts as</label>
+            <select id="status" name="status">
+                <option value="@TenantStatus.Trial">Trial</option>
+                <option value="@TenantStatus.Active">Active</option>
+            </select>
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="trialDays">Trial length (days)</label>
+            <input type="number" id="trialDays" name="trialDays" min="1" max="365" value="30" />
+        </div>
+        <button type="submit" class="ops-button">Create tenant</button>
+    </form>
+</section>

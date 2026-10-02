@@ -1,0 +1,316 @@
+@using ProgrammePulse.Models.SkillsEvidence
+@using ProgrammePulse.Models.ViewModels.SkillsEvidence
+@model MySkillsViewModel
+
+@{
+    var message = ViewData["Message"] as string;
+    var canReview = Model.CanReview;
+}
+
+<p class="ops-empty-state">
+    Your own skills record. You declare a level, a reviewer agrees or disagrees with a
+    reason, and you can challenge anything on this page that you think is wrong.
+    @if (canReview)
+    {
+        <a asp-controller="StaffSkills" asp-action="Review">Review queue</a>
+    }
+</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+@await Html.PartialAsync("~/Views/StaffOps/Skills/_Rubric.cshtml")
+@if (Model.OwnEvidence is not null)
+{
+    <p><a asp-controller="StaffContributionExamples" asp-action="Index">Link contributions and AI assistance to your skills</a></p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">My skills</h2>
+    @if (Model.Current.Count == 0)
+    {
+        <p class="ops-empty-state">You have not declared any skills yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Your current skill assertions, their review status and history</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Skill</th>
+                        <th scope="col">Kind</th>
+                        <th scope="col">Level</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Source</th>
+                        <th scope="col">Reviewed</th>
+                        <th scope="col">Review due</th>
+                        <th scope="col"><span class="ops-visually-hidden">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var row in Model.Current)
+                {
+                    var overdue = row.IsReviewOverdue(Model.AsOf);
+                    var canChallenge = row.Assertion.Status is AssertionStatus.Validated or AssertionStatus.Rejected;
+                    <tr class="@(overdue ? "ops-table__row--overdue" : "")">
+                        <td>
+                            @row.SkillName
+                            @if (row.Assertion.ReviewNote is not null)
+                            {
+                                <span class="ops-cell-context">Reviewer: “@row.Assertion.ReviewNote”</span>
+                            }
+                        </td>
+                        <td>@ProgrammePulse.Services.Shared.DisplayText.Words(row.Kind)</td>
+                        <td>@ProgrammePulse.Services.Shared.DisplayText.Words(row.Assertion.Proficiency)</td>
+                        <td>@ProgrammePulse.Services.Shared.DisplayText.Words(row.Assertion.Status)</td>
+                        <td>@(row.Assertion.Origin == AssertionOrigin.SelfDeclared ? "You declared it" : "A reviewer recorded it")</td>
+                        <td>@(row.Assertion.ReviewedAtUtc?.ToString("yyyy-MM-dd") ?? "—")</td>
+                        <td>
+                            @(row.Assertion.ReviewDueOn?.ToString("yyyy-MM-dd") ?? "—")
+                            @if (overdue)
+                            {
+                                <strong> (overdue)</strong>
+                            }
+                        </td>
+                        <td>
+                            <form asp-controller="StaffSkills" asp-action="Withdraw" asp-route-assertionKey="@row.Assertion.AssertionKey" method="post">
+                                <button type="submit" class="ops-button" aria-label="Withdraw @row.SkillName">Withdraw</button>
+                            </form>
+                        </td>
+                    </tr>
+                    @if (canChallenge || row.History.Count > 0)
+                    {
+                        <tr class="ops-table__row--sub">
+                            <td colspan="8">
+                                <details class="ops-disclosure ops-manage">
+                                    <summary>@(canChallenge && row.History.Count > 0 ? "Challenge or see history" : canChallenge ? "Challenge this" : "History")<span class="ops-visually-hidden"> for @row.SkillName</span></summary>
+                                    @if (canChallenge)
+                                    {
+                                        <form asp-controller="StaffSkills" asp-action="Challenge" asp-route-assertionKey="@row.Assertion.AssertionKey" method="post" class="ops-manage-form">
+                                            <div class="ops-filter-bar__field">
+                                                <label for="claim-@row.Assertion.AssertionKey">I think this should be</label>
+                                                <select id="claim-@row.Assertion.AssertionKey" name="claimedProficiency" required>
+                                                    @foreach (var level in ProficiencyRubric.All)
+                                                    {
+                                                        <option value="@level" selected="@(level == row.Assertion.Proficiency)">@ProgrammePulse.Services.Shared.DisplayText.Words(level)</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="ops-filter-bar__field">
+                                                <label for="reason-@row.Assertion.AssertionKey">Because</label>
+                                                <input type="text" id="reason-@row.Assertion.AssertionKey" name="reason" maxlength="1000" required />
+                                            </div>
+                                            <button type="submit" class="ops-button ops-button--primary">Challenge this</button>
+                                        </form>
+                                    }
+                                    @if (row.History.Count > 0)
+                                    {
+                                        <ul class="ops-history">
+                                            @foreach (var previous in row.History)
+                                            {
+                                                <li>
+                                                    @previous.RecordedAtUtc.ToString("yyyy-MM-dd") —
+                                                    @ProgrammePulse.Services.Shared.DisplayText.Words(previous.Proficiency),
+                                                    @ProgrammePulse.Services.Shared.DisplayText.Words(previous.Status).ToLowerInvariant()
+                                                    @if (previous.ReviewNote is not null)
+                                                    {
+                                                        <text> — “@previous.ReviewNote”</text>
+                                                    }
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </details>
+                            </td>
+                        </tr>
+                    }
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@if (Model.OwnEvidence is not null || Model.OwnSupportParticipation.Count > 0)
+{
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">What the connected sources say about you</h2>
+
+        <p class="ops-empty-state">
+            This is everything this system has recorded about your work from connected sources.
+            It is <strong>participation, not proficiency</strong> — it shows what you took part in,
+            and says nothing about how well. It never changes a skill level, and there is no score.
+            If something here is not yours, ask an administrator to remove the account mapping.
+        </p>
+
+        @if (Model.MappedAccounts.Count == 0 && Model.OwnEvidence is not null)
+        {
+            <p class="ops-empty-state">
+                No external account has been approved as you, so no repository evidence is attributed
+                to you. Nothing is collected about you from source control until an administrator
+                approves a mapping.
+            </p>
+        }
+        else if (Model.MappedAccounts.Count > 0)
+        {
+            <p class="ops-empty-state">
+                Built from @Model.MappedAccounts.Count approved
+                account@(Model.MappedAccounts.Count == 1 ? "" : "s"):
+                @string.Join(", ", Model.MappedAccounts.Select(a => $"{a.Provider} {a.ExternalLogin ?? a.ExternalActorId}")).
+                <strong>If one of these is not your account, say so</strong> — an administrator can revoke it,
+                and the evidence stops being attributed to you.
+            </p>
+        }
+
+        @if (Model.OwnEvidence is { } evidence)
+        {
+            @if (evidence.Coverage.IsUnverifiedReplay)
+            {
+                <p class="ops-banner ops-banner--info" role="status">
+                    <strong>Fixture or sandbox replay.</strong> No sync has completed cleanly against a live
+                    installation, so anything below is illustrative rather than a record of your work.
+                </p>
+            }
+
+            @if (evidence.EvidenceCount == 0)
+            {
+                <p class="ops-empty-state">No repository evidence is attributed to you.</p>
+            }
+            else
+            {
+                <p>
+                    Observed from @(evidence.Coverage.ObservedFromUtc?.ToString("yyyy-MM-dd") ?? "—"),
+                    complete through @(evidence.Coverage.CompleteThroughUtc?.ToString("yyyy-MM-dd") ?? "not claimed").
+                    @if (evidence.LanguageHints.Count > 0)
+                    {
+                        <text>Touched files classified as: @string.Join(", ", evidence.LanguageHints).</text>
+                    }
+                    @if (evidence.Evidence.Any(e => e.AuthorshipUnverified))
+                    {
+                        <text>A commit marked &ldquo;authorship not verified&rdquo; names you but was not signed by you with a
+                            key the provider verified, so it does not prove you wrote it.</text>
+                    }
+                </p>
+                <div class="ops-table-scroll">
+                    <table class="ops-table">
+                        <caption class="ops-visually-hidden">Repository evidence attributed to you</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">When</th>
+                                <th scope="col">Repository</th>
+                                <th scope="col">Role</th>
+                                <th scope="col">What</th>
+                                <th scope="col">Source</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var row in evidence.Evidence)
+                        {
+                            <tr>
+                                <td>@row.OccurredAtUtc.ToString("yyyy-MM-dd")</td>
+                                <td>@row.RepositoryKey</td>
+                                <td>
+                                    @ProgrammePulse.Services.Shared.DisplayText.Words(row.Role)
+                                    @if (row.AuthorshipUnverified)
+                                    {
+                                        <span class="ops-chip">authorship not verified</span>
+                                    }
+                                </td>
+                                <td>@row.Title</td>
+                                <td>
+                                    @if (row.SourceUrl is not null)
+                                    {
+                                        <a href="@row.SourceUrl" rel="noopener noreferrer nofollow" target="_blank">Open</a>
+                                    }
+                                    else
+                                    {
+                                        <text>—</text>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            <partial name="~/Views/StaffOps/_Pager.cshtml" model="evidence.EvidencePages" />
+                @if (evidence.Evidence.Count > 50)
+                {
+                    <p class="ops-empty-state">Showing the most recent 50 of @evidence.Evidence.Count rows.</p>
+                }
+            }
+        }
+
+        @if (Model.OwnSupportParticipation.Count > 0)
+        {
+            <h3>Support cases</h3>
+            <p class="ops-empty-state">
+                Cases you are recorded as having resolved or reviewed. This is credit for responding;
+                it never records anyone as having caused a case.
+            </p>
+            <div class="ops-table-scroll">
+                <table class="ops-table">
+                    <caption class="ops-visually-hidden">Support cases you took part in</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">When</th>
+                            <th scope="col">Case</th>
+                            <th scope="col">Your role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var row in Model.OwnSupportParticipation.Take(50))
+                    {
+                        <tr>
+                            <td>@row.OccurredAtUtc.ToString("yyyy-MM-dd")</td>
+                            <td>@row.ExternalTicketId</td>
+                            <td>@ProgrammePulse.Services.Shared.DisplayText.Words(row.Role)</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Declare a skill</h2>
+    @if (Model.Declarable.Count == 0)
+    {
+        <p class="ops-empty-state">
+            Nothing left to declare — either you have declared every skill your organisation tracks,
+            or an administrator has not added any yet.
+        </p>
+    }
+    else
+    {
+        <form asp-controller="StaffSkills" asp-action="Declare" method="post" class="ops-form">
+            <label>
+                Skill
+                <select name="skillKey" required>
+                    @foreach (var skill in Model.Declarable)
+                    {
+                        <option value="@skill.SkillKey">@skill.Name (@skill.Kind)</option>
+                    }
+                </select>
+            </label>
+            <label>
+                Level
+                <select name="proficiency" required>
+                    @foreach (var level in ProficiencyRubric.All)
+                    {
+                        <option value="@level">@level — @ProficiencyRubric.Describe(level)</option>
+                    }
+                </select>
+            </label>
+            <label>
+                What supports this? (optional, and only you and a reviewer see it)
+                <input type="text" name="evidenceNote" maxlength="1000" />
+            </label>
+            <button type="submit" class="ops-button">Declare</button>
+        </form>
+    }
+</section>

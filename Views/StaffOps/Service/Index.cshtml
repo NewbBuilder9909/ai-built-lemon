@@ -1,0 +1,157 @@
+@using ProgrammePulse.Models.ServiceOps
+@using ProgrammePulse.Models.ViewModels.ServiceOps
+@model ServiceHealthPageViewModel
+
+@{
+    var message = ViewData["Message"] as string;
+    var report = Model.Report;
+    var canReview = Model.CanReviewRootCause;
+    var canManage = Model.CanManageDesk;
+    var previous = report.PreviousPeriod?.ToDictionary(r => r.DisplayName, StringComparer.OrdinalIgnoreCase);
+
+    string Delta(ComponentServiceRow row)
+    {
+        if (previous is null || !previous.TryGetValue(row.DisplayName, out var before))
+        {
+            return "—";
+        }
+
+        var change = row.CasesOpened - before.CasesOpened;
+        return change == 0 ? "no change" : (change > 0 ? $"+{change}" : change.ToString());
+    }
+}
+
+<p class="ops-empty-state">
+    Support demand, recurrence and resolution by component for
+    @report.PeriodStart.ToString("yyyy-MM-dd") to @report.PeriodEnd.AddDays(-1).ToString("yyyy-MM-dd"),
+    compared with the previous @((report.PeriodEnd.DayNumber - report.PeriodStart.DayNumber)) days.
+    <strong>Nobody is named on this page.</strong> A support case belongs to a product and the team
+    that owns it; it is not evidence about a person.
+    @if (canReview)
+    {
+        <a asp-controller="StaffService" asp-action="Links">Case and code links</a>
+    }
+    @if (canManage)
+    {
+        <a asp-controller="StaffService" asp-action="Desks">Desks</a>
+    }
+</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--info" role="status" aria-live="polite">@message</p>
+}
+
+@if (report.IsUnverifiedReplay)
+{
+    <p class="ops-banner ops-banner--info" role="status">
+        <strong>Not yet verified against a live desk.</strong>
+        No sync has completed cleanly, so anything below is a fixture or sandbox replay and should
+        be labelled as such to anyone who reads it.
+    </p>
+}
+
+@if (report.AbsenceIsInconclusive)
+{
+    <p class="ops-banner ops-banner--info" role="status">
+        No cases in this window <em>and</em> coverage is incomplete — so this is
+        &ldquo;we cannot say&rdquo;, not &ldquo;nothing went wrong&rdquo;.
+    </p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">How to read this</h2>
+    <ul>
+        <li><strong>@report.TotalCasesOpened</strong> cases opened in the window, <strong>@report.TotalReopened</strong> reopened.</li>
+        <li>
+            <strong>@report.CasesWithUnmappedComponent</strong> had no approved component tag, so they sit in their own row
+            rather than being assigned to a product nobody chose.
+        </li>
+        <li><strong>@report.WithdrawnExcluded</strong> deleted or spam cases were excluded from every figure above.</li>
+        <li>
+            @if (report.SourceLinkCoverage is { } coverage)
+            {
+                <text><strong>@coverage.ToString("P0")</strong> of cases have any link to source at all.</text>
+            }
+            else
+            {
+                <text>No cases to link.</text>
+            }
+            A link is a relationship; only a reviewed root cause says a change <em>caused</em> a case.
+        </li>
+        @if (report.UnmappedAgents > 0)
+        {
+            <li><strong>@report.UnmappedAgents</strong> desk agents are unidentified, so their resolutions reach nobody's record.</li>
+        }
+        @if (report.Coverage is { } cov && !cov.IsTrustworthy)
+        {
+            <li>
+                <strong>Coverage is @cov.Status.</strong> @cov.StatusDetail
+                Cases missing here may simply not have been imported.
+            </li>
+        }
+    </ul>
+    <p class="ops-empty-state">
+        Rates are withheld below @ServiceHealthThresholds.MinimumCasesForRate resolved cases — a
+        percentage from two cases looks precise and means nothing. Time to restore is a median, to
+        the point service was restored rather than to administrative closure.
+    </p>
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Demand by component</h2>
+    @if (report.Components.Count == 0)
+    {
+        <p class="ops-empty-state">No cases in this window.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Cases opened, resolved, reopened and linked to source per component</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Component</th>
+                        <th scope="col">Opened</th>
+                        <th scope="col">vs previous</th>
+                        <th scope="col">Resolved</th>
+                        <th scope="col">Reopened</th>
+                        <th scope="col">Reopen rate</th>
+                        <th scope="col">High/urgent</th>
+                        <th scope="col">Median time to restore</th>
+                        <th scope="col">Linked to source</th>
+                        <th scope="col">Confirmed code cause</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var row in report.Components)
+                {
+                    <tr class="@(row.IsUnmappedComponent ? "ops-table__row--overdue" : "")">
+                        <td>
+                            @row.DisplayName
+                            @if (row.IsUnmappedComponent)
+                            {
+                                <br /><small>The desk gave no tag your organisation has approved.</small>
+                            }
+                        </td>
+                        <td>@row.CasesOpened</td>
+                        <td>@Delta(row)</td>
+                        <td>@row.CasesResolved</td>
+                        <td>@row.Reopened</td>
+                        <td>@(row.ReopenRate is { } rate ? rate.ToString("P0") : "—")</td>
+                        <td>@row.HighOrUrgent</td>
+                        <td>@(row.MedianTimeToRestore is { } t ? $"{t.TotalHours:N1} h" : "—")</td>
+                        <td>@row.LinkedToSource of @row.CasesOpened</td>
+                        <td>@row.ConfirmedCodeCauses</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        <p class="ops-empty-state">
+            &ldquo;Confirmed code cause&rdquo; counts only cases where a reviewer assessed a change and
+            concluded it caused the case, with a rationale on the record. A matching issue key is not
+            enough, and neither is a commit landing near the time the case was raised.
+        </p>
+    }
+</section>

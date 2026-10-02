@@ -1,0 +1,26 @@
+@* Sharing actions for a report page, shown in the page header when the view
+   sets ViewData["ReportActions"] = true (and optionally ViewData["ExportUrl"]
+   for a CSV of the same figures).
+
+   Deliberately no public or unauthenticated share link: a copied link keeps
+   the page's filters, and the recipient still signs in and needs the role
+   the page requires — the same access control, audit and tenant boundary as
+   everything else. Print/PDF output carries its own provenance header (see
+   .ops-print-header in app.css) so a figure never travels without when and
+   where it came from. The buttons rely on app.js; without JavaScript they
+   are hidden and the browser's own print and address bar still work. *@
+@{
+    var exportUrl = ViewData["ExportUrl"] as string;
+}
+<div class="ops-report-actions" data-requires-js hidden>
+    <button type="button" class="ops-button ops-button--secondary" data-report-action="print">@Localizer["Print or save as PDF"]</button>
+    <button type="button" class="ops-button ops-button--secondary" data-report-action="copy-link">@Localizer["Copy link"]</button>
+    @if (!string.IsNullOrWhiteSpace(exportUrl))
+    {
+        <a class="ops-button ops-button--secondary" href="@exportUrl">@Localizer["Download CSV"]</a>
+    }
+    @* The access note is said when it matters — as the link is copied —
+       rather than standing under every report title. *@
+    <p class="ops-report-actions__status" role="status" aria-live="polite"
+       data-copied="@Localizer["Link copied"]. @Localizer["Share.Note"]" data-copy-failed="@Localizer["Share.CopyFailed"]"></p>
+</div>

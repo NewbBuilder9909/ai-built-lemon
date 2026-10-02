@@ -1,0 +1,55 @@
+@using ProgrammePulse.Models.ViewModels.Staff
+@model MyWorkViewModel
+
+@{ ViewData["ReportActions"] = true; }
+<p class="ops-empty-state">Your assigned work items and logged hours. No cost or rate data appears here.</p>
+
+@{
+    var overdueCount = Model.Items.Count(i => i.IsOverdue);
+    var openCount = Model.Items.Count(i => !i.IsClosed);
+}
+@if (Model.Items.Count > 0)
+{
+    <section class="ops-kpi-row" aria-label="My work summary">
+        <partial name="~/Views/OperationsHub/Partials/_KpiCard.cshtml" model="@(new ProgrammePulse.Models.ViewModels.KpiCardViewModel("Open items", openCount.ToString()))" />
+        <partial name="~/Views/OperationsHub/Partials/_KpiCard.cshtml" model="@(new ProgrammePulse.Models.ViewModels.KpiCardViewModel("Overdue", overdueCount.ToString(), NeedsAttention: overdueCount > 0))" />
+        <partial name="~/Views/OperationsHub/Partials/_KpiCard.cshtml" model="@(new ProgrammePulse.Models.ViewModels.KpiCardViewModel("Hours logged", Model.TotalLoggedHours.ToString("0.##")))" />
+    </section>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">My Work Items</h2>
+    @if (Model.Items.Count == 0)
+    {
+        <p class="ops-empty-state">No work items are currently assigned to you.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">My assigned work items with estimated and logged hours</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Item</th>
+                        <th scope="col">Stage</th>
+                        <th scope="col">Due</th>
+                        <th scope="col">Estimated (hrs)</th>
+                        <th scope="col">Logged (hrs)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.Items)
+                    {
+                        <tr class="@(row.IsOverdue ? "ops-table__row--overdue" : "")">
+                            <td>@row.Title</td>
+                            <td>@row.StageLabel</td>
+                            <td>@(row.DueDateUtc?.ToString("yyyy-MM-dd") ?? "—")@(row.IsOverdue ? " (overdue)" : "")</td>
+                            <td>@(row.EstimatedHours?.ToString("0.##") ?? "—")</td>
+                            <td>@row.LoggedHours.ToString("0.##")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

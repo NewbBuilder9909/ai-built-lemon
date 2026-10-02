@@ -1,0 +1,80 @@
+@using ProgrammePulse.Models.SkillsEvidence
+@model SkillCoverageReport
+
+<p class="ops-empty-state">
+    How much reviewed cover this organisation has, skill by skill, as at @Model.AsOf.ToString("yyyy-MM-dd").
+    <strong>Nobody is named on this page.</strong> A single-maintainer warning is a statement about
+    the organisation's exposure, never a judgement about the person concerned.
+</p>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">What this is built from</h2>
+    <ul>
+        <li><strong>@Model.StaffInScope</strong> active people in scope.</li>
+        <li><strong>@Model.StaffWithNoAssertions</strong> of them have declared nothing at all — the largest unknown on this page.</li>
+        <li><strong>@Model.SkillsWithoutValidatedCover</strong> tracked skills have no reviewed cover at or above @ProficiencyRubric.CoverThreshold.</li>
+        <li><strong>@Model.SingleMaintainerSkills</strong> depend on exactly one reviewed person.</li>
+    </ul>
+    <p class="ops-empty-state">
+        &ldquo;Cover&rdquo; means a current, validated, in-date assertion at
+        @ProficiencyRubric.CoverThreshold or above. A validated level whose review date has
+        passed is counted as overdue, not as cover — we can no longer vouch for it.
+        Nothing here is inferred from anyone's activity.
+    </p>
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Coverage by skill</h2>
+    @if (Model.Rows.Count == 0)
+    {
+        <p class="ops-empty-state">No active skills are being tracked yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Reviewed cover, claims awaiting review, overdue reviews and open challenges per skill</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Skill</th>
+                        <th scope="col">Kind</th>
+                        <th scope="col">Reviewed cover</th>
+                        <th scope="col">Validated (any level)</th>
+                        <th scope="col">Awaiting review</th>
+                        <th scope="col">Review overdue</th>
+                        <th scope="col">Challenged</th>
+                        <th scope="col">Continuity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var row in Model.Rows)
+                {
+                    <tr class="@(row.HasNoValidatedCover || row.IsSingleMaintainerRisk ? "ops-table__row--overdue" : "")">
+                        <td>@row.Name</td>
+                        <td>@ProgrammePulse.Services.Shared.DisplayText.Words(row.Kind)</td>
+                        <td>@row.ValidatedCover</td>
+                        <td>@row.ValidatedAtAnyLevel</td>
+                        <td>@row.AwaitingReview</td>
+                        <td>@row.ReviewOverdue</td>
+                        <td>@row.Challenged</td>
+                        <td>
+                            @if (row.HasNoValidatedCover)
+                            {
+                                <text>No reviewed cover</text>
+                            }
+                            else if (row.IsSingleMaintainerRisk)
+                            {
+                                <text>One reviewed person, no reviewed backup</text>
+                            }
+                            else
+                            {
+                                <text>Covered</text>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

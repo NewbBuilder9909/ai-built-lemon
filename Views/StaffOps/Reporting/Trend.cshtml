@@ -1,0 +1,81 @@
+@using ProgrammePulse.Models.Programme
+@using ProgrammePulse.Services.ProgrammeOps
+@model IReadOnlyList<ReportingSnapshot>
+
+@{ ViewData["ReportActions"] = true; }
+<partial name="~/Views/StaffOps/Reporting/_ReportingNav.cshtml" model="@("trend")" />
+@* A snapshot's figures are the day it was captured, whatever period it is
+   filed under, so the page says which figures cover what. *@
+<p class="ops-page-lede">@Localizer["Trend.Lede"]</p>
+
+@if (ViewData["Message"] is string message && !string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--error" role="alert">@message</p>
+}
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@Localizer["Capture a snapshot"]</h2>
+    <form asp-controller="StaffReporting" asp-action="CaptureSnapshot" method="post" class="ops-filter-bar">
+        <div class="ops-filter-bar__field">
+            <label for="from">@Localizer["From"]</label>
+            <input type="date" id="from" name="from" required />
+        </div>
+        <div class="ops-filter-bar__field">
+            <label for="to">@Localizer["To"]</label>
+            <input type="date" id="to" name="to" required aria-describedby="capture-hint" />
+        </div>
+        <button type="submit" class="ops-button">@Localizer["Capture snapshot"]</button>
+    </form>
+    <p id="capture-hint" class="ops-empty-state">@Localizer["Trend.CaptureHint", ReportingSnapshotService.CaptureWindowDays]</p>
+</section>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">@Localizer["History"]</h2>
+    @if (Model.Count == 0)
+    {
+        <p class="ops-empty-state">@Localizer["No snapshots captured yet."]</p>
+    }
+    else
+    {
+        <p class="ops-empty-state">@Localizer["Trend.Basis"]</p>
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">@Localizer["Reporting snapshot history, oldest first"]</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">@Localizer["Captured"]</th>
+                        <th scope="col">@Localizer["Period"]</th>
+                        <th scope="col">@Localizer["Estimated (hrs)"]</th>
+                        <th scope="col">@Localizer["Actual (hrs)"]</th>
+                        <th scope="col">@Localizer["Variance (hrs)"]</th>
+                        <th scope="col">@Localizer["Open"]</th>
+                        <th scope="col">@Localizer["Blocked"]</th>
+                        <th scope="col">@Localizer["Avg. utilisation"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var snapshot in Model)
+                    {
+                        var lateBy = ReportingSnapshotService.CapturedLateByDays(snapshot);
+                        <tr class="@(lateBy is not null ? "ops-table__row--overdue" : "")">
+                            <td>
+                                @snapshot.CapturedAtUtc.ToString("yyyy-MM-dd HH:mm")
+                                @if (lateBy is { } days)
+                                {
+                                    <span class="ops-cell-context">@Localizer["Trend.CapturedLate", days]</span>
+                                }
+                            </td>
+                            <td>@snapshot.PeriodStart.ToString("yyyy-MM-dd") to @snapshot.PeriodEnd.ToString("yyyy-MM-dd")</td>
+                            <td>@snapshot.TotalEstimatedHours.ToString("0.##")</td>
+                            <td>@snapshot.TotalActualHours.ToString("0.##")</td>
+                            <td>@snapshot.TotalVarianceHours.ToString("0.##")</td>
+                            <td>@snapshot.OpenWorkItems</td>
+                            <td>@snapshot.BlockedWorkItems</td>
+                            <td>@(snapshot.AverageUtilisationPercent is decimal utilisation ? utilisation.ToString("0.##") + "%" : "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

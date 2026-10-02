@@ -1,0 +1,279 @@
+{
+  "$comment": [
+    "Maps each Capability to the HTTP route(s) that express it, so the persona",
+    "matrix can exercise a capability against the real application rather than",
+    "against the C# map that defines it.",
+    "",
+    "This file is TEST EXPECTATION, not authorization truth. Models/Staff/",
+    "RoleCapabilities is the only definition of who holds what; if this file and",
+    "that map disagree, the map wins and the matrix test fails.",
+    "",
+    "'form' is the page a POST route's antiforgery token is lifted from. A POST",
+    "assertion without a valid token proves nothing (see the gate document, B4),",
+    "so a persona that cannot reach the form cannot be asserted against the POST.",
+    "",
+    "'routes': [] means the capability has no distinct HTTP route of its own.",
+    "Those need a 'noRouteReason' and are reported by the coverage test rather",
+    "than silently skipped."
+  ],
+  "schemaVersion": 1,
+  "capabilities": [
+    {
+      "capability": "ManageExecutiveDecisions",
+      "routes": [],
+      "noRouteReason": "Opt-in executive decision creation and transitions require tenant-owned packs and actors. ExecutiveDecisionIntegrationTests enables the feature and tests actual HTTP writes, read-only refusals and foreign IDs."
+    },
+    {
+      "capability": "ReviewExecutiveEvidence",
+      "routes": [],
+      "noRouteReason": "Opt-in evidence review requires a saved decision and version. ExecutiveDecisionIntegrationTests exercises review actions with real antiforgery and permission boundaries."
+    },
+    {
+      "capability": "ViewOwnProfile",
+      "routes": [{ "method": "GET", "path": "/staffops" }]
+    },
+    {
+      "capability": "ViewOwnWork",
+      "routes": [{ "method": "GET", "path": "/staffops/my-work" }]
+    },
+    {
+      "capability": "SubmitOwnLeave",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/staffops/leave/submit",
+          "form": "/staffops",
+          "fields": { "requestedFrom": "2026-10-05", "requestedTo": "2026-10-06", "type": "Holiday", "notes": "persona matrix" }
+        }
+      ]
+    },
+    {
+      "capability": "ViewPortfolio",
+      "routes": [
+        { "method": "GET", "path": "/staffops/programme" },
+        { "method": "GET", "path": "/staffops/programme/export" }
+      ]
+    },
+    {
+      "capability": "ViewDeliveryReporting",
+      "routes": [
+        { "method": "GET", "path": "/staffops/reporting" },
+        { "method": "GET", "path": "/staffops/reporting/trend" },
+        { "method": "GET", "path": "/staffops/reporting/governance" },
+        { "method": "GET", "path": "/staffops/reporting/alerts" },
+        { "method": "GET", "path": "/staffops/programme/evidence-check" },
+        { "method": "GET", "path": "/staffops/programme/evidence-check/reviews" }
+      ]
+    },
+    {
+      "capability": "ViewProjectRisk",
+      "routes": [{ "method": "GET", "path": "/staffops/reporting/raid" }]
+    },
+    {
+      "capability": "ViewTeamCapacity",
+      "routes": [],
+      "noRouteReason": "Capacity is a section of the reporting hub, not a route of its own. Covered indirectly by ViewDeliveryReporting until it gets a dedicated page."
+    },
+    {
+      "capability": "ManageProjectRisk",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/staffops/reporting/raid/risks",
+          "form": "/staffops/reporting/raid",
+          "fields": { "workstreamKey": "00000000-0000-0000-0000-000000000000", "title": "persona matrix", "severity": "Medium" }
+        }
+      ]
+    },
+    {
+      "capability": "LockBaseline",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/staffops/reporting/baseline/lock",
+          "form": "/staffops/reporting/raid",
+          "fields": { "workstreamKey": "00000000-0000-0000-0000-000000000000", "baselineEffortHours": "10" }
+        }
+      ]
+    },
+    {
+      "capability": "CaptureTrend",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/staffops/reporting/trend/capture",
+          "form": "/staffops/reporting/trend",
+          "fields": {}
+        }
+      ]
+    },
+    {
+      "capability": "DecideChangeRequest",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/staffops/reporting/governance/changes",
+          "form": "/staffops/reporting/governance",
+          "fields": { "projectKey": "00000000-0000-0000-0000-000000000000", "title": "persona matrix" }
+        }
+      ]
+    },
+    {
+      "capability": "ManageStakeholders",
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/staffops/reporting/governance/stakeholders",
+          "form": "/staffops/reporting/governance",
+          "fields": { "programmeKey": "00000000-0000-0000-0000-000000000000", "externalName": "persona matrix", "role": "Consulted" }
+        }
+      ]
+    },
+    {
+      "capability": "TriggerSync",
+      "routes": [],
+      "noRouteReason": "POST /staffops/programme/sync/{source} is still gated on IsAdminAsync. Deliberately not migrated while Codex is extending that controller for new connectors."
+    },
+    {
+      "capability": "ViewCommercials",
+      "routes": [
+        { "method": "GET", "path": "/staffops/reporting/cost" },
+        { "method": "GET", "path": "/staffops/reporting/cost/export" }
+      ]
+    },
+    {
+      "capability": "ManageContracts",
+      "routes": [
+        { "method": "GET", "path": "/staffops/contracts" },
+        { "method": "GET", "path": "/staffops/contracts/assurance" }
+      ]
+    },
+    {
+      "capability": "ViewEstimateCalibration",
+      "routes": [{ "method": "GET", "path": "/staffops/reporting/estimate-calibration" }]
+    },
+    {
+      "capability": "ViewEstimatorHistory",
+      "routes": [],
+      "noRouteReason": "Per-estimator rows are a section of the calibration page shown only to Admin, not a route. Needs a body-level assertion, not a status-code one."
+    },
+    {
+      "capability": "ManageEstimateCalibration",
+      "routes": [],
+      "noRouteReason": "POST capture/review require a real work item and estimator key from seeded programme data, which the matrix fixture does not create yet."
+    },
+    {
+      "capability": "ViewTeamLoad",
+      "routes": [{ "method": "GET", "path": "/staffops/programme/load" }]
+    },
+    {
+      "capability": "ViewPersonLoad",
+      "routes": [],
+      "noRouteReason": "Named load findings are a section of /staffops/programme/load shown only to roles that can reassign work, not a route. Same shape as ViewEstimatorHistory: needs a body-level assertion, not a status-code one."
+    },
+    {
+      "capability": "ApproveLeave",
+      "routes": [{ "method": "GET", "path": "/staffops/approvals" }]
+    },
+    {
+      "capability": "ManageStaff",
+      "routes": [
+        { "method": "GET", "path": "/staffops/admin" },
+        { "method": "GET", "path": "/staffops/admin/create" }
+      ]
+    },
+    {
+      "capability": "ViewAudit",
+      "routes": [{ "method": "GET", "path": "/staffops/admin/audit" }]
+    },
+    {
+      "capability": "ManageIntegrations",
+      "routes": [
+        { "method": "GET", "path": "/staffops/programme/connections" },
+        { "method": "GET", "path": "/staffops/programme/import" },
+        { "method": "GET", "path": "/staffops/programme/import/sample/work-items" },
+        { "method": "GET", "path": "/staffops/skills/evidence" },
+        { "method": "GET", "path": "/staffops/service/desks" },
+        { "method": "GET", "path": "/staffops/security" }
+      ]
+    },
+    {
+      "capability": "ManageIdentityMappings",
+      "routes": [
+        { "method": "GET", "path": "/staffops/programme/identities" },
+        { "method": "GET", "path": "/staffops/skills/evidence/actors" },
+        { "method": "GET", "path": "/staffops/service/agents" }
+      ]
+    },
+    {
+      "capability": "ManageBranding",
+      "routes": [
+        { "method": "GET", "path": "/staffops/branding" },
+        { "method": "GET", "path": "/staffops/branding/history" }
+      ]
+    },
+    {
+      "capability": "ManageModules",
+      "routes": [
+        { "method": "GET", "path": "/staffops/settings/modules" }
+      ]
+    },
+    {
+      "capability": "ManageCustomers",
+      "routes": [{ "method": "GET", "path": "/staffops/programme/repositories" }]
+    },
+    {
+      "capability": "ManageSkillTaxonomy",
+      "routes": [{ "method": "GET", "path": "/staffops/skills/taxonomy" }]
+    },
+    {
+      "capability": "ViewOwnSkills",
+      "routes": [{ "method": "GET", "path": "/staffops/skills" }]
+    },
+    {
+      "capability": "DeclareOwnSkills",
+      "routes": [],
+      "noRouteReason": "POST /staffops/skills/declare needs a skill definition seeded in the caller's own tenant to declare against, which the matrix fixture does not create. Covered directly by SkillAssertionServiceTests and SkillsEvidenceAccessTests."
+    },
+    {
+      "capability": "ViewTeamSkillCoverage",
+      "routes": [{ "method": "GET", "path": "/staffops/skills/coverage" }]
+    },
+    {
+      "capability": "ViewStaffSkillEvidence",
+      "routes": [
+        { "method": "GET", "path": "/staffops/skills/review" },
+        { "method": "GET", "path": "/staffops/skills/continuity/suggestions" }
+      ]
+    },
+    {
+      "capability": "ReviewStaffSkills",
+      "routes": [],
+      "noRouteReason": "POST validate/reject need a real assertion key belonging to another person in the caller's tenant, which the matrix fixture does not create. The GET that lists them is ViewStaffSkillEvidence; the decision itself is covered by SkillAssertionServiceTests."
+    },
+    {
+      "capability": "ViewServiceHealth",
+      "routes": [
+        { "method": "GET", "path": "/staffops/service" },
+        { "method": "GET", "path": "/staffops/service/links" }
+      ]
+    },
+    {
+      "capability": "ReviewRootCause",
+      "routes": [],
+      "noRouteReason": "Confirming or ruling out a root cause is POST-only against a real link key on a real case, which the matrix fixture does not create. Covered directly by SupportCodeLinkServiceTests."
+    },
+    {
+      "capability": "ManageContinuityPlan",
+      "routes": [{ "method": "GET", "path": "/staffops/skills/continuity" }]
+    },
+    {
+      "capability": "RecordProcessingDecision",
+      "routes": [{ "method": "GET", "path": "/staffops/skills/continuity/processing" }]
+    },
+    {
+      "capability": "ManagePlatform",
+      "routes": [{ "method": "GET", "path": "/staffops/platform/tenants" }]
+    }
+  ]
+}

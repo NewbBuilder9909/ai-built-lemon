@@ -1,0 +1,200 @@
+@using ProgrammePulse.Services.ProgrammeOps
+@model JiraTempoReconciliationReport
+@{
+    ViewData["ReportActions"] = true;
+    var message = ViewData["Message"] as string;
+    string Hours(decimal value) => value.ToString("#,0.##");
+    string Share(decimal part, decimal total) => total == 0 ? "" : $"{part / total:P0} of recorded hours";
+    string RunLabel(SourceRunState? run) => run is null ? "No sync recorded"
+        : run.LastRunFailed ? "Last sync failed"
+        : run.IsRunning ? "Sync running"
+        : run.LastPublishedAtUtc is { } at ? $"Last published {at:yyyy-MM-dd HH:mm} UTC"
+        : "Never published";
+}
+<partial name="~/Views/StaffOps/Reporting/_ReportingNav.cshtml" model="@("jira-tempo")" />
+<p class="ops-page-lede">
+    Jira issues set against the time recorded in Tempo, for @Model.From.ToString("d MMM yyyy") to @Model.To.ToString("d MMM yyyy").
+    Tempo is the only time source for Jira work, so every hour is counted once.
+</p>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <p class="ops-banner ops-banner--error" role="alert">@message</p>
+}
+
+<form method="get" class="ops-filter-bar" aria-label="Reporting period">
+    <div class="ops-filter-bar__field">
+        <label for="from">@Localizer["From"]</label>
+        <input type="date" id="from" name="from" value="@Model.From.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="ops-filter-bar__field">
+        <label for="to">@Localizer["To"]</label>
+        <input type="date" id="to" name="to" value="@Model.To.ToString("yyyy-MM-dd")" />
+    </div>
+    <button type="submit" class="ops-button ops-button--secondary">Show period</button>
+</form>
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Sources</h2>
+    <div class="ops-table-scroll">
+        <table class="ops-table">
+            <caption class="ops-visually-hidden">Which of Jira and Tempo this organisation has data from, and when each last synced</caption>
+            <thead><tr><th scope="col">Source</th><th scope="col">Data</th><th scope="col">Sync</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Jira Cloud</td>
+                    <td>@(Model.HasJira ? "Issues synced" : Model.Jira is not null ? "Connected for identity only, no issues" : "Not connected")</td>
+                    <td>@(Model.HasJira || Model.Jira is not null ? RunLabel(Model.Jira) : "—")</td>
+                </tr>
+                <tr>
+                    <td>Tempo Timesheets</td>
+                    <td>@(Model.HasTempo ? "Worklogs synced" : "Not connected")</td>
+                    <td>@(Model.HasTempo || Model.Tempo is not null ? RunLabel(Model.Tempo) : "—")</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+@if (Model.Notes.Count > 0)
+{
+    <div class="ops-banner ops-banner--warning" role="status">
+        <strong>Read these figures with</strong>
+        <ul class="ops-validation-list">
+            @foreach (var note in Model.Notes)
+            {
+                <li>@note</li>
+            }
+        </ul>
+    </div>
+}
+
+@if (Model.Hours is { } hours)
+{
+    <section class="ops-kpi-row" aria-label="Where this period's Tempo hours went">
+        <div class="ops-kpi-card">
+            <span class="ops-kpi-card__label">Recorded in Tempo</span>
+            <span class="ops-kpi-card__value">@Hours(hours.Total) h</span>
+            <span class="ops-kpi-card__sublabel">@hours.Worklogs.ToString("N0") worklogs</span>
+        </div>
+        <div class="ops-kpi-card">
+            <span class="ops-kpi-card__label">Linked to a synced issue</span>
+            <span class="ops-kpi-card__value">@Hours(hours.Linked) h</span>
+            <span class="ops-kpi-card__sublabel">@Share(hours.Linked, hours.Total)</span>
+        </div>
+        <div class="ops-kpi-card@(hours.IssueNotSynced > 0 ? " ops-kpi-card--alert" : "")">
+            <span class="ops-kpi-card__label">Issue not synced</span>
+            <span class="ops-kpi-card__value">@Hours(hours.IssueNotSynced) h</span>
+            <span class="ops-kpi-card__sublabel">@Share(hours.IssueNotSynced, hours.Total)</span>
+        </div>
+        <div class="ops-kpi-card@(hours.NoIssue > 0 ? " ops-kpi-card--alert" : "")">
+            <span class="ops-kpi-card__label">No issue recorded</span>
+            <span class="ops-kpi-card__value">@Hours(hours.NoIssue) h</span>
+            <span class="ops-kpi-card__sublabel">@Share(hours.NoIssue, hours.Total)</span>
+        </div>
+        <div class="ops-kpi-card@(hours.WithoutPerson > 0 ? " ops-kpi-card--alert" : "")">
+            <span class="ops-kpi-card__label">Person not matched</span>
+            <span class="ops-kpi-card__value">@Hours(hours.WithoutPerson) h</span>
+            <span class="ops-kpi-card__sublabel">@Share(hours.WithoutPerson, hours.Total)</span>
+        </div>
+    </section>
+}
+
+@if (Model.HasJira)
+{
+    <section class="ops-panel">
+        <div class="ops-panel__header">
+            <h2 class="ops-panel__heading">Synced Jira projects</h2>
+            <span class="ops-panel__meta">@Localizer["Hours.AllInHours"]</span>
+        </div>
+        @if (Model.HasTempo)
+        {
+            <p>
+                Hours are this period's. Estimate figures compare each issue's original estimate with all the time ever recorded
+                against it, because an overrun is cumulative. Story points are never treated as hours.
+            </p>
+        }
+        @if (Model.Projects.Count == 0)
+        {
+            <p class="ops-empty-state">No Jira issues synced yet.</p>
+        }
+        else
+        {
+            <div class="ops-table-scroll">
+                <table class="ops-table">
+                    <caption class="ops-visually-hidden">Issues, open issues, period hours and estimate overruns for each synced Jira project</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Project</th>
+                            <th scope="col">Issues</th>
+                            <th scope="col">Open</th>
+                            @* Time columns only with a time source: without Tempo they would be zeros that read as healthy. *@
+                            @if (Model.HasTempo)
+                            {
+                                <th scope="col">Hours this period</th>
+                                <th scope="col">Issues with time this period</th>
+                                <th scope="col">Open, no time ever</th>
+                                <th scope="col">Over estimate</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var project in Model.Projects)
+                        {
+                            <tr>
+                                <td>@project.Project</td>
+                                <td>@project.Issues.ToString("N0")</td>
+                                <td>@project.OpenIssues.ToString("N0")</td>
+                                @if (Model.HasTempo)
+                                {
+                                    <td>@Hours(project.PeriodHours)</td>
+                                    <td>@project.IssuesWithPeriodTime.ToString("N0")</td>
+                                    <td>@(project.OpenIssuesWithNoTimeRecorded?.ToString("N0") ?? "—")</td>
+                                    <td>@project.OverEstimate.ToString("N0") of @project.EstimatedIssuesWithTime.ToString("N0") estimated with time</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+}
+
+@if (Model.HasTempo)
+{
+    <section class="ops-panel">
+        <h2 class="ops-panel__heading">Hours against issues that aren't synced</h2>
+        <p>
+            Tempo recorded these hours against Jira issues outside the synced projects, so they sit outside every
+            project figure above. Each is a Jira issue id, which Jira's search finds with <code>id = …</code>.
+        </p>
+        @if (Model.UnlinkedIssues.Count == 0)
+        {
+            <p class="ops-empty-state">None in this period.</p>
+        }
+        else
+        {
+            <div class="ops-table-scroll">
+                <table class="ops-table">
+                    <caption class="ops-visually-hidden">Jira issues outside the synced projects, with the Tempo hours recorded against each this period</caption>
+                    <thead><tr><th scope="col">Jira issue id</th><th scope="col">Worklogs</th><th scope="col">Hours</th></tr></thead>
+                    <tbody>
+                        @foreach (var issue in Model.UnlinkedIssues)
+                        {
+                            <tr>
+                                <td>@issue.IssueId</td>
+                                <td>@issue.Worklogs.ToString("N0")</td>
+                                <td>@Hours(issue.Hours)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (Model.MoreUnlinkedIssues > 0)
+            {
+                <p class="ops-empty-state">And @Model.MoreUnlinkedIssues.ToString("N0") more issues, @Hours(Model.MoreUnlinkedHours) hours between them.</p>
+            }
+        }
+    </section>
+}

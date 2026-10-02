@@ -1,0 +1,27 @@
+@model OperationsHubDashboardViewModel
+
+<section class="ops-kpi-row" aria-label="Key performance indicators">
+    @foreach (var card in Model.KpiCards)
+    {
+        <partial name="~/Views/OperationsHub/Partials/_KpiCard.cshtml" model="card" />
+    }
+</section>
+
+<section class="ops-panel" aria-labelledby="status-summary-heading">
+    <h2 id="status-summary-heading" class="ops-panel__heading">@Localizer["Status Summary"]</h2>
+    <ul class="ops-status-summary">
+        @foreach (var item in Model.StatusSummary.Items)
+        {
+            <li class="ops-status-summary__item">
+                <span class="ops-chip @item.CssClass">@Localizer[item.Label]</span>
+                <span class="ops-status-summary__count">@item.Count</span>
+                <span class="ops-status-summary__percent">@(item.PercentOfTotal)%</span>
+            </li>
+        }
+    </ul>
+</section>
+
+<div class="ops-two-column">
+    <partial name="~/Views/OperationsHub/Partials/_PipelinePanel.cshtml" model="Model.Pipeline" />
+    <partial name="~/Views/OperationsHub/Partials/_ActivityFeed.cshtml" model="Model.RecentActivity" />
+</div>

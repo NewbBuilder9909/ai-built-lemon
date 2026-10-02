@@ -1,0 +1,51 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // Dev Kit's launcher. Resolves the project through Dev Kit's
+            // project-system server, so it stops working the moment that
+            // server dies ("Cannot find an instance of the
+            // Microsoft.VisualStudio.ProjectSystem.Server.IComponentExportsService
+            // service"). Use the config below when that happens.
+            "name": "Run ProgrammePulse (Dev Kit)",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/ProgrammePulse.csproj"
+        },
+        {
+            // Dev Kit-independent. "coreclr" is vsdbg, shipped by the base
+            // ms-dotnettools.csharp extension, and it attaches to an already
+            // built DLL — no project system, no solution parsing. Debugging
+            // and breakpoints keep working with Dev Kit completely broken.
+            // Keep this as the fallback for any Dev Kit outage.
+            "name": "Run ProgrammePulse (no Dev Kit)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/Debug/net10.0/ProgrammePulse.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            // Umbraco's boot is slow enough that the browser must wait for the
+            // real "Now listening on" line rather than a fixed delay.
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s"
+            }
+        },
+        {
+            // Attach to a site already started from the terminal
+            // (`dotnet run`, or the "watch" task). Survives a Dev Kit outage
+            // and avoids re-booting Umbraco just to attach a debugger.
+            "name": "Attach to running ProgrammePulse",
+            "type": "coreclr",
+            "request": "attach",
+            "processName": "ProgrammePulse"
+        }
+    ]
+}

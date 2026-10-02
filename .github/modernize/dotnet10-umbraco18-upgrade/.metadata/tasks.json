@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Modernization tasks for the current .NET 10 / Umbraco 18 app baseline, focused on upgrade hygiene, version alignment, validation, and compatibility checks.",
+  "tasks": [
+    {
+      "id": "001-version-baseline-audit",
+      "type": "upgrade",
+      "description": "Baseline .NET 10 / Umbraco 18 compatibility audit",
+      "requirements": "Confirm the repo is intentionally on .NET SDK 10.0.100, target framework net10.0, and Umbraco 18.2.0, and capture any dependency drift or compatibility risks before making further changes.",
+      "dependencies": [],
+      "skills": [
+        { "name": "dotnet-version-upgrade", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "passUnitTests": "true",
+        "passViewChecks": "true"
+      }
+    },
+    {
+      "id": "002-version-alignment-hygiene",
+      "type": "upgrade",
+      "description": "Align package versions and dependency hygiene",
+      "requirements": "Review and normalize central package versions, Umbraco runtime alignment, ICU configuration, and direct dependency health without widening the scope beyond the recommended upgrade path.",
+      "dependencies": ["001-version-baseline-audit"],
+      "skills": [
+        { "name": "dotnet-package-hygiene", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "passUnitTests": "true",
+        "passViewChecks": "true"
+      }
+    },
+    {
+      "id": "003-build-test-view-validation",
+      "type": "validate",
+      "description": "Run build, test, and Razor validation for the current app baseline",
+      "requirements": "Execute restore, build, test, and the repository view-validation script to prove the app remains healthy and that no hidden Razor regressions are being missed.",
+      "dependencies": ["002-version-alignment-hygiene"],
+      "skills": [
+        { "name": "dotnet-build-validation", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "passUnitTests": "true",
+        "passViewChecks": "true"
+      }
+    },
+    {
+      "id": "004-runtime-compatibility-checks",
+      "type": "validate",
+      "description": "Verify runtime and Umbraco compatibility",
+      "requirements": "Check startup guards, environment-specific configuration, health endpoints, and custom middleware or security assumptions to ensure the current .NET 10 / Umbraco 18 baseline is compatibility-safe.",
+      "dependencies": ["003-build-test-view-validation"],
+      "skills": [
+        { "name": "umbraco-compatibility-check", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "passUnitTests": "true",
+        "passViewChecks": "true"
+      }
+    },
+    {
+      "id": "005-release-readiness-gate",
+      "type": "upgrade",
+      "description": "Final upgrade readiness and release gate",
+      "requirements": "Review the project against the current security, validation, and compatibility checks and confirm the app is ready to remain on the supported .NET 10 / Umbraco 18 baseline or proceed to a later follow-on modernization.",
+      "dependencies": ["004-runtime-compatibility-checks"],
+      "skills": [
+        { "name": "dotnet-release-readiness", "location": "builtin" }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "passUnitTests": "true",
+        "passViewChecks": "true"
+      }
+    }
+  ],
+  "metadata": {
+    "language": "dotnet",
+    "planName": "dotnet10-umbraco18-upgrade",
+    "projectName": "ProgrammePulse",
+    "createdAt": "2026-09-23T00:00:00Z",
+    "version": "1.0"
+  }
+}

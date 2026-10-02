@@ -1,0 +1,16 @@
+@model KpiCardViewModel
+
+<div class="ops-kpi-card@(Model.NeedsAttention ? " ops-kpi-card--alert" : "")">
+    <span class="ops-kpi-card__label">@Localizer[Model.Label]</span>
+    <span class="ops-kpi-card__value">@Model.Value</span>
+    @if (Model.Denominator is { } outOf && Model.DenominatorKey is { } key)
+    {
+        <span class="ops-kpi-card__sublabel">@Localizer[key, outOf]</span>
+        @* The meter repeats the figure beside it, so it is hidden from screen readers. *@
+        <span class="ops-share ops-share--thin" aria-hidden="true"><span class="ops-share__fill" style="--share: @Model.SharePercent"></span></span>
+    }
+    @if (Model.SubLabel is not null)
+    {
+        <span class="ops-kpi-card__sublabel">@Model.SubLabel</span>
+    }
+</div>

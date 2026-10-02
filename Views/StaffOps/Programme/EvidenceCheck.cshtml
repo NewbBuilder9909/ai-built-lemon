@@ -1,0 +1,254 @@
+@using ProgrammePulse.Controllers
+@using ProgrammePulse.Services.ProgrammeOps
+@model EvidenceCheckPage
+@*
+    The Review: the answer, then the few things to act on, then everything
+    else folded away. Verdict and projects first; the top findings with the
+    owner last week's review gave them; all findings, movement since the last
+    review and how it is all worked out sit behind disclosures.
+*@
+@{
+    var report = Model.Report;
+    var canRecord = Model.CanRecord;
+    ViewData["StaffNames"] = Model.StaffNames;
+    const int RecordsShown = 25;
+    var gaps = report.Findings.Where(f => f.Category == EvidenceFindingCategory.EvidenceGap).ToList();
+    var exceptions = report.Findings.Where(f => f.Category == EvidenceFindingCategory.DeliveryException).ToList();
+    var top = EvidenceTopFindings.Rank(report, Model.SinceLastReview);
+    var hasData = report.Readiness != EvidenceReadiness.NoData;
+
+    var scope = report.Scope!;
+    var picker = Model.ScopePicker;
+    ViewData["ReportActions"] = true;
+    ViewData["ExportUrl"] = $"/staffops/programme/evidence-check/export?{StaffEvidenceCheckController.Query(scope)}";
+    var scopeOpen = !string.IsNullOrWhiteSpace(Model.ScopeError);
+    string Anchor(string key) => "finding-" + key;
+}
+@if (Model.NothingToRecord)
+{
+    <p class="ops-banner ops-banner--info" role="status">There is nothing to record in this scope yet: import a work-items file or run a sync first.</p>
+}
+@if (!string.IsNullOrWhiteSpace(Model.ScopeError))
+{
+    <p class="ops-banner ops-banner--error" role="alert">@Model.ScopeError Showing the default scope instead.</p>
+}
+
+<section class="ops-panel ops-scope" aria-label="What this check covers">
+    <details open="@scopeOpen">
+        <summary class="ops-panel__summary">
+            <h2 class="ops-panel__heading">@scope.Label, @scope.PeriodFrom.ToString("d MMM") to @scope.PeriodTo.ToString("d MMM yyyy")</h2>
+            <span class="ops-panel__meta">@(scope.ExtractedOn is { } extractedOn ? $"Data extracted {extractedOn:d MMM yyyy}" : "Extract date not given") · Change</span>
+        </summary>
+        <form method="get" class="ops-filter-bar" aria-label="Review scope">
+            <div class="ops-filter-bar__field">
+                <label for="scope-programme">Programme</label>
+                <select id="scope-programme" name="programmeKey">
+                    <option value="">All programmes</option>
+                    @foreach (var option in picker?.Programmes ?? [])
+                    {
+                        <option value="@option.Key" selected="@(option.Key == scope.ProgrammeKey)">@option.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="scope-customer">Customer</label>
+                <select id="scope-customer" name="customerKey">
+                    <option value="">All customers</option>
+                    @foreach (var option in picker?.Customers ?? [])
+                    {
+                        <option value="@option.Key" selected="@(option.Key == scope.CustomerKey)">@option.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="scope-from">From</label>
+                <input id="scope-from" name="from" type="date" value="@scope.PeriodFrom.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="scope-to">To</label>
+                <input id="scope-to" name="to" type="date" value="@scope.PeriodTo.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="ops-filter-bar__field">
+                <label for="scope-extracted">Data extracted on</label>
+                <input id="scope-extracted" name="extractedOn" type="date" value="@scope.ExtractedOn?.ToString("yyyy-MM-dd")" />
+            </div>
+            <button type="submit" class="ops-button ops-button--secondary">Check</button>
+        </form>
+    </details>
+</section>
+
+<section class="ops-panel" aria-labelledby="verdict-heading">
+    <h2 class="ops-panel__heading" id="verdict-heading">Can this period's delivery report be trusted?</h2>
+    <div class="ops-verdict@(hasData ? "" : " ops-verdict--single")">
+        <div class="ops-verdict__main">
+            @if (!hasData)
+            {
+                <p class="ops-banner ops-banner--info" role="status">@report.ReadinessReason</p>
+            }
+            else
+            {
+                <partial name="~/Views/StaffOps/Programme/_ReadinessBand.cshtml" model="@((report.Readiness, "This check"))" />
+                <p class="ops-verdict__line">@StaffEvidenceCheckController.Label(report.Readiness).</p>
+                <p>@report.ReadinessReason</p>
+            }
+            @foreach (var note in report.SourceNotes)
+            {
+                <p class="ops-banner ops-banner--warning">@note</p>
+            }
+            <p class="ops-panel__meta">
+                @report.WorkItems.ToString("N0") work items and @report.RecordedHours.ToString("N1") hours, checked @report.AsOfUtc.ToString("d MMM yyyy HH:mm") UTC.
+            </p>
+            @if (canRecord && hasData)
+            {
+                <form method="post" action="/staffops/programme/evidence-check/record" class="ops-filter-bar">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="programmeKey" value="@scope.ProgrammeKey" />
+                    <input type="hidden" name="customerKey" value="@scope.CustomerKey" />
+                    <input type="hidden" name="from" value="@scope.PeriodFrom.ToString("yyyy-MM-dd")" />
+                    <input type="hidden" name="to" value="@scope.PeriodTo.ToString("yyyy-MM-dd")" />
+                    <input type="hidden" name="extractedOn" value="@scope.ExtractedOn?.ToString("yyyy-MM-dd")" />
+                    <div class="ops-filter-bar__field">
+                        <label for="record-decision">What this review should decide (optional)</label>
+                        <input id="record-decision" name="decision" type="text" maxlength="@EvidenceScope.MaxDecisionLength"
+                               placeholder="e.g. Can we tell the client the October release is on track?" />
+                    </div>
+                    <button type="submit" class="ops-button">Record for the review</button>
+                </form>
+            }
+        </div>
+        @if (hasData)
+        {
+            <div>
+                <partial name="~/Views/StaffOps/Programme/_ProjectBands.cshtml" model="report.Projects" />
+            </div>
+        }
+    </div>
+</section>
+
+@if (hasData)
+{
+    <section class="ops-panel" aria-labelledby="top-heading">
+        <div class="ops-panel__header">
+            <h2 class="ops-panel__heading" id="top-heading">Look at these first</h2>
+            @if (Model.LastReview is { } last)
+            {
+                <a href="/staffops/programme/evidence-check/reviews/@last.ReviewKey">Give owners in the last review</a>
+            }
+        </div>
+        @if (top.Count == 0)
+        {
+            <p class="ops-empty-state">No findings. The figures can be presented as they are.</p>
+        }
+        else
+        {
+            <ol class="ops-top-findings">
+                @foreach (var item in top)
+                {
+                    var finding = item.Finding;
+                    var owner = item.OwnerStaffKey is { } key ? Model.StaffNames.GetValueOrDefault(key, "former staff member") : null;
+                    <li class="ops-top-finding@(EvidenceTopFindings.BlocksTheReport(finding) || item.DecisionBroken ? " ops-top-finding--alert" : "")">
+                        <span class="ops-top-finding__figure">@finding.Numerator.ToString("#,0.##")<span class="ops-top-finding__of"> of @finding.Denominator.ToString("#,0.##") @finding.Unit</span></span>
+                        <span class="ops-top-finding__body">
+                            <a class="ops-top-finding__title" href="#@Anchor(finding.Key)">@finding.Title</a>
+                            <span class="ops-top-finding__meta">
+                                @StaffEvidenceCheckController.CategoryLabel(finding.Category)
+                                @if (EvidenceTopFindings.BlocksTheReport(finding))
+                                {
+                                    <text> · makes the report not decision-ready</text>
+                                }
+                                @if (item.DecisionBroken)
+                                {
+                                    <text> · last review's decision didn't hold</text>
+                                }
+                            </span>
+                        </span>
+                        <span class="ops-top-finding__owner@(owner is null ? " ops-top-finding__owner--none" : "")">@(owner is null ? "No owner" : owner)</span>
+                    </li>
+                }
+            </ol>
+            @if (Model.LastReview is null)
+            {
+                <p class="ops-empty-state">Record this check before the review meeting to give each finding an owner. Next week's check of the same scope then shows whether they were fixed.</p>
+            }
+        }
+    </section>
+
+    @if (Model.SinceLastReview is { } since)
+    {
+        <section class="ops-panel" aria-label="Since the last recorded review">
+            <details>
+                <summary class="ops-panel__summary">
+                    <h2 class="ops-panel__heading">Since @since.Previous.RecordedAtUtc.ToString("d MMM"): @since.Improved better, @since.Worse new or worse@(since.BrokenCommitments > 0 ? $", {since.BrokenCommitments} decision(s) didn't hold" : "")</h2>
+                </summary>
+                <p class="ops-empty-state">
+                    Readiness was <strong>@StaffEvidenceCheckController.Label(since.PreviousReadiness)</strong>, now
+                    <strong>@StaffEvidenceCheckController.Label(since.CurrentReadiness)</strong>.
+                    <a href="/staffops/programme/evidence-check/reviews/@since.Previous.ReviewKey">Open that review</a>.
+                </p>
+                <partial name="~/Views/StaffOps/Programme/_EvidenceComparison.cshtml" model="since" view-data="ViewData" />
+            </details>
+        </section>
+    }
+
+    <section class="ops-panel" aria-label="All findings">
+        <details>
+            <summary class="ops-panel__summary">
+                <h2 class="ops-panel__heading">All findings (@report.Findings.Count)</h2>
+                <span class="ops-panel__meta">@gaps.Count evidence @(gaps.Count == 1 ? "gap" : "gaps") · @exceptions.Count delivery @(exceptions.Count == 1 ? "exception" : "exceptions")</span>
+            </summary>
+            @foreach (var (heading, findings) in new[] { ("Evidence gaps: fix, or state them beside the figures", gaps), ("Delivery exceptions: each needs an owner and a decision", exceptions) })
+            {
+                @if (findings.Count > 0)
+                {
+                    <h3>@heading</h3>
+                    @foreach (var finding in findings)
+                    {
+                        var marked = finding.Category == EvidenceFindingCategory.EvidenceGap && finding.Severity == EvidenceFindingSeverity.High;
+                        <details class="ops-finding" id="@Anchor(finding.Key)">
+                            <summary>
+                                <span class="ops-finding__title">@finding.Title</span>
+                                <partial name="~/Views/StaffOps/Programme/_FindingShare.cshtml" model="@((finding.Numerator, finding.Denominator, marked))" />
+                                <span class="ops-finding__figure">@finding.Numerator.ToString("#,0.##") of @finding.Denominator.ToString("#,0.##") @finding.Unit</span>
+                                <span class="ops-chip chip-severity--@finding.Severity.ToString().ToLowerInvariant()">@finding.Severity.ToString().ToLowerInvariant()</span>
+                            </summary>
+                            <p class="ops-empty-state">@finding.WhyItMatters</p>
+                            @if (finding.Records.Count > 0)
+                            {
+                                <div class="ops-table-scroll">
+                                    <table class="ops-table">
+                                        <caption class="ops-visually-hidden">Source records behind: @finding.Title</caption>
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Project</th>
+                                                <th scope="col">Source record</th>
+                                                <th scope="col">Item</th>
+                                                <th scope="col">Detail</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var record in finding.Records.Take(RecordsShown))
+                                            {
+                                                <tr>
+                                                    <td>@record.Project</td>
+                                                    <td>@record.Source @record.ExternalId</td>
+                                                    <td>@record.Title</td>
+                                                    <td>@record.Detail</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                @if (finding.Records.Count > RecordsShown)
+                                {
+                                    <p class="ops-empty-state">Showing @RecordsShown of @finding.Records.Count records. The CSV has them all.</p>
+                                }
+                            }
+                        </details>
+                    }
+                }
+            }
+        </details>
+    </section>
+}
+
+<partial name="~/Views/StaffOps/Programme/_EvidenceMethod.cshtml" />

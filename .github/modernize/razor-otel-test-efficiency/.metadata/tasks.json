@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Executable modernization tasks for Razor validation, OpenTelemetry security, and test/build efficiency.",
+  "tasks": [
+    {
+      "type": "transform",
+      "id": "001-transform-razor-view-validation-gate",
+      "description": "Make Razor view validation a normal build and CI gate while preserving the Umbraco exception.",
+      "reason": "A normal build intentionally skips Razor compilation, allowing view defects to reach runtime unless the documented check is enforced.",
+      "requirements": "Update only the Razor gate surfaces: ProgrammePulse.csproj, scripts/check-views.ps1, .github/workflows/ci.yml, .vscode/tasks.json, and docs/dev-environment.md. Preserve RazorCompileOnBuild=false and RazorCompileOnPublish=false for normal builds, preserve the conditional CheckRazorViews=true override, and preserve exactly Views/GardnerPMBlog.cshtml as the generated InMemoryAuto-model exclusion. Keep the script's exclusion-list guard and its explicit dotnet build -p:CheckRazorViews=true check. Make the gate normal in the documented build/CI workflow without making the check output publishable or removing the render-test second gate. Resolve any failures encountered during execution before completion.",
+      "dependencies": [],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "transform",
+      "id": "002-transform-separate-unit-and-integration-validation",
+      "description": "Separate fast unit tests from SQL-backed startup and render tests while retaining full coverage.",
+      "reason": "The single test command forces fast feedback to wait for WebApplicationFactory startup and SQL-backed integration work.",
+      "requirements": "Update the test project and existing test/CI documentation surfaces only as needed: ProgrammePulse.Tests/ProgrammePulse.Tests.csproj, the existing ProgrammePulse.Tests unit and Integration files, .github/workflows/ci.yml, .vscode/tasks.json, docs/dev-environment.md, and CLAUDE.md. Preserve every existing test and the xUnit conventions. Keep startup-heavy tests under ProgrammePulse.Tests/Integration, including render tests using [Collection(IntegrationTestCollection.Name)] and ProgrammePulseWebApplicationFactory. Keep PP_TEST_SQL_CONNECTION and PP_REQUIRE_SQL_TESTS for integration/render execution. Provide independently runnable unit and integration/render commands, and run both in CI so coverage is not reduced. Resolve test/build failures during execution before completion.",
+      "dependencies": ["001-transform-razor-view-validation-gate"],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "security",
+      "id": "003-security-remediate-opentelemetry-api-advisory-and-commit",
+      "description": "Remediate the OpenTelemetry.Api NU1902 advisory and commit only the intended modernization changes.",
+      "reason": "The centrally managed Azure Monitor OpenTelemetry dependency chain currently exposes a known advisory, and CI already has a repository-standard transitive vulnerability audit.",
+      "requirements": "Use Directory.Packages.props as the central version authority for Azure.Monitor.OpenTelemetry.AspNetCore and ProgrammePulse.csproj as its consumer. Resolve the OpenTelemetry.Api NU1902 advisory through the centrally managed Azure Monitor/OpenTelemetry dependency chain with the smallest compatible change, and add or update an audit/policy check only where it follows existing conventions. Preserve scripts/test-dependency-audit.ps1, which runs dotnet list package --vulnerable --include-transitive --format json and fails on vulnerabilities, and preserve CI evidence at artifacts/security/nuget-vulnerabilities.json. Verify the post-change audit has no vulnerable packages or audit diagnostics, then run the required build and test validations and fix any failures. As the final step, inspect git status and the complete git diff, confirm only intended files from this modernization plan are included, preserve unrelated user changes, and commit the completed work with a descriptive modernization commit message.",
+      "dependencies": ["002-transform-separate-unit-and-integration-validation"],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    }
+  ],
+  "metadata": {
+    "planName": "razor-otel-test-efficiency",
+    "projectName": "ProgrammePulse",
+    "language": "dotnet",
+    "createdAt": "2026-09-23T00:00:00Z",
+    "version": "1.0"
+  }
+}

@@ -1,0 +1,106 @@
+@using ProgrammePulse.Models.SkillsEvidence
+@using ProgrammePulse.Services.SkillsEvidence
+@model ContributionExamplesPage
+
+<p>@Model.StaffName's contribution examples connect a skill claim to work that a reviewer can inspect.
+    Accepting an example confirms its relevance; skill proficiency is reviewed separately.</p>
+<p><a asp-controller="StaffSkills" asp-action="Index">My skills</a></p>
+@if (Model.Error is not null)
+{
+    <p class="ops-banner ops-banner--warning" role="alert">@Model.Error</p>
+}
+@await Html.PartialAsync("~/Views/StaffOps/Skills/Examples/_Coverage.cshtml", Model.Coverage)
+
+@if (Model.CanDeclare)
+{
+    <section class="ops-panel">
+        <h2>Link a contribution to a skill</h2>
+        @if (Model.SourcePage > 1 || Model.HasMoreSources)
+        {
+            <nav class="ops-pager" aria-label="Contribution choices">
+                @if (Model.SourcePage > 1)
+                {
+                    <a asp-action="Index" asp-route-page="@Model.Page" asp-route-sourcePage="@(Model.SourcePage - 1)">Newer contributions</a>
+                }
+                <span>Contribution page @Model.SourcePage</span>
+                @if (Model.HasMoreSources)
+                {
+                    <a asp-action="Index" asp-route-page="@Model.Page" asp-route-sourcePage="@(Model.SourcePage + 1)">Older contributions</a>
+                }
+            </nav>
+            <p>Choose a contribution page before filling in the form. Changing pages clears an unfinished form.</p>
+        }
+        @if (Model.Assertions.Count == 0 || Model.Sources.Count == 0)
+        {
+            <p>No eligible skill assertion or contribution is available on this page. To add an example, you need a current skill assertion and a contribution mapped to you from an active, selected repository.
+                Declare a skill on My skills, or ask an administrator to check your source connection and account mapping.</p>
+        }
+        else
+        {
+            <form asp-controller="StaffContributionExamples" asp-action="Submit" method="post">
+                <input asp-for="Form.SourcePage" type="hidden" />
+                <div asp-validation-summary="All" role="alert"></div>
+                <p><label asp-for="Form.AssertionKey">Skill assertion</label>
+                    <select asp-for="Form.AssertionKey" required>
+                        <option value="">Choose a skill</option>
+                        @foreach (var assertion in Model.Assertions)
+                        {
+                            <option value="@assertion.Key">@assertion.Name — @assertion.Proficiency (@assertion.Status)</option>
+                        }
+                    </select>
+                </p>
+                <p><label asp-for="Form.EvidenceKey">Contribution</label>
+                    <select asp-for="Form.EvidenceKey" required>
+                        <option value="">Choose an example</option>
+                        @foreach (var source in Model.Sources)
+                        {
+                            <option value="@source.EvidenceKey">@source.OccurredAtUtc.ToString("yyyy-MM-dd") · @source.Repository · @source.Role@(source.AuthorshipUnverified ? " (authorship not verified)" : "") · @(source.Title ?? source.ExternalId)</option>
+                        }
+                    </select>
+                </p>
+                <p>The chooser shows up to 100 eligible contribution records per page, newest first. Roles are preserved: reviewing and authoring are different contributions.</p>
+                <p><label asp-for="Form.DemonstrationNote">What did you demonstrate?</label>
+                    <textarea asp-for="Form.DemonstrationNote" required maxlength="1000" rows="4" aria-describedby="demonstration-help"></textarea>
+                    <span asp-validation-for="Form.DemonstrationNote"></span>
+                </p>
+                <p id="demonstration-help">Describe your decisions, verification or learning. Explain your own role, including how you checked any AI output.</p>
+                <p><label asp-for="Form.AiTool">AI tool involved (optional)</label>
+                    <input asp-for="Form.AiTool" maxlength="100" aria-describedby="ai-help" />
+                </p>
+                <p id="ai-help">This records your declaration about this contribution. Leave blank if unknown. It does not claim all participants used the tool or measure generated code.</p>
+                <p><label asp-for="Form.AiWorkflow">Assistance workflow</label>
+                    <select asp-for="Form.AiWorkflow" asp-items="Html.GetEnumSelectList<AiAssistanceWorkflow>()"></select>
+                </p>
+                <button type="submit">Submit example for review</button>
+            </form>
+        }
+    </section>
+}
+
+<section class="ops-panel">
+    <h2>Linked examples</h2>
+    @if (Model.Examples.Count == 0)
+    {
+        <p>No examples on this page. An empty list does not mean no work was done.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll"><table class="ops-table">
+            <caption>Contribution examples for @Model.StaffName</caption>
+            <thead><tr><th scope="col">Skill</th><th scope="col">Status</th><th scope="col">Declared AI assistance</th><th scope="col">Updated (UTC)</th><th scope="col">Review</th></tr></thead>
+            <tbody>
+            @foreach (var row in Model.Examples)
+            {
+                <tr>
+                    <td>@(Model.Assertions.FirstOrDefault(a => a.Key == row.AssertionKey)?.Name ?? "Previous skill revision")</td>
+                    <td>@ProgrammePulse.Services.Shared.DisplayText.Words(row.Status)</td>
+                    <td>@(row.AiTool ?? "Unknown")</td>
+                    <td>@row.RecordedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td><a asp-controller="StaffContributionExamples" asp-action="Detail" asp-route-linkKey="@row.LinkKey">Open example and history</a></td>
+                </tr>
+            }
+            </tbody>
+        </table></div>
+    }
+    @await Html.PartialAsync("~/Views/StaffOps/_Pager.cshtml", new ProgrammePulse.Services.Shared.PageLinks(Model.Page, Model.Page > 1, Model.HasMore))
+</section>

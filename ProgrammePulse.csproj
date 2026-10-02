@@ -1,0 +1,115 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!--
+      This folder contains full copies of the repository that are NOT part of
+      this project and must never be globbed into it:
+        artifacts/**  - build/scan evidence, including whole-tree scan copies
+                        (artifacts/security/*-scan).
+        .claude/**    - agent worktrees. .claude/worktrees/<branch> is a live
+                        `git worktree` checkout with its own ProgrammePulse.csproj
+                        and the same assembly name as this one.
+        */bin/**, */obj/** - build output of any project nested in this folder.
+                        Git moves only tracked files, so renaming a nested
+                        project (HwbOperationsHub.Tests -> ProgrammePulse.Tests)
+                        leaves its old obj/ behind on every existing checkout;
+                        its generated AssemblyInfo and GlobalUsings then fail
+                        this build with CS0579/CS0246.
+      Each holds duplicate .cs files; globbing any of them produces thousands of
+      CS0101 duplicate-type errors. .claude/ is currently also covered by the
+      SDK's implicit `**/.*/**` dot-directory exclusion, but relying on that is
+      how this breaks silently if the SDK default changes or a worktree is ever
+      created at a non-dotted path. Declared explicitly instead.
+      See docs/dev-environment.md.
+    -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);artifacts/**;.claude/**;*/bin/**;*/obj/**</DefaultItemExcludes>
+    <UserSecretsId>programmepulse-user-secrets</UserSecretsId>
+    <CompressionEnabled>false</CompressionEnabled> <!-- Disable compression. E.g. for umbraco backoffice files. These files should be precompressed by node and not let dotnet handle it -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets"/>
+    <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs"/>
+    <PackageReference Include="Azure.Security.KeyVault.Certificates"/>
+    <PackageReference Include="Azure.Storage.Blobs"/>
+    <PackageReference Include="Azure.Storage.Files.Shares"/>
+    <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore"/>
+    <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore"/>
+    <PackageReference Include="Umbraco.Cms"/>
+    <PackageReference Include="Umbraco.Cms.DevelopmentMode.Backoffice"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- ProgrammePulse.Tests is a separate project nested in this folder;
+         without this, the SDK's default **/*.cs glob would compile its files
+         into this project too. -->
+    <Compile Remove="ProgrammePulse.Tests\**" />
+    <Content Remove="ProgrammePulse.Tests\**" />
+    <None Remove="ProgrammePulse.Tests\**" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!--
+      Opt-in to app-local ICU to ensure consistent globalization APIs across different platforms.
+      Default mirrors prior behaviour introduced in https://github.com/umbraco/Umbraco-CMS/pull/11276: enabled unless building on macOS without an explicit RuntimeIdentifier.
+      To override:
+        * Build/publish:  dotnet publish -p:UmbracoUseAppLocalIcu=false
+        * Post-publish:   edit System.Globalization.AppLocalIcu in the published *.runtimeconfig.json
+      Note: DOTNET_SYSTEM_GLOBALIZATION_APPLOCALICU is only honored when AppLocalIcu is absent from runtimeconfig.json
+      (verified on .NET 10) — the general .NET 9 env-var-precedence rule does not apply to this knob, since it is
+      resolved by the native host before the CLR boots. Use one of the two override paths above instead.
+      Keep UmbracoAppLocalIcuVersion in sync with the referenced Microsoft.ICU.ICU4C.Runtime package version.
+    -->
+    <UmbracoUseAppLocalIcu Condition="'$(UmbracoUseAppLocalIcu)' == '' and ($(RuntimeIdentifier.StartsWith('linux')) or $(RuntimeIdentifier.StartsWith('win')) or ('$(RuntimeIdentifier)' == '' and !$([MSBuild]::IsOSPlatform('osx'))))">true</UmbracoUseAppLocalIcu>
+    <UmbracoUseAppLocalIcu Condition="'$(UmbracoUseAppLocalIcu)' == ''">false</UmbracoUseAppLocalIcu>
+    <UmbracoAppLocalIcuVersion Condition="'$(UmbracoAppLocalIcuVersion)' == ''">72.1.0.3</UmbracoAppLocalIcuVersion>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(UmbracoUseAppLocalIcu)' == 'true'">
+    <PackageReference Include="Microsoft.ICU.ICU4C.Runtime"/>
+    <RuntimeHostConfigurationOption Include="System.Globalization.AppLocalIcu" Value="$(UmbracoAppLocalIcuVersion)" />
+  </ItemGroup>
+
+
+  <PropertyGroup>
+    <!-- Razor files are needed for the backoffice to work correctly -->
+    <CopyRazorGenerateFilesToPublishDirectory>true</CopyRazorGenerateFilesToPublishDirectory>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Remove RazorCompileOnBuild and RazorCompileOnPublish when not using ModelsMode InMemoryAuto -->
+    <RazorCompileOnBuild>false</RazorCompileOnBuild>
+    <RazorCompileOnPublish>false</RazorCompileOnPublish>
+  </PropertyGroup>
+
+  <!--
+    View check (opt-in): `dotnet build -p:CheckRazorViews=true`, or
+    ./scripts/check-views.ps1, or the "check views" VS Code task.
+
+    Because RazorCompileOnBuild is false above, an ordinary build does NOT look
+    at .cshtml files at all — a typo, a renamed view-model property or a
+    deleted helper surfaces only as a runtime 500 on the page. That is the
+    single largest source of "green build, broken page" in this repository.
+
+    This turns Razor compilation back on for a throwaway build so those become
+    build errors. It cannot be on permanently: Umbraco's InMemoryAuto models
+    mode generates ContentModels.* at runtime, so any view bound to a document
+    type cannot compile ahead of time. Exactly one view is in that position
+    (Views/GardnerPMBlog.cshtml, an empty auto-generated doctype stub), so it
+    is excluded here and the other 55 views are fully type-checked. Re-check
+    the exclusion list if a view ever starts using ContentModels/PublishedModels;
+    scripts/check-views.ps1 does that automatically and tells you.
+
+    Output of this build is not publishable. It is a check, not an artifact.
+  -->
+  <PropertyGroup Condition="'$(CheckRazorViews)' == 'true'">
+    <RazorCompileOnBuild>true</RazorCompileOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(CheckRazorViews)' == 'true'">
+    <Content Remove="Views/GardnerPMBlog.cshtml" />
+  </ItemGroup>
+
+</Project>

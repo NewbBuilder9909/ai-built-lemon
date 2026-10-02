@@ -1,0 +1,59 @@
+@model AuditTrailPageViewModel
+
+<partial name="~/Views/StaffOps/Settings/_SettingsNav.cshtml" model="@("audit")" />
+
+<section class="ops-panel">
+    <h2 class="ops-panel__heading">Recent activity</h2>
+    <p class="ops-empty-state">Every change to people, settings, data and reviews, newest first. Entries can't be edited or deleted.</p>
+    @if (Model.Entries.Items.Count == 0 && !Model.Entries.HasPrevious)
+    {
+        <p class="ops-empty-state">No audit entries yet.</p>
+    }
+    else
+    {
+        <div class="ops-table-scroll">
+            <table class="ops-table">
+                <caption class="ops-visually-hidden">Audit trail entries</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">When (UTC)</th>
+                        <th scope="col">Source</th>
+                        <th scope="col">Entity</th>
+                        <th scope="col">Action</th>
+                        <th scope="col">Actor</th>
+                        <th scope="col">Detail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.Entries.Items)
+                    {
+                        <tr>
+                            <td>@row.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            <td>@row.Source</td>
+                            <td>
+                                @ProgrammePulse.Services.Shared.DisplayText.Words(row.EntityType)
+                                <span class="ops-cell-context" title="@row.EntityId">@(row.EntityId is { Length: > 12 } id ? id[..8] + "…" : row.EntityId)</span>
+                            </td>
+                            <td>@ProgrammePulse.Services.Shared.DisplayText.Words(row.Action)</td>
+                            <td>@row.Actor</td>
+                            <td class="ops-table__cell--wrap">
+                                @foreach (var (label, value) in ProgrammePulse.Services.Shared.DisplayText.Fields(row.DetailJson))
+                                {
+                                    <span class="ops-field"><span class="ops-field__label">@label</span> <span class="ops-break">@value</span></span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <partial name="~/Views/StaffOps/_Pager.cshtml" model="Model.Entries.Links" />
+        @if (Model.OlderEntriesNotShown)
+        {
+            <p class="ops-empty-state">
+                This screen shows the newest @Model.DepthLimit.ToString("N0") entries. Older entries are
+                kept in the database and are not shown here.
+            </p>
+        }
+    }
+</section>

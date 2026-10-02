@@ -1,0 +1,39 @@
+@using ProgrammePulse.Models.ExecutiveReview
+@model DecisionQueue
+<a asp-controller="StaffExecutiveReview" asp-action="Index">@Localizer["Review.Title"]</a>
+<form method="get" class="ops-filter-bar">
+    <div class="ops-filter-bar__field">
+        <label for="status">@Localizer["Decision.Status"]</label>
+        <select id="status" name="status">
+            <option value="">@Localizer["Decision.AllStatuses"]</option>
+            @foreach (var status in Enum.GetValues<DecisionStatus>())
+            { <option value="@status" selected="@(Model.Status == status)">@Localizer[$"Decision.Status.{status}"]</option> }
+        </select>
+    </div>
+    <button class="ops-button" type="submit">@Localizer["Decision.Filter"]</button>
+</form>
+<h2>@Localizer["Decision.QueueLimit"]</h2>
+@if (Model.Decisions.Count == 0)
+{
+    <p class="ops-empty-state">@Localizer["Decision.None"]</p>
+}
+else
+{
+    <div class="ops-table-scroll">
+        <table class="ops-table">
+            <thead><tr><th>@Localizer["Decision.Title"]</th><th>@Localizer["Decision.Status"]</th><th>@Localizer["Decision.Evidence"]</th><th>@Localizer["Decision.Due"]</th><th>@Localizer["Decision.FollowUp"]</th></tr></thead>
+            <tbody>
+                @foreach (var decision in Model.Decisions)
+                {
+                    <tr>
+                        <td><a class="review-decision-title" asp-action="Detail" asp-route-decisionKey="@decision.DecisionKey">@decision.Definition.Title</a></td>
+                        <td>@Localizer[$"Decision.Status.{decision.Status}"]</td>
+                        <td>@Localizer[$"Decision.Evidence.{decision.Evidence}"]</td>
+                        <td>@decision.Definition.DueOn.ToString("d")</td>
+                        <td>@(decision.FollowUpOn?.ToString("d") ?? Localizer["Review.Unknown"].Value)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

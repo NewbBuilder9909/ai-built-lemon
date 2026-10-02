@@ -1,0 +1,74 @@
+@using System.Globalization
+@model (IReadOnlyList<ProgrammePulse.Models.ViewModels.ProgrammeOverview.MilestoneStatusViewModel> Milestones, DateTime Today)
+@*
+    Dated milestones on one date axis, with today marked: overdue ones sit
+    left of the line as filled dots, and one whose status can't be read is
+    a hollow diamond, never a filled "late" dot, because nobody knows if it
+    is finished. Every position comes from one scale. The milestone table
+    below it carries the same facts for anyone who can't see the chart.
+*@
+@{
+    var dated = Model.Milestones.Where(m => m.DueDateUtc is not null).ToList();
+    var today = Model.Today.Date;
+    var start = dated.Select(m => m.DueDateUtc!.Value.Date).Append(today).Min().AddDays(-4);
+    var end = dated.Select(m => m.DueDateUtc!.Value.Date).Append(today).Max().AddDays(4);
+    var days = Math.Max(1, (end - start).TotalDays);
+    string At(DateTime date) => Math.Round((date.Date - start).TotalDays / days * 100, 2).ToString(CultureInfo.InvariantCulture) + "%";
+    var months = new List<DateTime>();
+    for (var month = new DateTime(start.Year, start.Month, 1).AddMonths(1); month <= end; month = month.AddMonths(1))
+        months.Add(month);
+    var overdue = dated.Count(m => m.IsOverdue);
+    var unread = dated.Count(m => m.IsPastDueWithUnreadableStatus);
+    var summary = $"{dated.Count} dated milestones from {start.AddDays(4):d MMM} to {end.AddDays(-4):d MMM yyyy}; {overdue} overdue"
+        + (unread > 0 ? $", {unread} past due with a status that can't be read" : "") + ". The table below lists them.";
+}
+@if (dated.Count > 0)
+{
+    <div class="ops-timeline" role="img" aria-label="@summary">
+        <span class="ops-timeline__axis-spacer"></span>
+        <div class="ops-timeline__axis">
+            @foreach (var month in months)
+            {
+                <span style="--at: @At(month)">@month.ToString("d MMM", CultureInfo.CurrentCulture)</span>
+            }
+        </div>
+        <span class="ops-timeline__axis-spacer"></span>
+        @foreach (var milestone in dated)
+        {
+            var due = milestone.DueDateUtc!.Value;
+            var marker = milestone.IsPastDueWithUnreadableStatus ? "unread"
+                : milestone.IsOverdue ? "late"
+                : milestone.IsClosed ? "done"
+                : "next";
+            <span class="ops-timeline__name">@milestone.Title</span>
+            <span class="ops-timeline__track">
+                @foreach (var month in months)
+                {
+                    <span class="ops-timeline__tick" style="--at: @At(month)"></span>
+                }
+                <span class="ops-timeline__today" style="--at: @At(today)"></span>
+                <span class="ops-timeline__marker ops-timeline__marker--@marker" style="--at: @At(due)"></span>
+            </span>
+            <span class="ops-timeline__note">
+                @if (milestone.IsPastDueWithUnreadableStatus)
+                {
+                    @($"{milestone.DaysPastDue} {(milestone.DaysPastDue == 1 ? "day" : "days")} past due; status can't be read")
+                }
+                else if (milestone.IsOverdue)
+                {
+                    @($"{milestone.DaysPastDue} {(milestone.DaysPastDue == 1 ? "day" : "days")} late")
+                }
+                else
+                {
+                    @due.ToString("d MMM", CultureInfo.CurrentCulture)
+                }
+            </span>
+        }
+    </div>
+    <ul class="ops-legend" aria-hidden="true">
+        <li class="ops-key ops-key--dot" style="--key: var(--ops-band-not-ready)">Overdue</li>
+        <li class="ops-key ops-key--ring" style="--key: var(--ops-viz-bar)">Due, or finished (grey)</li>
+        <li class="ops-key ops-key--diamond" style="--key: var(--ops-band-not-ready)">Past due, status can't be read</li>
+        <li class="ops-key ops-key--mark" style="--key: var(--ops-viz-rule)">Today</li>
+    </ul>
+}
