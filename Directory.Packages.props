@@ -10,8 +10,8 @@
     <UmbracoAppLocalIcuVersion Condition="'$(UmbracoAppLocalIcuVersion)' == ''">72.1.0.3</UmbracoAppLocalIcuVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Umbraco.Cms" Version="18.2.0" />
-    <PackageVersion Include="Umbraco.Cms.DevelopmentMode.Backoffice" Version="18.2.0" />
+    <PackageVersion Include="Umbraco.Cms" Version="18.2.1" />
+    <PackageVersion Include="Umbraco.Cms.DevelopmentMode.Backoffice" Version="18.2.1" />
     <PackageVersion Include="Microsoft.ICU.ICU4C.Runtime" Version="$(UmbracoAppLocalIcuVersion)" />
     <PackageVersion Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.5.2" />
     <PackageVersion Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.5.4" />
