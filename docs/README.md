@@ -38,7 +38,7 @@ When a document is added, overtaken or archived, update this page in the same ch
 
 ## Release, security and assurance
 
-[release-readiness.md](release-readiness.md), [security-assurance.md](security-assurance.md), [security/aikido-findings-2026-09-27.md](security/aikido-findings-2026-09-27.md), [mfa-security-runbook.md](mfa-security-runbook.md), [data-governance.md](data-governance.md), [gdpr.md](gdpr.md), and the ITHC pack in [assurance/](assurance/): [ithc-readiness.md](assurance/ithc-readiness.md), [ithc-handover.md](assurance/ithc-handover.md), [finding-template.md](assurance/finding-template.md).
+[release-readiness.md](release-readiness.md), [security-assurance.md](security-assurance.md), [security/aikido-findings-2026-09-27.md](security/aikido-findings-2026-09-27.md), [security/imagesharp-advisories-2026-10.md](security/imagesharp-advisories-2026-10.md) (accepted risk, expires 12 November), [mfa-security-runbook.md](mfa-security-runbook.md), [data-governance.md](data-governance.md), [gdpr.md](gdpr.md), and the ITHC pack in [assurance/](assurance/): [ithc-readiness.md](assurance/ithc-readiness.md), [ithc-handover.md](assurance/ithc-handover.md), [finding-template.md](assurance/finding-template.md).
 
 ## Commercial
 
