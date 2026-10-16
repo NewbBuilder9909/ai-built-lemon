@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using ProgrammePulse.Models.Branding;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
 
 namespace ProgrammePulse.Services.BrandingOps;
 
@@ -13,6 +16,14 @@ namespace ProgrammePulse.Services.BrandingOps;
 /// upload is decoded via ImageSharp and re-encoded to a memory stream rather
 /// than the raw bytes being saved verbatim, so a spoofed-extension or polyglot
 /// file fails to decode (rejected) instead of being written as-is.
+///
+/// The decoder only knows the formats the asset type allows. The request's
+/// Content-Type is the client's claim, so with every format registered a TIFF
+/// labelled image/png reached ImageSharp's TIFF decoder and was re-encoded as
+/// TIFF, the paths behind GHSA-j9gm-c75j-xc9q and GHSA-jjfr-hcj7-qf5w (process
+/// crash) and GHSA-wmxv-xphr-5c9g (decoder hang). Metadata is skipped too: a
+/// logo needs no EXIF or ICC, and ICC parsing is GHSA-gwg2-r3hj-4w44. See
+/// docs/security/imagesharp-advisories-2026-10.md.
 /// </summary>
 public sealed class BrandingAssetStorageService(
     IWebHostEnvironment webHostEnvironment,
@@ -23,13 +34,19 @@ public sealed class BrandingAssetStorageService(
     private const int MinDimensionPx = 16;
     private const int MaxDimensionPx = 4096;
 
-    private static readonly IReadOnlyDictionary<BrandingAssetType, (long MaxSizeBytes, string[] AllowedContentTypes)> Rules =
-        new Dictionary<BrandingAssetType, (long, string[])>
+    private static readonly DecoderOptions PngOnly = DecoderFor(new PngConfigurationModule());
+    private static readonly DecoderOptions PngOrJpeg = DecoderFor(new PngConfigurationModule(), new JpegConfigurationModule());
+
+    private static readonly IReadOnlyDictionary<BrandingAssetType, (long MaxSizeBytes, string[] AllowedContentTypes, DecoderOptions Decoder)> Rules =
+        new Dictionary<BrandingAssetType, (long, string[], DecoderOptions)>
         {
-            [BrandingAssetType.Logo] = (2 * 1024 * 1024, ["image/png", "image/jpeg"]),
-            [BrandingAssetType.Favicon] = (512 * 1024, ["image/png"]),
-            [BrandingAssetType.Hero] = (4 * 1024 * 1024, ["image/png", "image/jpeg"])
+            [BrandingAssetType.Logo] = (2 * 1024 * 1024, ["image/png", "image/jpeg"], PngOrJpeg),
+            [BrandingAssetType.Favicon] = (512 * 1024, ["image/png"], PngOnly),
+            [BrandingAssetType.Hero] = (4 * 1024 * 1024, ["image/png", "image/jpeg"], PngOrJpeg)
         };
+
+    private static DecoderOptions DecoderFor(params IImageFormatConfigurationModule[] formats) =>
+        new() { Configuration = new Configuration(formats), SkipMetadata = true };
 
     public async Task<BrandingAsset> StoreAsync(IFormFile file, BrandingAssetType assetType, int? uploadedByMemberId, Guid tenantId)
     {
@@ -49,17 +66,35 @@ public sealed class BrandingAssetStorageService(
             throw new BrandingAssetValidationException($"Unsupported file type '{file.ContentType}'. Allowed: {string.Join(", ", rule.AllowedContentTypes)}.");
         }
 
-        Image image;
-        await using (var stream = file.OpenReadStream())
+        // Dimensions come from the header first: a small file can declare a
+        // canvas large enough to exhaust memory once its pixels are decoded.
+        ImageInfo info;
+        try
         {
-            try
-            {
-                image = await Image.LoadAsync(stream);
-            }
-            catch (UnknownImageFormatException)
-            {
-                throw new BrandingAssetValidationException("The uploaded file is not a valid image.");
-            }
+            await using var probe = file.OpenReadStream();
+            info = await Image.IdentifyAsync(rule.Decoder, probe);
+        }
+        catch (ImageFormatException)
+        {
+            throw new BrandingAssetValidationException("The uploaded file is not a valid image.");
+        }
+
+        if (info.Width < MinDimensionPx || info.Height < MinDimensionPx ||
+            info.Width > MaxDimensionPx || info.Height > MaxDimensionPx)
+        {
+            throw new BrandingAssetValidationException(
+                $"Image dimensions must be between {MinDimensionPx}px and {MaxDimensionPx}px on each side.");
+        }
+
+        Image image;
+        try
+        {
+            await using var stream = file.OpenReadStream();
+            image = await Image.LoadAsync(rule.Decoder, stream);
+        }
+        catch (ImageFormatException)
+        {
+            throw new BrandingAssetValidationException("The uploaded file is not a valid image.");
         }
 
         using (image)
@@ -68,13 +103,6 @@ public sealed class BrandingAssetStorageService(
             if (format is null)
             {
                 throw new BrandingAssetValidationException("The uploaded file is not a valid image.");
-            }
-
-            if (image.Width < MinDimensionPx || image.Height < MinDimensionPx ||
-                image.Width > MaxDimensionPx || image.Height > MaxDimensionPx)
-            {
-                throw new BrandingAssetValidationException(
-                    $"Image dimensions must be between {MinDimensionPx}px and {MaxDimensionPx}px on each side.");
             }
 
             var extension = format.FileExtensions.FirstOrDefault() ?? "png";

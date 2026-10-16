@@ -1,0 +1,42 @@
+[
+  {
+    "package": "SixLabors.ImageSharp",
+    "version": "3.1.12",
+    "advisory": "https://github.com/advisories/GHSA-j3p4-wp97-rph4",
+    "expires": "2026-11-12",
+    "owner": "NewbBuilder9909",
+    "record": "docs/security/imagesharp-advisories-2026-10.md"
+  },
+  {
+    "package": "SixLabors.ImageSharp",
+    "version": "3.1.12",
+    "advisory": "https://github.com/advisories/GHSA-j9gm-c75j-xc9q",
+    "expires": "2026-11-12",
+    "owner": "NewbBuilder9909",
+    "record": "docs/security/imagesharp-advisories-2026-10.md"
+  },
+  {
+    "package": "SixLabors.ImageSharp",
+    "version": "3.1.12",
+    "advisory": "https://github.com/advisories/GHSA-jjfr-hcj7-qf5w",
+    "expires": "2026-11-12",
+    "owner": "NewbBuilder9909",
+    "record": "docs/security/imagesharp-advisories-2026-10.md"
+  },
+  {
+    "package": "SixLabors.ImageSharp",
+    "version": "3.1.12",
+    "advisory": "https://github.com/advisories/GHSA-gwg2-r3hj-4w44",
+    "expires": "2026-11-12",
+    "owner": "NewbBuilder9909",
+    "record": "docs/security/imagesharp-advisories-2026-10.md"
+  },
+  {
+    "package": "SixLabors.ImageSharp",
+    "version": "3.1.12",
+    "advisory": "https://github.com/advisories/GHSA-wmxv-xphr-5c9g",
+    "expires": "2026-11-12",
+    "owner": "NewbBuilder9909",
+    "record": "docs/security/imagesharp-advisories-2026-10.md"
+  }
+]
