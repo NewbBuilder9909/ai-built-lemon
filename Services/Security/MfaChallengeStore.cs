@@ -12,6 +12,7 @@ namespace ProgrammePulse.Services.Security;
 
 public sealed class MfaChallengeStore(
     IScopeProvider scopeProvider, MemberManager memberManager, IStaffRepository staffRepository,
+    IWebHostEnvironment environment,
     IMfaRepository mfaRepository, TimeProvider timeProvider, IConfiguration configuration) : IMfaChallengeStore
 {
     public const string SchemeName = "MfaPending";
@@ -43,7 +44,7 @@ public sealed class MfaChallengeStore(
         identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, memberId));
         identity.AddClaim(new Claim(ChallengeClaimType, challenge.ChallengeKey.ToString("D")));
         if (!string.IsNullOrWhiteSpace(returnUrl)) identity.AddClaim(new Claim(ReturnUrlClaimType, returnUrl));
-        context.Response.Cookies.Append(BindingCookieName, binding, CookieOptions());
+        context.Response.Cookies.Append(BindingCookieName, binding, CookieOptions(context));
         await context.SignInAsync(SchemeName, new ClaimsPrincipal(identity));
     }
 
@@ -123,11 +124,11 @@ public sealed class MfaChallengeStore(
             await scope.Database.ExecuteAsync($"DELETE FROM {MemberMfaChallengeDto.TableName} WHERE challengeKey=@0", key);
             scope.Complete();
         }
-        context.Response.Cookies.Delete(BindingCookieName, CookieOptions());
+        context.Response.Cookies.Delete(BindingCookieName, CookieOptions(context));
         await context.SignOutAsync(SchemeName);
     }
 
-    private CookieOptions CookieOptions()
+    private CookieOptions CookieOptions(HttpContext context)
     {
         var securePolicy = Enum.TryParse<CookieSecurePolicy>(configuration["Security:MfaCookieSecurePolicy"], true, out var configuredPolicy)
             ? configuredPolicy
@@ -136,13 +137,18 @@ public sealed class MfaChallengeStore(
         return new CookieOptions
         {
             HttpOnly = true,
-            Secure = securePolicy == CookieSecurePolicy.Always,
+            Secure = ShouldUseSecureCookie(environment.IsDevelopment(), securePolicy, context.Request.IsHttps),
             SameSite = SameSiteMode.Strict,
             Path = "/staffops/account",
             MaxAge = TimeSpan.FromMinutes(5),
             IsEssential = true
         };
     }
+
+    internal static bool ShouldUseSecureCookie(bool isDevelopment, CookieSecurePolicy securePolicy, bool requestIsHttps) =>
+        !isDevelopment
+        || securePolicy == CookieSecurePolicy.Always
+        || (securePolicy == CookieSecurePolicy.SameAsRequest && requestIsHttps);
 
     private static string Hash(string value) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
 }

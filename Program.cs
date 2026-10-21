@@ -84,9 +84,11 @@ builder.Services.AddHsts(options =>
 // AddWebsite below. Umbraco's own cookies get Secure from
 // Umbraco:CMS:Global:UseHttps (enforced non-Development by
 // ProductionConfigurationGuard); this one has to be told explicitly.
-var mfaCookieSecurePolicy = Enum.TryParse<CookieSecurePolicy>(builder.Configuration["Security:MfaCookieSecurePolicy"], true, out var configuredPolicy)
-    ? configuredPolicy
-    : CookieSecurePolicy.SameAsRequest;
+var mfaCookieSecurePolicy = builder.Environment.IsDevelopment()
+    ? Enum.TryParse<CookieSecurePolicy>(builder.Configuration["Security:MfaCookieSecurePolicy"], true, out var configuredPolicy)
+        ? configuredPolicy
+        : CookieSecurePolicy.SameAsRequest
+    : CookieSecurePolicy.Always;
 
 builder.Services.AddAuthentication().AddCookie(MfaChallengeStore.SchemeName, options =>
 {
