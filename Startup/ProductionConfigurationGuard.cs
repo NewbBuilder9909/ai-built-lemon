@@ -101,6 +101,13 @@ public static class ProductionConfigurationGuard
                 errors.Add("Umbraco:CMS:Global:UseHttps must be true outside Development so Umbraco's own authentication cookies are issued Secure.");
             }
 
+            var mfaCookieSecurePolicy = configuration["Security:MfaCookieSecurePolicy"];
+            if (!string.IsNullOrWhiteSpace(mfaCookieSecurePolicy)
+                && !string.Equals(mfaCookieSecurePolicy, nameof(CookieSecurePolicy.Always), StringComparison.OrdinalIgnoreCase))
+            {
+                errors.Add("Security:MfaCookieSecurePolicy must be Always outside Development so MFA cookies are issued Secure.");
+            }
+
             if (configuration.GetValue<bool>("Umbraco:CMS:Hosting:Debug"))
             {
                 errors.Add("Umbraco:CMS:Hosting:Debug must be false outside Development — it exposes detailed error pages.");

@@ -39,6 +39,27 @@ public class ProductionConfigurationGuardTests
     }
 
     [Fact]
+    public void Production_accepts_an_explicit_always_secure_mfa_cookie_policy()
+    {
+        var findings = ProductionConfigurationGuard.Validate(
+            Build([.. ProductionReady(), ("Security:MfaCookieSecurePolicy", "Always")]), "Production");
+
+        Assert.DoesNotContain(findings.Errors, error => error.Contains("MfaCookieSecurePolicy"));
+    }
+
+    [Theory]
+    [InlineData("SameAsRequest")]
+    [InlineData("None")]
+    [InlineData("invalid")]
+    public void Production_rejects_a_non_always_mfa_cookie_policy(string policy)
+    {
+        var findings = ProductionConfigurationGuard.Validate(
+            Build([.. ProductionReady(), ("Security:MfaCookieSecurePolicy", policy)]), "Production");
+
+        Assert.Contains(findings.Errors, error => error.Contains("MfaCookieSecurePolicy"));
+    }
+
+    [Fact]
     public void Production_requires_a_durable_encrypted_data_protection_key_ring()
     {
         var values = ProductionReady().Where(v => !v.Item1.StartsWith("DataProtection:", StringComparison.Ordinal)).ToArray();
