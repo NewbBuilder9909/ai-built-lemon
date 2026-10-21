@@ -1,5 +1,31 @@
 # Build direction and status
 
+## Reopened for validation, 21 October 2026
+
+The project is reopened for **validation only**. No new features until a buyer has paid.
+
+**Niche:** an independent, read-only delivery figures auditor for anyone who
+signs off progress or hours reported by suppliers they don't control (a client
+with several suppliers, a PMO overseeing partners, a prime with
+subcontractors). It does not compete with Jira, ClickUp or Rovo, which only
+see their own tool's data. The Patchwork data set plants 13 problems, 9
+visible only across organisations.
+
+**Order of work:**
+1. Five buyer conversations, no demo ([interview script](validation/interview-script.md)).
+2. Rovo benchmark ([scorecard](validation/rovo-benchmark-scorecard.md)), published.
+3. One hand-delivered paid diagnostic (£3,500, ten working days) on the buyer's exports via file import. Founding-customer discount in exchange for an anonymised case study.
+4. Only if it lands: the [read-only MCP design](mcp-read-only-design.md), built for that customer.
+5. Then a second cycle and the £2,000/month assisted review.
+
+**Stop rule:** stop if the in-tool assistant finds most of what matters inside one tool, or if fewer than two of five buyers describe a recent, costly incident and agree to discuss a paid diagnostic.
+
+**Success metric:** users and money, not tests. Two buyers describe a costly incident; one pays.
+
+**Held back:** self-service sign-up, billing, new connectors, plan tiers, multilingual expansion and all benched modules, unless a paying customer's engagement needs one. Tracker: [validation/](validation/README.md).
+
+---
+
 ## Stopped, 2 October 2026
 
 The project stopped here and was published as a lesson. Read

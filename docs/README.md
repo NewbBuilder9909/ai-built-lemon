@@ -9,7 +9,7 @@ When a document is added, overtaken or archived, update this page in the same ch
 | Question | Document |
 |---|---|
 | Why did this stop, and what's the lesson? | **[READ-ME-FIRST.md](../READ-ME-FIRST.md)** |
-| Where do we stand, what are we building next, and what are we not building? | **[direction.md](direction.md)** (stopped 2 October 2026) |
+| Where do we stand, what are we building next, and what are we not building? | **[direction.md](direction.md)** (reopened for validation 21 October 2026) |
 | How is the code organised, and what are the rules? | [`../CLAUDE.md`](../CLAUDE.md) |
 | Can we release, and what blocks it? | [release-readiness.md](release-readiness.md) (risk register), [security-assurance.md](security-assurance.md) (supersedes the former's security claims), [pilot gates](assayer-pilot-gates-2026-09-27.md) |
 | What may we say publicly? | [commercial/claim-register.md](commercial/claim-register.md) |
@@ -67,3 +67,5 @@ Read the relevant one before changing that area (CLAUDE.md says the same).
 ## Archive
 
 Earlier reviews, briefs and superseded gates: [archive/](archive/README.md), with what each decided and where its actions went. Not a backlog.
+
+Validation tools: [validation/](validation/README.md). Parked connector design: [mcp-read-only-design.md](mcp-read-only-design.md).
