@@ -68,21 +68,31 @@ with no centre.
 
 ## What I did after stopping
 
-I stopped product work on 2 October, but returned on 21 October for two
-bounded improvements:
+I stopped product work on 2 October, then kept returning to it. In October I
+merged dependency updates, hardened branding image uploads after ImageSharp
+advisories, added a time-limited exception for the remaining upstream advisory,
+and required secure MFA cookies outside Development. These are maintenance and
+security work, not evidence of a market.
 
-- I made MFA cookies require the secure-cookie setting outside Development.
-- I added a SQL-backed integration test for two scoped diagnostic cycles. It
-  exercises a stale then current extract, corrected and removed records,
-  confirmed replacement imports, replay, changed findings and the frozen first
-  review. The test is added; SQL-backed execution is still outstanding.
+On 21 October I added a SQL-backed integration test for two scoped diagnostic
+cycles. It covers stale and current extracts, corrected and removed records,
+confirmed replacement imports, replay, changed findings and the frozen first
+review. The test is added; SQL-backed execution is still outstanding.
 
-I also updated the project direction record to say exactly that: test added,
-execution still open. These changes improve security and test coverage; they
-do not establish customer demand, prove a paid diagnostic, or make the product
-ready to relaunch. I recognise the temptation to treat more engineering as a
-reason to bring the product back. It is not evidence that the original
-problem was solved.
+Then I went further: I reopened the project for **validation only**. I picked
+a niche—independently checking delivery figures reported by suppliers across
+organisations—and wrote a no-demo interview script, a Rovo benchmark scorecard,
+an outreach tracker and a stop rule. I also designed a read-only MCP connection
+for later, but explicitly parked it: no server code until a paid pilot has
+completed and asked for it. The current direction and materials are in
+[`docs/direction.md`](docs/direction.md) and [`docs/validation/`](docs/validation/README.md).
+
+This is another attempt to make it work, not proof that it does. The interview
+and benchmark documents are plans, not results; this repository records no
+buyer validation or paid pilot. The test still needs SQL-backed execution.
+More engineering, a sharper niche and a plan to ask buyers do not establish
+demand. I recognise that I may be repeating the original mistake; the stop
+rule has to be followed if the evidence does not appear.
 
 ## What I'd do differently
 
