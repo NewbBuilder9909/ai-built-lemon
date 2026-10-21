@@ -13,7 +13,8 @@ a lemon, what to do differently, and which parts are worth reusing.
 - The instructions the AI agents worked under: [CLAUDE.md](CLAUDE.md).
 - A fictional five-organisation data set in native Jira, Tempo, ClickUp,
   monday.com, Harvest and Hub Planner formats: [TestScenarios/Patchwork](TestScenarios/Patchwork/README.md).
-- Licence: [MIT](LICENSE). Provided as is; not maintained.
+- Licence: [MIT](LICENSE). Provided as is, not an active product; see
+  [the note on later maintenance](READ-ME-FIRST.md#what-i-did-after-stopping).
 
 ## Local setup
 

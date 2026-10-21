@@ -66,6 +66,24 @@ with no centre.
    organisations'* tools: a client with three suppliers, each in a different
    tool. That might be worth something. Nobody was ever asked.
 
+## What I did after stopping
+
+I stopped product work on 2 October, but returned on 21 October for two
+bounded improvements:
+
+- I made MFA cookies require the secure-cookie setting outside Development.
+- I added a SQL-backed integration test for two scoped diagnostic cycles. It
+  exercises a stale then current extract, corrected and removed records,
+  confirmed replacement imports, replay, changed findings and the frozen first
+  review. The test is added; SQL-backed execution is still outstanding.
+
+I also updated the project direction record to say exactly that: test added,
+execution still open. These changes improve security and test coverage; they
+do not establish customer demand, prove a paid diagnostic, or make the product
+ready to relaunch. I recognise the temptation to treat more engineering as a
+reason to bring the product back. It is not evidence that the original
+problem was solved.
+
 ## What I'd do differently
 
 - **No code until five people who would pay have described the problem**, in
@@ -123,8 +141,9 @@ purpose: optional modules start off and are switched on in Settings →
 Modules.
 
 Links in the documents to `NewbBuilder9909/OpsHwb` or to pull requests point
-at the original private repository and won't open. It's provided as is, and
-I won't be maintaining it.
+at the original private repository and won't open. It's provided as is, not
+as an active product. I have made limited security and testability
+improvements since stopping; they do not amount to a relaunch.
 
 ## Licence
 
