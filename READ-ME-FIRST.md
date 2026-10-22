@@ -66,6 +66,34 @@ with no centre.
    organisations'* tools: a client with three suppliers, each in a different
    tool. That might be worth something. Nobody was ever asked.
 
+## What I did after stopping
+
+I stopped product work on 2 October, then kept returning to it. In October I
+merged dependency updates, hardened branding image uploads after ImageSharp
+advisories, added a time-limited exception for the remaining upstream advisory,
+and required secure MFA cookies outside Development. These are maintenance and
+security work, not evidence of a market.
+
+On 21 October I added a SQL-backed integration test for two scoped diagnostic
+cycles. It covers stale and current extracts, corrected and removed records,
+confirmed replacement imports, replay, changed findings and the frozen first
+review. The test is added; SQL-backed execution is still outstanding.
+
+Then I went further: I reopened the project for **validation only**. I picked
+a niche—independently checking delivery figures reported by suppliers across
+organisations—and wrote a no-demo interview script, a Rovo benchmark scorecard,
+an outreach tracker and a stop rule. I also designed a read-only MCP connection
+for later, but explicitly parked it: no server code until a paid pilot has
+completed and asked for it. The current direction and materials are in
+[`docs/direction.md`](docs/direction.md) and [`docs/validation/`](docs/validation/README.md).
+
+This is another attempt to make it work, not proof that it does. The interview
+and benchmark documents are plans, not results; this repository records no
+buyer validation or paid pilot. The test still needs SQL-backed execution.
+More engineering, a sharper niche and a plan to ask buyers do not establish
+demand. I recognise that I may be repeating the original mistake; the stop
+rule has to be followed if the evidence does not appear.
+
 ## What I'd do differently
 
 - **No code until five people who would pay have described the problem**, in
@@ -123,8 +151,9 @@ purpose: optional modules start off and are switched on in Settings →
 Modules.
 
 Links in the documents to `NewbBuilder9909/OpsHwb` or to pull requests point
-at the original private repository and won't open. It's provided as is, and
-I won't be maintaining it.
+at the original private repository and won't open. It's provided as is, not
+as an active product. I have made limited security and testability
+improvements since stopping; they do not amount to a relaunch.
 
 ## Licence
 
