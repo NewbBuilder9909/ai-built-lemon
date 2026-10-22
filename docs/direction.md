@@ -22,6 +22,8 @@ visible only across organisations.
 
 **Success metric:** users and money, not tests. Two buyers describe a costly incident; one pays.
 
+**Prototype (22 Oct 2026):** `Services/ProgrammeOps/DeliveryQuestions.cs` is a pure, read-only calculator that turns a stalled, over-hours or past-due project into at most five owner questions (late scope without change requests, hours over estimate, unestimated work, stalled items, concentration). It is not wired to a page, a table or the Evidence Review yet, on purpose: that waits for the buyer conversations and the Rovo benchmark. Not yet built: churn, estimate-bias and upward re-estimate rules, and the owner-answer loop.
+
 **Held back:** self-service sign-up, billing, new connectors, plan tiers, multilingual expansion and all benched modules, unless a paying customer's engagement needs one. Tracker: [validation/](validation/README.md).
 
 ---
