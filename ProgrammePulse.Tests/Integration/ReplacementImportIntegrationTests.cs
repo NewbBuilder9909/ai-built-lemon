@@ -133,7 +133,7 @@ public sealed partial class ReplacementImportIntegrationTests(ProgrammePulseWebA
         var first = (await reviews.RecordAsync(tenant, firstScope, new EvidenceReviewActor(null, null)))!;
 
         Assert.Equal(EvidenceReadiness.UseWithCaveats, first.Readiness);
-        Assert.Contains(first.SourceNotes, note => note.Contains("more than 7 days ago", StringComparison.Ordinal));
+        Assert.Contains($"The data was extracted on {today.AddDays(-21):yyyy-MM-dd}, more than 7 days ago", first.ReadinessReason, StringComparison.Ordinal);
         Assert.Equal(2, first.WorkItems);
         Assert.Equal(8m, first.RecordedHours);
         Assert.Equal(2, Assert.Single(first.Findings, f => f.FindingKey == "overdue").Numerator);
